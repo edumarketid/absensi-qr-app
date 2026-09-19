@@ -33,7 +33,7 @@
   <!-- Container Mobile -->
   <div class="w-full max-w-md h-[100vh] sm:h-[840px] bg-white flex flex-col justify-between shadow-2xl overflow-hidden sm:rounded-3xl relative border border-gray-200">
 
-    <!-- HEADER UTAMA (TAMPILAN JAM & STATUS BAR ATAS DIHILANGKAN) -->
+    <!-- HEADER UTAMA -->
     <header class="bg-[#0b3c5d] text-white py-3 px-4 z-20 shadow-md">
       <div class="flex items-center justify-between">
         <div class="flex items-center space-x-3">
@@ -203,7 +203,7 @@
     </main>
 
 
-    <!-- VIEW 4: MONITORING PRESENSI (FITUR FILTER SESI PAGI / SIANG) -->
+    <!-- VIEW 4: MONITORING PRESENSI -->
     <main id="view-monitoring" class="flex-1 flex-col overflow-y-auto no-scrollbar bg-slate-50 p-4 hidden">
       <div class="flex items-center justify-between mb-3">
         <div>
@@ -212,7 +212,6 @@
         </div>
       </div>
 
-      <!-- FILTER KELAS & FILTER SESI PAGI/SIANG -->
       <div class="grid grid-cols-2 gap-2 mb-3">
         <div>
           <label class="block text-[10px] font-bold text-gray-600 mb-1"><i class="fa-solid fa-filter text-blue-600"></i> Filter Kelas</label>
@@ -231,7 +230,6 @@
         </div>
       </div>
 
-      <!-- GRAFIK CHART.JS -->
       <div class="bg-white p-3.5 rounded-2xl border border-gray-100 shadow-sm mb-3 text-center">
         <h4 class="text-xs font-bold text-gray-700 mb-2">Persentase Presensi Hari Ini</h4>
         <div class="w-48 h-48 mx-auto relative">
@@ -239,7 +237,6 @@
         </div>
       </div>
 
-      <!-- MATRIKS STATISTIK -->
       <div class="grid grid-cols-3 gap-2 mb-4">
         <div class="bg-emerald-50 border border-emerald-100 p-2.5 rounded-xl text-center">
           <span class="block text-[10px] text-emerald-600 font-bold">Hadir</span>
@@ -272,7 +269,6 @@
         </div>
       </div>
 
-      <!-- DAFTAR SISWA BELUM PRESENSI / BERMASALAH -->
       <div class="space-y-2">
         <h3 class="font-bold text-xs text-gray-800 flex items-center justify-between">
           <span>Siswa Belum Complete / Bermasalah</span>
@@ -284,14 +280,81 @@
     </main>
 
 
-    <!-- VIEW 5: PENGATURAN WAKTU HARI SENIN - SABTU (DENGAN SAKELAR TOGGLE HARI) -->
+    <!-- VIEW 5: DUKUNGAN DONASI PENGEMBANGAN APLIKASI (BARU) -->
+    <main id="view-donation" class="flex-1 flex-col overflow-y-auto no-scrollbar bg-slate-50 p-4 hidden">
+      <div class="text-center mb-4">
+        <div class="w-12 h-12 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-2 text-xl shadow-sm">
+          <i class="fa-solid fa-hand-holding-heart"></i>
+        </div>
+        <h2 class="font-bold text-lg text-gray-900">Donasi & Dukungan</h2>
+        <p class="text-xs text-gray-500">Pengembangan Aplikasi Presensi Sekolah</p>
+      </div>
+
+      <!-- CATATAN DEDIKASI & DUKUNGAN -->
+      <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm space-y-2 mb-3">
+        <h3 class="font-bold text-xs text-blue-900 flex items-center gap-1.5">
+          <i class="fa-solid fa-heart text-rose-500"></i>
+          <span>Catatan Pengembang</span>
+        </h3>
+        <p class="text-xs text-gray-600 leading-relaxed text-justify">
+          Aplikasi <strong>Sistem Absensi Murid</strong> ini dikembangkan dengan niat tulus untuk membantu efisiensi administrasi serta mempermudah pencatatan presensi di lingkungan sekolah secara gratis dan mandiri.
+        </p>
+        <p class="text-xs text-gray-600 leading-relaxed text-justify mt-1">
+          Meski aplikasi ini dibuat untuk membantu sesama, kami tetap membuka pintu kebaikan bagi Bapak/Ibu atau pihak sekolah yang berkenan menyisihkan sebagian hartanya untuk mendukung operasional, server, serta keberlanjutan pengembangan aplikasi-aplikasi pendidikan bermanfaat lainnya di masa depan.
+        </p>
+      </div>
+
+      <!-- REKENING BRI & E-WALLET -->
+      <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm space-y-3 mb-3">
+        <h3 class="font-bold text-xs text-gray-800 border-b border-gray-100 pb-2">Saluran Donasi Transfer:</h3>
+
+        <!-- BANK BRI -->
+        <div class="bg-blue-50/70 p-3 rounded-xl border border-blue-100 flex items-center justify-between">
+          <div>
+            <div class="flex items-center space-x-1.5">
+              <span class="font-extrabold text-blue-900 text-xs">BANK BRI</span>
+            </div>
+            <p class="font-mono text-sm font-bold text-gray-900 mt-0.5">488801018509539</p>
+            <p class="text-[10px] text-gray-500">a.n. <span class="font-bold text-gray-700">Ajiardin</span></p>
+          </div>
+          <button onclick="navigator.clipboard.writeText('488801018509539'); alert('Nomor Rekening BRI Berhasil Disalin!');" class="px-2.5 py-1.5 bg-white border border-blue-200 text-blue-700 font-bold text-[10px] rounded-lg shadow-sm">
+            <i class="fa-solid fa-copy"></i> Salin
+          </button>
+        </div>
+
+        <!-- E-WALLETS -->
+        <div class="bg-emerald-50/70 p-3 rounded-xl border border-emerald-100 flex items-center justify-between">
+          <div>
+            <div class="flex items-center space-x-1 text-[10px] font-bold text-emerald-800">
+              <span>DANA</span> • <span>OVO</span> • <span>GoPay</span> • <span>ShopeePay</span> • <span>KasPro</span>
+            </div>
+            <p class="font-mono text-sm font-bold text-gray-900 mt-0.5">085298875399</p>
+            <p class="text-[10px] text-gray-500">a.n. <span class="font-bold text-gray-700">Ajiardin</span></p>
+          </div>
+          <button onclick="navigator.clipboard.writeText('085298875399'); alert('Nomor e-Wallet Berhasil Disalin!');" class="px-2.5 py-1.5 bg-white border border-emerald-200 text-emerald-700 font-bold text-[10px] rounded-lg shadow-sm">
+            <i class="fa-solid fa-copy"></i> Salin
+          </button>
+        </div>
+      </div>
+
+      <!-- KONTAK WHATSAPP & REQUEST APLIKASI -->
+      <div class="bg-emerald-600 text-white p-4 rounded-2xl shadow-md text-center space-y-2">
+        <h4 class="font-bold text-xs"><i class="fa-brands fa-whatsapp text-lg mr-1"></i> Konsultasi & Request Aplikasi</h4>
+        <p class="text-[11px] text-emerald-100">Punya ide atau butuh aplikasi sekolah khusus lainnya? Anda dapat menghubungi langsung pengembang via WhatsApp.</p>
+        <a href="https://wa.me/6285298875399?text=Halo%20Pak%20Ajiardin,%20saya%20ingin%20konsultasi/request%20aplikasi." target="_blank" class="inline-block bg-white text-emerald-700 font-bold text-xs px-4 py-2 rounded-xl shadow-sm mt-1">
+          Hubungi via WhatsApp (085298875399)
+        </a>
+      </div>
+    </main>
+
+
+    <!-- VIEW 6: PENGATURAN -->
     <main id="view-settings" class="flex-1 flex-col overflow-y-auto no-scrollbar bg-slate-50 p-4 hidden">
       <div class="mb-4">
         <h2 class="font-bold text-lg text-gray-900">Pengaturan System</h2>
         <p class="text-xs text-gray-500">Konfigurasi waktu presensi per hari & identitas sekolah</p>
       </div>
 
-      <!-- CONFIG JAM HARI SENIN - SABTU -->
       <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3 mb-3">
         <h3 class="font-bold text-xs text-blue-900 border-b border-gray-100 pb-2 flex items-center justify-between">
           <span class="flex items-center gap-2">
@@ -301,7 +364,6 @@
           <span class="text-[10px] font-normal text-rose-500">*Minggu otomatis libur</span>
         </h3>
 
-        <!-- CONTAINER HARI (SENIN - SABTU) -->
         <div id="days-config-container" class="space-y-3"></div>
 
         <button onclick="saveDaysTimeSettings()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-xl text-xs flex items-center justify-center space-x-1.5 shadow-sm transition">
@@ -310,7 +372,6 @@
         </button>
       </div>
 
-      <!-- FORM IDENTITAS SEKOLAH -->
       <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3 mb-3">
         <h3 class="font-bold text-xs text-blue-900 border-b border-gray-100 pb-2 flex items-center gap-2">
           <i class="fa-solid fa-school text-blue-600"></i>
@@ -338,7 +399,6 @@
         </button>
       </div>
 
-      <!-- AKSI DATABASE LOKAL -->
       <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3">
         <h3 class="font-bold text-xs text-gray-800">Aksi Database Lokal HP</h3>
 
@@ -355,7 +415,7 @@
     </main>
 
 
-    <!-- MODAL MENU POP-UP -->
+    <!-- MODAL MENU POP-UP (MENU LAPORAN DIPINDAHKAN KE SINI) -->
     <div id="menu-modal" class="absolute inset-0 bg-black/60 backdrop-blur-sm z-50 flex flex-col justify-end hidden">
       <div class="bg-white rounded-t-3xl p-5 space-y-4 shadow-2xl">
         <div class="flex items-center justify-between border-b border-gray-100 pb-3">
@@ -374,14 +434,15 @@
             <span class="text-xs font-bold text-gray-800">Absensi Manual</span>
           </button>
 
+          <!-- MENU LAPORAN DIPINDAHKAN KE SINI -->
+          <button onclick="toggleMenuModal(); alert('Fitur Cetak Laporan Rekapitulasi Presensi segera hadir!');" class="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col items-center justify-center gap-1.5 hover:bg-emerald-50 hover:border-emerald-200 transition">
+            <i class="fa-solid fa-file-invoice text-xl text-emerald-600"></i>
+            <span class="text-xs font-bold text-gray-800">Laporan Rekap</span>
+          </button>
+
           <button onclick="toggleMenuModal(); alert('Fitur Tindak Lanjut Siswa Terlambat/Absen segera hadir!');" class="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col items-center justify-center gap-1.5 hover:bg-amber-50 hover:border-amber-200 transition">
             <i class="fa-solid fa-clipboard-check text-xl text-amber-600"></i>
             <span class="text-xs font-bold text-gray-800">Tindak Lanjut</span>
-          </button>
-
-          <button onclick="toggleMenuModal(); alert('Fitur Cetak QR Code Kartu Siswa segera hadir!');" class="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col items-center justify-center gap-1.5 hover:bg-emerald-50 hover:border-emerald-200 transition">
-            <i class="fa-solid fa-print text-xl text-emerald-600"></i>
-            <span class="text-xs font-bold text-gray-800">Cetak QR Code</span>
           </button>
 
           <button onclick="toggleMenuModal(); toggleView('settings');" class="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col items-center justify-center gap-1.5 hover:bg-purple-50 hover:border-purple-200 transition">
@@ -393,7 +454,7 @@
     </div>
 
 
-    <!-- BOTTOM NAVIGATION -->
+    <!-- BOTTOM NAVIGATION (MENU DONASI MENGGANTIKAN LAPORAN) -->
     <nav class="bg-white border-t border-gray-200 px-3 py-1.5 flex justify-between items-center text-center z-20">
       <button id="nav-students" onclick="toggleView('students')" class="flex-1 text-gray-400 hover:text-gray-600 flex flex-col items-center">
         <div class="w-7 h-7 flex items-center justify-center mb-0.5">
@@ -416,11 +477,12 @@
         <span class="text-[10px] font-bold mt-0.5">Scanner</span>
       </button>
 
-      <button class="flex-1 text-gray-400 hover:text-gray-600 flex flex-col items-center">
+      <!-- MENU DONASI MENGGANTIKAN LAPORAN DENGAN IKON HAND-HOLDING-HEART -->
+      <button id="nav-donation" onclick="toggleView('donation')" class="flex-1 text-gray-400 hover:text-gray-600 flex flex-col items-center">
         <div class="w-7 h-7 flex items-center justify-center mb-0.5">
-          <i class="fa-solid fa-file-invoice text-sm"></i>
+          <i class="fa-solid fa-hand-holding-heart text-sm text-rose-500"></i>
         </div>
-        <span class="text-[10px] font-medium">Laporan</span>
+        <span class="text-[10px] font-medium">Donasi</span>
       </button>
 
       <button onclick="toggleMenuModal()" class="flex-1 text-gray-400 hover:text-gray-600 flex flex-col items-center">
@@ -478,7 +540,7 @@
       });
     }
 
-    // 2. CONFIGURATION MANAGEMENT (TIME PER DAY & SCHOOL)
+    // 2. CONFIGURATION MANAGEMENT
     function loadAppConfigs() {
       const schoolName = localStorage.getItem("SCHOOL_NAME") || "SMK Negeri 1 Contoh";
       const principalName = localStorage.getItem("PRINCIPAL_NAME") || "";
@@ -574,10 +636,10 @@
     }
 
     function getCurrentDayConfig() {
-      const dayIndex = new Date().getDay(); // 0: Minggu, 1: Senin, ..., 6: Sabtu
+      const dayIndex = new Date().getDay();
       const dayKeys = [null, "mon", "tue", "wed", "thu", "fri", "sat"];
 
-      if (dayIndex === 0) return { isHoliday: true, name: "Minggu" }; // Minggu Otomatis Libur
+      if (dayIndex === 0) return { isHoliday: true, name: "Minggu" };
 
       const key = dayKeys[dayIndex];
       const active = localStorage.getItem(`DAY_ACTIVE_${key}`) !== "false";
@@ -635,7 +697,7 @@
       }
     }
 
-    // 3. AUTO DOWNLOAD DATA SISWA & PETUGAS & RIWAYAT DARI GAS
+    // 3. AUTO DOWNLOAD MASTER SISWA
     async function autoDownloadMasterStudents() {
       if (!navigator.onLine) {
         document.getElementById('sync-info-text').innerText = "Mode Offline - Menggunakan data HP.";
@@ -831,17 +893,16 @@
       `).join('');
     }
 
-    // 8. DASHBOARD MONITORING & DUAL FILTER (KELAS & SESI)
+    // 8. DASHBOARD MONITORING & DUAL FILTER
     async function updateMonitoringDashboard() {
       const selectedClass = document.getElementById('monitoring-class-filter').value;
-      const selectedSession = document.getElementById('monitoring-session-filter').value; // ALL / PAGI / SIANG
+      const selectedSession = document.getElementById('monitoring-session-filter').value;
       
       const todayStr = new Date().toISOString().split('T')[0];
       const nowHM = new Date().toTimeString().substring(0, 5);
 
       const dayCfg = getCurrentDayConfig();
 
-      // Jika hari libur, tampilkan info khusus
       if (dayCfg.isHoliday) {
         document.getElementById('unscanned-students-container').innerHTML = `
           <div class="bg-blue-50 border border-blue-200 p-4 rounded-2xl text-center text-blue-800 text-xs font-bold">
@@ -865,7 +926,6 @@
         const studentSiang = allTodayRecords.find(r => r.id_siswa === student.id_siswa && (r.sesi === "SIANG" || r.jam_siang));
         const anyRecord = allTodayRecords.find(r => r.id_siswa === student.id_siswa);
 
-        // Filter Spesifik Sesi Pagi
         if (selectedSession === "PAGI") {
           if (studentPagi) {
             const st = studentPagi.status_presensi || "HADIR";
@@ -882,7 +942,6 @@
             }
           }
         } 
-        // Filter Spesifik Sesi Siang
         else if (selectedSession === "SIANG") {
           if (studentSiang) {
             const st = studentSiang.status_presensi || "HADIR";
@@ -904,7 +963,6 @@
             }
           }
         } 
-        // Filter Semua Sesi (Awal)
         else {
           if (anyRecord) {
             const st = anyRecord.status_presensi || "HADIR";
@@ -1096,22 +1154,26 @@
       const successView = document.getElementById('view-success');
       const studentsView = document.getElementById('view-students');
       const monitoringView = document.getElementById('view-monitoring');
+      const donationView = document.getElementById('view-donation');
       const settingsView = document.getElementById('view-settings');
 
       const navScanner = document.getElementById('nav-scanner');
       const navStudents = document.getElementById('nav-students');
       const navMonitoring = document.getElementById('nav-monitoring');
+      const navDonation = document.getElementById('nav-donation');
 
       navScanner.className = "flex-1 text-gray-400 hover:text-gray-600 flex flex-col items-center -mt-4";
       navScanner.children[0].className = "w-12 h-12 rounded-full bg-slate-500 text-white shadow-md flex items-center justify-center border-4 border-white";
 
       navStudents.className = "flex-1 text-gray-400 hover:text-gray-600 flex flex-col items-center";
       navMonitoring.className = "flex-1 text-gray-400 hover:text-gray-600 flex flex-col items-center";
+      navDonation.className = "flex-1 text-gray-400 hover:text-gray-600 flex flex-col items-center";
 
       scannerView.classList.add('hidden'); scannerView.classList.remove('flex');
       successView.classList.add('hidden'); successView.classList.remove('flex');
       studentsView.classList.add('hidden'); studentsView.classList.remove('flex');
       monitoringView.classList.add('hidden'); monitoringView.classList.remove('flex');
+      donationView.classList.add('hidden'); donationView.classList.remove('flex');
       settingsView.classList.add('hidden'); settingsView.classList.remove('flex');
 
       if (viewName === 'students') {
@@ -1123,6 +1185,10 @@
         monitoringView.classList.remove('hidden'); monitoringView.classList.add('flex');
         navMonitoring.className = "flex-1 text-blue-600 flex flex-col items-center";
         updateMonitoringDashboard();
+        stopCameraIfActive();
+      } else if (viewName === 'donation') {
+        donationView.classList.remove('hidden'); donationView.classList.add('flex');
+        navDonation.className = "flex-1 text-rose-600 flex flex-col items-center font-bold";
         stopCameraIfActive();
       } else if (viewName === 'settings') {
         settingsView.classList.remove('hidden'); settingsView.classList.add('flex');
