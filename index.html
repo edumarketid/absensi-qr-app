@@ -1180,54 +1180,72 @@
     }
 
     // 3. AUTO DOWNLOAD MASTER SISWA, PENGATURAN & HARI LIBUR
-    async function autoDownloadMasterStudents() {
-      if (!navigator.onLine) {
-        document.getElementById('sync-info-text').innerText = "Mode Offline - Menggunakan data HP.";
-        loadStudentsView();
-        return;
+   // AUTO DOWNLOAD MASTER SISWA, PENGATURAN & HARI LIBUR
+async function autoDownloadMasterStudents() {
+  // Cek apakah database lokal di HP sudah memiliki data siswa
+  cachedStudents = await getAllStudentsFromDB();
+
+  if (!navigator.onLine) {
+    if (cachedStudents.length === 0) {
+      // Jika pertama kali dibuka di HP ini TANPA INTERNET dan database lokal masih kosong
+      alert("⚠️ PERHATIAN: Ini pertama kali aplikasi dibuka di perangkat ini.\n\nHarap hubungkan internet terlebih dahulu selama beberapa detik untuk mengunduh Data Master Siswa dari Server Google Sheets.");
+      document.getElementById('sync-info-text').innerText = "⚠️ Butuh internet untuk sinkronisasi awal!";
+    } else {
+      // Jika hari berikutnya tanpa internet (Data siswa sudah tersimpan di HP)
+      document.getElementById('sync-info-text').innerText = ` Mode Offline - Terbaca ${cachedStudents.length} Siswa di HP.`;
+      loadStudentsView();
+    }
+    return;
+  }
+
+  // Jika ONLINE, perbarui data master dari Google Sheets ke HP
+  try {
+    document.getElementById('sync-info-text').innerText = "Syncing data dari Cloud...";
+    const response = await fetch(`${GAS_WEB_APP_URL}?action=GET_ALL_STUDENTS`);
+    const result = await response.json();
+
+    if (result.success) {
+      if (result.settings && Object.keys(result.settings).length > 0) {
+        applySettingsFromCloud(result.settings);
       }
 
-      try {
-        document.getElementById('sync-info-text').innerText = "Mengunduh data siswa & pengaturan...";
-        const response = await fetch(`${GAS_WEB_APP_URL}?action=GET_ALL_STUDENTS`);
-        const result = await response.json();
+      if (result.today_attendance) fetchedTodayAttendance = result.today_attendance;
+      if (result.attendance_history) fetchedAttendanceHistory = result.attendance_history;
+      if (result.tindak_lanjut) fetchedTindakLanjutHistory = result.tindak_lanjut;
+      if (result.hari_libur) fetchedHariLiburList = result.hari_libur;
 
-        if (result.success) {
-          if (result.settings && Object.keys(result.settings).length > 0) {
-            applySettingsFromCloud(result.settings);
-          }
+      if (result.students && result.students.length > 0) {
+        const tx = db.transaction("students", "readwrite");
+        const store = tx.objectStore("students");
+        store.clear(); // Bersihkan lalu timpa dengan data terbaru dari server
 
-          if (result.today_attendance) fetchedTodayAttendance = result.today_attendance;
-          if (result.attendance_history) fetchedAttendanceHistory = result.attendance_history;
-          if (result.tindak_lanjut) fetchedTindakLanjutHistory = result.tindak_lanjut;
-          if (result.hari_libur) fetchedHariLiburList = result.hari_libur;
+        result.students.forEach(std => {
+          store.put({
+            id_siswa: std.qr_key || std.id_siswa,
+            nisn: std.nisn,
+            nama: std.nama,
+            kelas: std.kelas,
+            status: std.status
+          });
+        });
 
-          if (result.students) {
-            const tx = db.transaction("students", "readwrite");
-            const store = tx.objectStore("students");
-            store.clear();
-
-            result.students.forEach(std => {
-              store.put({
-                id_siswa: std.qr_key || std.id_siswa,
-                nisn: std.nisn,
-                nama: std.nama,
-                kelas: std.kelas,
-                status: std.status
-              });
-            });
-
-            tx.oncomplete = () => {
-              document.getElementById('sync-info-text').innerText = `Terhubung! ${result.students.length} Siswa Aktif.`;
-              loadStudentsView();
-              populateClassDropdowns();
-            };
-          }
-        }
-      } catch (err) {
-        document.getElementById('sync-info-text').innerText = "Gagal terhubung ke Google Sheets.";
+        tx.oncomplete = async () => {
+          cachedStudents = await getAllStudentsFromDB();
+          document.getElementById('sync-info-text').innerText = `Terhubung! ${cachedStudents.length} Siswa Siap Offline.`;
+          loadStudentsView();
+          populateClassDropdowns();
+        };
       }
     }
+  } catch (err) {
+    if (cachedStudents.length > 0) {
+      document.getElementById('sync-info-text').innerText = ` Mode Offline - Terbaca ${cachedStudents.length} Siswa di HP.`;
+      loadStudentsView();
+    } else {
+      document.getElementById('sync-info-text').innerText = "Gagal terhubung ke Google Sheets.";
+    }
+  }
+}
 
     function applySettingsFromCloud(settings) {
       for (let key in settings) {
