@@ -1043,50 +1043,156 @@
       }
     }
 
-    // 3. AUTO DOWNLOAD MASTER SISWA
-    async function autoDownloadMasterStudents() {
-      if (!navigator.onLine) {
-        document.getElementById('sync-info-text').innerText = "Mode Offline - Menggunakan data HP.";
-        loadStudentsView();
-        return;
+    // 1. AUTO DOWNLOAD MASTER SISWA & PENGATURAN DARI SHEET
+async function autoDownloadMasterStudents() {
+  if (!navigator.onLine) {
+    document.getElementById('sync-info-text').innerText = "Mode Offline - Menggunakan data HP.";
+    loadStudentsView();
+    return;
+  }
+
+  try {
+    document.getElementById('sync-info-text').innerText = "Mengunduh data siswa & pengaturan...";
+    const response = await fetch(`${GAS_WEB_APP_URL}?action=GET_ALL_STUDENTS`);
+    const result = await response.json();
+
+    if (result.success) {
+      // Terapkan Pengaturan dari Cloud Sheet jika ada
+      if (result.settings && Object.keys(result.settings).length > 0) {
+        applySettingsFromCloud(result.settings);
       }
 
-      try {
-        document.getElementById('sync-info-text').innerText = "Mengunduh data siswa & absensi...";
-        const response = await fetch(`${GAS_WEB_APP_URL}?action=GET_ALL_STUDENTS`);
-        const result = await response.json();
+      if (result.today_attendance) {
+        fetchedTodayAttendance = result.today_attendance;
+      }
 
-        if (result.success) {
-          if (result.today_attendance) {
-            fetchedTodayAttendance = result.today_attendance;
-          }
+      if (result.students) {
+        const tx = db.transaction("students", "readwrite");
+        const store = tx.objectStore("students");
+        store.clear();
 
-          if (result.students) {
-            const tx = db.transaction("students", "readwrite");
-            const store = tx.objectStore("students");
-            store.clear();
+        result.students.forEach(std => {
+          store.put({
+            id_siswa: std.qr_key || std.id_siswa,
+            nisn: std.nisn,
+            nama: std.nama,
+            kelas: std.kelas,
+            status: std.status
+          });
+        });
 
-            result.students.forEach(std => {
-              store.put({
-                id_siswa: std.qr_key || std.id_siswa,
-                nisn: std.nisn,
-                nama: std.nama,
-                kelas: std.kelas,
-                status: std.status
-              });
-            });
-
-            tx.oncomplete = () => {
-              document.getElementById('sync-info-text').innerText = `Terhubung! ${result.students.length} Siswa Aktif.`;
-              loadStudentsView();
-              populateClassDropdowns();
-            };
-          }
-        }
-      } catch (err) {
-        document.getElementById('sync-info-text').innerText = "Gagal terhubung ke Google Sheets.";
+        tx.oncomplete = () => {
+          document.getElementById('sync-info-text').innerText = `Terhubung! ${result.students.length} Siswa Aktif.`;
+          loadStudentsView();
+          populateClassDropdowns();
+        };
       }
     }
+  } catch (err) {
+    document.getElementById('sync-info-text').innerText = "Gagal terhubung ke Google Sheets.";
+  }
+}
+
+// 2. SINKRONISASI PENGATURAN DARI CLOUD KE LOCAL STORAGE HP
+function applySettingsFromCloud(settings) {
+  for (let key in settings) {
+    if (settings.hasOwnProperty(key)) {
+      localStorage.setItem(key, settings[key]);
+    }
+  }
+
+  // Perbarui variabel Kop dan Logo
+  if (settings["KOP_SURAT"]) kopSuratSrc = settings["KOP_SURAT"];
+  if (settings["LOGO_LEFT"]) logoLeftSrc = settings["LOGO_LEFT"];
+  if (settings["LOGO_RIGHT"]) logoRightSrc = settings["LOGO_RIGHT"];
+
+  loadAppConfigs();
+}
+
+// 3. FUNGSI SIMPAN PENGATURAN JAM KE CLOUD SHEET & HP
+async function saveDaysTimeSettings() {
+  const settingsToSave = {};
+
+  DAYS_LIST.forEach(day => {
+    const active = document.getElementById(`toggle-${day.key}`).checked;
+    const pStart = document.getElementById(`pagi-start-${day.key}`).value;
+    const pLimit = document.getElementById(`pagi-limit-${day.key}`).value;
+    const sStart = document.getElementById(`siang-start-${day.key}`).value;
+    const sLimit = document.getElementById(`siang-limit-${day.key}`).value;
+
+    localStorage.setItem(`DAY_ACTIVE_${day.key}`, active);
+    localStorage.setItem(`TIME_${day.key}_PAGI_START`, pStart);
+    localStorage.setItem(`TIME_${day.key}_PAGI_LIMIT`, pLimit);
+    localStorage.setItem(`TIME_${day.key}_SIANG_START`, sStart);
+    localStorage.setItem(`TIME_${day.key}_SIANG_LIMIT`, sLimit);
+
+    settingsToSave[`DAY_ACTIVE_${day.key}`] = active;
+    settingsToSave[`TIME_${day.key}_PAGI_START`] = pStart;
+    settingsToSave[`TIME_${day.key}_PAGI_LIMIT`] = pLimit;
+    settingsToSave[`TIME_${day.key}_SIANG_START`] = sStart;
+    settingsToSave[`TIME_${day.key}_SIANG_LIMIT`] = sLimit;
+  });
+
+  autoUpdateShiftLabel();
+  await pushSettingsToCloudSheet(settingsToSave);
+  alert("Pengaturan jam presensi berhasil disimpan ke Cloud Sheet & disinkronkan!");
+}
+
+// 4. FUNGSI SIMPAN IDENTITAS SEKOLAH KE CLOUD SHEET & HP
+async function saveSchoolSettings() {
+  const schoolName = document.getElementById("input-school-name").value.trim();
+  const principalName = document.getElementById("input-principal-name").value.trim();
+  const principalNip = document.getElementById("input-principal-nip").value.trim();
+
+  if (!schoolName) return alert("Nama sekolah wajib diisi!");
+
+  localStorage.setItem("SCHOOL_NAME", schoolName);
+  localStorage.setItem("PRINCIPAL_NAME", principalName);
+  localStorage.setItem("PRINCIPAL_NIP", principalNip);
+
+  document.getElementById("app-header-school-name").innerText = schoolName;
+
+  const settingsToSave = {
+    "SCHOOL_NAME": schoolName,
+    "PRINCIPAL_NAME": principalName,
+    "PRINCIPAL_NIP": principalNip
+  };
+
+  await pushSettingsToCloudSheet(settingsToSave);
+  alert("Identitas sekolah berhasil disimpan ke Cloud Sheet!");
+}
+
+// 5. HELPER UNTUK MENGIRIM PENGATURAN LENGKAP KE GOOGLE SHEETS
+async function pushSettingsToCloudSheet(partialSettings) {
+  if (!navigator.onLine) {
+    alert("Perangkat offline. Pengaturan tersimpan lokal di HP ini.");
+    return;
+  }
+
+  // Kumpulkan seluruh data LocalStorage saat ini
+  const allSettings = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    allSettings[k] = localStorage.getItem(k);
+  }
+
+  // Gabungkan dengan pembaruan terbaru
+  Object.assign(allSettings, partialSettings);
+
+  try {
+    await fetch(GAS_WEB_APP_URL, {
+      method: "POST",
+      mode: "cors",
+      headers: { "Content-Type": "text/plain" },
+      body: JSON.stringify({
+        action: "SAVE_SETTINGS",
+        settings: allSettings
+      })
+    });
+  } catch (err) {
+    console.warn("Gagal mengirim pengaturan ke Cloud Sheet:", err);
+  }
+}
 
     // 4. FITUR TAMBAH SISWA BARU
     function toggleAddStudentModal() {
