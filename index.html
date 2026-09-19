@@ -128,7 +128,6 @@
     <header class="bg-[#0b3c5d] text-white py-3.5 px-4 z-20 shadow-md">
       <div class="flex items-center justify-between">
         <div class="flex items-center space-x-3">
-          <button onclick="toggleMenuModal()" class="text-xl focus:outline-none"><i class="fa-solid fa-bars"></i></button>
           <div class="min-w-0 flex-1">
             <h1 class="font-bold text-base leading-tight">Sistem Absensi Murid</h1>
             <p id="app-header-school-name" class="text-xs text-gray-300 truncate">SMK Negeri 1 Contoh</p>
@@ -650,7 +649,29 @@
     </main>
 
 
-    <!-- VIEW 8: PENGATURAN SYSTEM -->
+    <!-- VIEW 8: FITUR TINDAK LANJUT SISWA BERMASALAH -->
+    <main id="view-tindak-lanjut" class="flex-1 flex-col overflow-y-auto no-scrollbar bg-slate-50 p-4 hidden">
+      <div class="flex items-center justify-between mb-3">
+        <div>
+          <h2 class="font-bold text-lg text-gray-900">🚩 Tindak Lanjut Siswa</h2>
+          <p class="text-xs text-gray-500">Deteksi Otomatis Pelanggaran Presensi Siswa</p>
+        </div>
+      </div>
+
+      <div class="bg-amber-50 border border-amber-200 p-3 rounded-2xl mb-3 text-xs text-amber-900 space-y-1">
+        <p class="font-bold"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Kriteria Siswa Masuk Daftar Tindak Lanjut:</p>
+        <ul class="list-disc pl-4 text-[11px] space-y-0.5 text-amber-800">
+          <li><strong>3x Alpa</strong> (Secara Kumulatif/Tidak Berturut-turut)</li>
+          <li><strong>3x Bolos Berturut-turut</strong></li>
+          <li><strong>3x Terlambat Berturut-turut</strong></li>
+        </ul>
+      </div>
+
+      <div id="tindak-lanjut-list-container" class="space-y-3 pb-6"></div>
+    </main>
+
+
+    <!-- VIEW 9: PENGATURAN SYSTEM -->
     <main id="view-settings" class="flex-1 flex-col overflow-y-auto no-scrollbar bg-slate-50 p-4 hidden">
       <div class="mb-4">
         <h2 class="font-bold text-lg text-gray-900">Pengaturan System</h2>
@@ -774,7 +795,13 @@
             <span class="text-xs font-bold text-gray-800">Absensi Manual</span>
           </button>
 
-          <!-- MENU LAPORAN REKAPITULASI INTEGRASI -->
+          <!-- MENU FITUR TINDAK LANJUT -->
+          <button onclick="toggleMenuModal(); toggleView('tindak-lanjut');" class="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col items-center justify-center gap-1.5 hover:bg-rose-50 hover:border-rose-200 transition relative">
+            <i class="fa-solid fa-user-shield text-xl text-rose-600"></i>
+            <span class="text-xs font-bold text-gray-800">Tindak Lanjut</span>
+          </button>
+
+          <!-- MENU LAPORAN REKAPITULASI -->
           <button onclick="toggleMenuModal(); toggleView('report');" class="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col items-center justify-center gap-1.5 hover:bg-emerald-50 hover:border-emerald-200 transition">
             <i class="fa-solid fa-file-invoice text-xl text-emerald-600"></i>
             <span class="text-xs font-bold text-gray-800">Laporan Rekap</span>
@@ -785,9 +812,9 @@
             <span class="text-xs font-bold text-gray-800">Cetak QR Code</span>
           </button>
 
-          <button onclick="toggleMenuModal(); toggleView('settings');" class="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col items-center justify-center gap-1.5 hover:bg-purple-50 hover:border-purple-200 transition">
+          <button onclick="toggleMenuModal(); toggleView('settings');" class="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col items-center justify-center gap-1.5 hover:bg-purple-50 hover:border-purple-200 transition col-span-2">
             <i class="fa-solid fa-gear text-xl text-purple-600"></i>
-            <span class="text-xs font-bold text-gray-800">Pengaturan</span>
+            <span class="text-xs font-bold text-gray-800">Pengaturan System</span>
           </button>
         </div>
       </div>
@@ -842,6 +869,8 @@
     let db = null;
     let cachedStudents = [];
     let fetchedTodayAttendance = [];
+    let fetchedAttendanceHistory = [];
+    let fetchedTindakLanjutHistory = [];
     let currentScanSession = "PAGI";
     let myPieChart = null;
 
@@ -1111,9 +1140,9 @@
             applySettingsFromCloud(result.settings);
           }
 
-          if (result.today_attendance) {
-            fetchedTodayAttendance = result.today_attendance;
-          }
+          if (result.today_attendance) fetchedTodayAttendance = result.today_attendance;
+          if (result.attendance_history) fetchedAttendanceHistory = result.attendance_history;
+          if (result.tindak_lanjut) fetchedTindakLanjutHistory = result.tindak_lanjut;
 
           if (result.students) {
             const tx = db.transaction("students", "readwrite");
@@ -1376,6 +1405,13 @@
       generateReportData();
     }
 
+    function cleanJamOnly(val) {
+      if (!val) return "-";
+      var str = String(val).trim();
+      var match = str.match(/\d{2}:\d{2}/);
+      return match ? match[0] : (str === "null" || str === "" ? "-" : str);
+    }
+
     async function generateReportData() {
       const selectedClass = document.getElementById("rep-select-class").value;
       const schoolName = localStorage.getItem("SCHOOL_NAME") || "SMK NEGERI 1 CONTOH";
@@ -1391,7 +1427,7 @@
       document.getElementById("rep-ttd-tanggal").innerText = nowStr;
 
       const queueRecords = await getAllQueueFromDB();
-      let allAttendance = [...fetchedTodayAttendance, ...queueRecords];
+      let allAttendance = [...fetchedTodayAttendance, ...fetchedAttendanceHistory, ...queueRecords];
 
       let filtered = classFilter(cachedStudents, selectedClass);
 
@@ -1428,8 +1464,8 @@
           const recSiang = dayRecords.find(r => r.id_siswa === std.id_siswa && (r.sesi === "SIANG" || r.jam_siang));
           const anyRec = dayRecords.find(r => r.id_siswa === std.id_siswa);
 
-          let jamPagi = recPagi ? (recPagi.jam || recPagi.jam_pagi || "-") : "-";
-          let jamSiang = recSiang ? (recSiang.jam || recSiang.jam_siang || "-") : "-";
+          let jamPagi = cleanJamOnly(recPagi ? (recPagi.jam || recPagi.jam_pagi) : "");
+          let jamSiang = cleanJamOnly(recSiang ? (recSiang.jam || recSiang.jam_siang) : "");
           let statusStr = anyRec ? (anyRec.status_presensi || "HADIR") : "ALPA";
 
           if (statusStr === "HADIR") totalHadir++;
@@ -1507,7 +1543,136 @@
       return selected === "ALL" ? list : list.filter(s => s.kelas === selected);
     }
 
-    // 7. SCANNER CONTROLLER
+    // 7. MODUL FITUR TINDAK LANJUT SISWA BERMASALAH
+    async function renderTindakLanjutView() {
+      const container = document.getElementById("tindak-lanjut-list-container");
+      container.innerHTML = `<div class="text-center py-6 text-gray-400 text-xs"><i class="fa-solid fa-spinner fa-spin mr-1"></i>Menganalisis data pelanggaran siswa...</div>`;
+
+      const queueRecords = await getAllQueueFromDB();
+      const allHistory = [...fetchedAttendanceHistory, ...fetchedTodayAttendance, ...queueRecords];
+
+      const problemStudents = [];
+
+      cachedStudents.forEach(std => {
+        const stdLogs = allHistory
+          .filter(r => r.id_siswa === std.id_siswa)
+          .sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
+
+        let totalAlpa = stdLogs.filter(r => r.status_presensi === "ALPA").length;
+
+        let maxConsecutiveBolos = 0, currentBolos = 0;
+        let maxConsecutiveTerlambat = 0, currentTerlambat = 0;
+
+        stdLogs.forEach(log => {
+          const st = log.status_presensi || "HADIR";
+          if (st === "BOLOS") {
+            currentBolos++;
+            if (currentBolos > maxConsecutiveBolos) maxConsecutiveBolos = currentBolos;
+          } else {
+            currentBolos = 0;
+          }
+
+          if (st === "TERLAMBAT") {
+            currentTerlambat++;
+            if (currentTerlambat > maxConsecutiveTerlambat) maxConsecutiveTerlambat = currentTerlambat;
+          } else {
+            currentTerlambat = 0;
+          }
+        });
+
+        const violations = [];
+        if (totalAlpa >= 3) violations.push(`${totalAlpa}x Alpa (Kumulatif)`);
+        if (maxConsecutiveBolos >= 3) violations.push(`${maxConsecutiveBolos}x Bolos (Berturut-turut)`);
+        if (maxConsecutiveTerlambat >= 3) violations.push(`${maxConsecutiveTerlambat}x Terlambat (Berturut-turut)`);
+
+        if (violations.length > 0) {
+          const isResolved = fetchedTindakLanjutHistory.some(tl => tl.id_siswa === std.id_siswa);
+          problemStudents.push({
+            ...std,
+            violations: violations.join(" • "),
+            isResolved: isResolved
+          });
+        }
+      });
+
+      if (problemStudents.length === 0) {
+        container.innerHTML = `
+          <div class="bg-white p-6 rounded-2xl border border-gray-100 text-center space-y-2">
+            <i class="fa-solid fa-shield-check text-emerald-500 text-3xl"></i>
+            <h4 class="font-bold text-xs text-gray-800">Tidak Ada Siswa Bermasalah</h4>
+            <p class="text-[11px] text-gray-500">Semua siswa memenuhi kriteria tingkat kehadiran dengan baik.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = problemStudents.map(std => `
+        <div class="bg-white p-3.5 rounded-2xl border border-gray-200 shadow-sm space-y-2">
+          <div class="flex items-center justify-between border-b border-gray-100 pb-2">
+            <div>
+              <h4 class="font-bold text-xs text-gray-900">${std.nama}</h4>
+              <p class="text-[10px] text-gray-500">Kelas: <span class="font-bold text-blue-900">${std.kelas}</span> | NISN: ${std.nisn || '-'}</p>
+            </div>
+            ${std.isResolved ? `
+              <span class="px-2 py-0.5 bg-emerald-100 text-emerald-700 font-bold text-[9px] rounded-full">
+                <i class="fa-solid fa-check mr-1"></i>Sudah Selesai
+              </span>
+            ` : `
+              <span class="px-2 py-0.5 bg-rose-100 text-rose-700 font-bold text-[9px] rounded-full">
+                <i class="fa-solid fa-circle-exclamation mr-1"></i>Perlu Tindakan
+              </span>
+            `}
+          </div>
+
+          <div class="bg-rose-50 border border-rose-100 p-2 rounded-xl text-[10px] text-rose-800 font-semibold">
+            <i class="fa-solid fa-circle-xmark text-rose-600 mr-1"></i>Pelanggaran: ${std.violations}
+          </div>
+
+          ${!std.isResolved ? `
+            <button onclick="markTindakLanjutSelesai('${std.id_siswa}', '${std.nama}', '${std.kelas}', '${std.violations}')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-xl text-xs flex items-center justify-center space-x-1.5 shadow-sm">
+              <i class="fa-solid fa-user-check"></i>
+              <span>Sudah Ditindaklanjuti</span>
+            </button>
+          ` : `
+            <p class="text-[10px] text-gray-400 text-center italic">Tindak lanjut telah dicatat di database server.</p>
+          `}
+        </div>
+      `).join('');
+    }
+
+    async function markTindakLanjutSelesai(idSiswa, nama, kelas, kategori) {
+      if (!confirm(`Tandai siswa ${nama} (${kelas}) sebagai SUDAH DITINDAKLANJUTI?`)) return;
+
+      const data = {
+        id_siswa: idSiswa,
+        nama: nama,
+        kelas: kelas,
+        kategori: kategori,
+        catatan: "Telah diberikan pembinaan / tindak lanjut oleh wali kelas / guru BK."
+      };
+
+      fetchedTindakLanjutHistory.push(data);
+      renderTindakLanjutView();
+
+      if (navigator.onLine) {
+        try {
+          await fetch(GAS_WEB_APP_URL, {
+            method: "POST",
+            mode: "cors",
+            headers: { "Content-Type": "text/plain" },
+            body: JSON.stringify({
+              action: "SAVE_TINDAK_LANJUT",
+              data: data
+            })
+          });
+          alert("Status tindak lanjut berhasil tersimpan ke Cloud Sheet!");
+        } catch (e) {
+          console.warn("Gagal simpan ke server:", e);
+        }
+      }
+    }
+
+    // 8. SCANNER CONTROLLER
     function initScanner() {
       if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
       const config = { fps: 15, qrbox: { width: 250, height: 250 } };
@@ -1534,7 +1699,7 @@
       }
     }
 
-    // 8. PROCESS SCAN & STATUS
+    // 9. PROCESS SCAN & STATUS
     async function onScanSuccess(decodedText) {
       if (isCameraActive) {
         await html5QrCode.stop();
@@ -1548,7 +1713,7 @@
       const student = await getStudentFromDB(qrCodeKey);
       const now = new Date();
       const dateStr = now.toISOString().split('T')[0];
-      const timeStr = now.toTimeString().split(' ')[0];
+      const timeStr = now.toTimeString().split(' ')[0].substring(0, 5);
       const sesi = currentScanSession;
 
       if (student) {
@@ -1578,7 +1743,7 @@
       }
     }
 
-    // 9. POPULATE CLASS DROPDOWNS
+    // 10. POPULATE CLASS DROPDOWNS
     function populateClassDropdowns() {
       const classes = [...new Set(cachedStudents.map(s => s.kelas))].filter(Boolean).sort();
       const filterSelect = document.getElementById('filter-class-select');
@@ -1594,7 +1759,7 @@
       if (repClassSelect) repClassSelect.innerHTML = classOptions;
     }
 
-    // 10. DATA SISWA & FILTER KELAS
+    // 11. DATA SISWA & FILTER KELAS
     function getAllStudentsFromDB() {
       return new Promise((resolve) => {
         const tx = db.transaction("students", "readonly");
@@ -1658,7 +1823,7 @@
       `).join('');
     }
 
-    // 11. DASHBOARD MONITORING & DUAL FILTER
+    // 12. DASHBOARD MONITORING & DUAL FILTER
     async function updateMonitoringDashboard() {
       const selectedClass = document.getElementById('monitoring-class-filter').value;
       const selectedSession = document.getElementById('monitoring-session-filter').value;
@@ -1824,7 +1989,7 @@
       updateMonitoringDashboard();
     }
 
-    // 12. HELPER DATABASE & QUEUE
+    // 13. HELPER DATABASE & QUEUE
     function getStudentFromDB(qrKey) {
       return new Promise((resolve) => {
         const tx = db.transaction("students", "readonly");
@@ -1886,7 +2051,7 @@
       });
     }
 
-    // 13. AUTO SYNC ANTREAN KE GOOGLE SHEETS
+    // 14. AUTO SYNC ANTREAN KE GOOGLE SHEETS
     async function syncQueueToGAS() {
       const queueData = await getAllQueueFromDB();
       if (queueData.length === 0) return;
@@ -1912,9 +2077,9 @@
       }
     }
 
-    // 14. NAVIGATION TOGGLE
+    // 15. NAVIGATION TOGGLE
     function toggleView(viewName) {
-      const views = ['view-scanner', 'view-success', 'view-students', 'view-monitoring', 'view-donation', 'view-print-qr', 'view-report', 'view-settings'];
+      const views = ['view-scanner', 'view-success', 'view-students', 'view-monitoring', 'view-donation', 'view-print-qr', 'view-report', 'view-tindak-lanjut', 'view-settings'];
       views.forEach(v => {
         const el = document.getElementById(v);
         if (el) { el.classList.add('hidden'); el.classList.remove('flex'); }
@@ -1958,6 +2123,11 @@
         document.getElementById('view-report').classList.remove('hidden');
         document.getElementById('view-report').classList.add('flex');
         generateReportData();
+        stopCameraIfActive();
+      } else if (viewName === 'tindak-lanjut') {
+        document.getElementById('view-tindak-lanjut').classList.remove('hidden');
+        document.getElementById('view-tindak-lanjut').classList.add('flex');
+        renderTindakLanjutView();
         stopCameraIfActive();
       } else if (viewName === 'settings') {
         document.getElementById('view-settings').classList.remove('hidden');
