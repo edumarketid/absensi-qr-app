@@ -33,17 +33,8 @@
   <!-- Container Mobile -->
   <div class="w-full max-w-md h-[100vh] sm:h-[840px] bg-white flex flex-col justify-between shadow-2xl overflow-hidden sm:rounded-3xl relative border border-gray-200">
 
-    <!-- HEADER UTAMA -->
-    <header class="bg-[#0b3c5d] text-white pt-2 pb-3 px-4 z-20 shadow-md">
-      <div class="flex justify-between items-center text-xs font-semibold pb-1 border-b border-blue-900/50 mb-2">
-        <span id="current-time-clock">07.08</span>
-        <div class="flex items-center space-x-1.5 text-xs">
-          <i class="fa-solid font-bold fa-signal"></i>
-          <i class="fa-solid fa-wifi" id="wifi-icon"></i>
-          <i class="fa-solid fa-battery-full"></i>
-        </div>
-      </div>
-
+    <!-- HEADER UTAMA (TAMPILAN JAM & STATUS BAR ATAS DIHILANGKAN) -->
+    <header class="bg-[#0b3c5d] text-white py-3 px-4 z-20 shadow-md">
       <div class="flex items-center justify-between">
         <div class="flex items-center space-x-3">
           <button onclick="toggleMenuModal()" class="text-xl focus:outline-none"><i class="fa-solid fa-bars"></i></button>
@@ -212,16 +203,32 @@
     </main>
 
 
-    <!-- VIEW 4: MONITORING PRESENSI & EVALUASI ALPA/BOLOS -->
+    <!-- VIEW 4: MONITORING PRESENSI (FITUR FILTER SESI PAGI / SIANG) -->
     <main id="view-monitoring" class="flex-1 flex-col overflow-y-auto no-scrollbar bg-slate-50 p-4 hidden">
       <div class="flex items-center justify-between mb-3">
         <div>
           <h2 class="font-bold text-lg text-gray-900">Monitoring Absensi</h2>
           <p class="text-xs text-gray-500">Statistik Realtime Hari Berjalan</p>
         </div>
-        <select id="monitoring-class-filter" onchange="updateMonitoringDashboard()" class="py-1.5 px-3 bg-white border border-gray-200 rounded-xl text-xs font-bold text-blue-900 shadow-sm focus:outline-none">
-          <option value="ALL">Semua Kelas</option>
-        </select>
+      </div>
+
+      <!-- FILTER KELAS & FILTER SESI PAGI/SIANG -->
+      <div class="grid grid-cols-2 gap-2 mb-3">
+        <div>
+          <label class="block text-[10px] font-bold text-gray-600 mb-1"><i class="fa-solid fa-filter text-blue-600"></i> Filter Kelas</label>
+          <select id="monitoring-class-filter" onchange="updateMonitoringDashboard()" class="w-full py-1.5 px-2 bg-white border border-gray-200 rounded-xl text-xs font-bold text-blue-900 shadow-sm focus:outline-none">
+            <option value="ALL">Semua Kelas</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-[10px] font-bold text-gray-600 mb-1"><i class="fa-solid fa-clock text-amber-600"></i> Filter Sesi</label>
+          <select id="monitoring-session-filter" onchange="updateMonitoringDashboard()" class="w-full py-1.5 px-2 bg-white border border-gray-200 rounded-xl text-xs font-bold text-blue-900 shadow-sm focus:outline-none">
+            <option value="ALL">Semua Sesi</option>
+            <option value="PAGI">Sesi Pagi</option>
+            <option value="SIANG">Sesi Siang</option>
+          </select>
+        </div>
       </div>
 
       <!-- GRAFIK CHART.JS -->
@@ -265,7 +272,7 @@
         </div>
       </div>
 
-      <!-- DAFTAR SISWA BELUM PRESENSI / EVALUASI ALPA/BOLOS -->
+      <!-- DAFTAR SISWA BELUM PRESENSI / BERMASALAH -->
       <div class="space-y-2">
         <h3 class="font-bold text-xs text-gray-800 flex items-center justify-between">
           <span>Siswa Belum Complete / Bermasalah</span>
@@ -277,42 +284,29 @@
     </main>
 
 
-    <!-- VIEW 5: PENGATURAN WAKTU ABSEN & IDENTITAS -->
+    <!-- VIEW 5: PENGATURAN WAKTU HARI SENIN - SABTU (DENGAN SAKELAR TOGGLE HARI) -->
     <main id="view-settings" class="flex-1 flex-col overflow-y-auto no-scrollbar bg-slate-50 p-4 hidden">
       <div class="mb-4">
         <h2 class="font-bold text-lg text-gray-900">Pengaturan System</h2>
-        <p class="text-xs text-gray-500">Konfigurasi waktu presensi & identitas sekolah</p>
+        <p class="text-xs text-gray-500">Konfigurasi waktu presensi per hari & identitas sekolah</p>
       </div>
 
-      <!-- FORM JAM PRESENSI DAN BATASAN -->
+      <!-- CONFIG JAM HARI SENIN - SABTU -->
       <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3 mb-3">
-        <h3 class="font-bold text-xs text-blue-900 border-b border-gray-100 pb-2 flex items-center gap-2">
-          <i class="fa-solid fa-clock text-blue-600"></i>
-          <span>Pengaturan Jam Presensi & Toleransi</span>
+        <h3 class="font-bold text-xs text-blue-900 border-b border-gray-100 pb-2 flex items-center justify-between">
+          <span class="flex items-center gap-2">
+            <i class="fa-solid fa-calendar-days text-blue-600"></i>
+            <span>Jam Presensi Per Hari</span>
+          </span>
+          <span class="text-[10px] font-normal text-rose-500">*Minggu otomatis libur</span>
         </h3>
 
-        <div class="grid grid-cols-2 gap-2">
-          <div>
-            <label class="block text-[10px] font-semibold text-gray-700 mb-1">Mulai Absen Pagi</label>
-            <input type="time" id="time-pagi-start" class="w-full px-2.5 py-1.5 bg-slate-50 border border-gray-200 rounded-xl text-xs font-bold text-gray-800 focus:outline-none focus:border-blue-500">
-          </div>
-          <div>
-            <label class="block text-[10px] font-semibold text-gray-700 mb-1">Toleransi Pagi (Alpa)</label>
-            <input type="time" id="time-pagi-limit" class="w-full px-2.5 py-1.5 bg-slate-50 border border-gray-200 rounded-xl text-xs font-bold text-gray-800 focus:outline-none focus:border-blue-500">
-          </div>
-          <div>
-            <label class="block text-[10px] font-semibold text-gray-700 mb-1">Mulai Absen Siang</label>
-            <input type="time" id="time-siang-start" class="w-full px-2.5 py-1.5 bg-slate-50 border border-gray-200 rounded-xl text-xs font-bold text-gray-800 focus:outline-none focus:border-blue-500">
-          </div>
-          <div>
-            <label class="block text-[10px] font-semibold text-gray-700 mb-1">Batas Absen Siang (Bolos)</label>
-            <input type="time" id="time-siang-limit" class="w-full px-2.5 py-1.5 bg-slate-50 border border-gray-200 rounded-xl text-xs font-bold text-gray-800 focus:outline-none focus:border-blue-500">
-          </div>
-        </div>
+        <!-- CONTAINER HARI (SENIN - SABTU) -->
+        <div id="days-config-container" class="space-y-3"></div>
 
-        <button onclick="saveTimeSettings()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-xl text-xs flex items-center justify-center space-x-1.5 shadow-sm transition">
+        <button onclick="saveDaysTimeSettings()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-xl text-xs flex items-center justify-center space-x-1.5 shadow-sm transition">
           <i class="fa-solid fa-floppy-disk"></i>
-          <span>Simpan Konfigurasi Jam</span>
+          <span>Simpan Pengaturan Jam Hari</span>
         </button>
       </div>
 
@@ -446,9 +440,18 @@
     let isCameraActive = false;
     let db = null;
     let cachedStudents = [];
-    let fetchedTodayAttendance = []; // Storage riwayat dari GAS
+    let fetchedTodayAttendance = [];
     let currentScanSession = "PAGI";
     let myPieChart = null;
+
+    const DAYS_LIST = [
+      { key: "mon", label: "Senin" },
+      { key: "tue", label: "Selasa" },
+      { key: "wed", label: "Rabu" },
+      { key: "thu", label: "Kamis" },
+      { key: "fri", label: "Jumat" },
+      { key: "sat", label: "Sabtu" }
+    ];
 
     // 1. INITIALIZE DATABASE
     function initDatabase() {
@@ -475,7 +478,7 @@
       });
     }
 
-    // 2. CONFIGURATION MANAGEMENT
+    // 2. CONFIGURATION MANAGEMENT (TIME PER DAY & SCHOOL)
     function loadAppConfigs() {
       const schoolName = localStorage.getItem("SCHOOL_NAME") || "SMK Negeri 1 Contoh";
       const principalName = localStorage.getItem("PRINCIPAL_NAME") || "";
@@ -488,13 +491,105 @@
       document.getElementById("input-principal-nip").value = principalNip;
       document.getElementById("header-officer-name").innerText = officerName;
 
-      // Jam default
-      document.getElementById("time-pagi-start").value = localStorage.getItem("TIME_PAGI_START") || "06:00";
-      document.getElementById("time-pagi-limit").value = localStorage.getItem("TIME_PAGI_LIMIT") || "07:15";
-      document.getElementById("time-siang-start").value = localStorage.getItem("TIME_SIANG_START") || "12:00";
-      document.getElementById("time-siang-limit").value = localStorage.getItem("TIME_SIANG_LIMIT") || "16:00";
+      renderDaysConfigForm();
+      autoUpdateShiftLabel();
+    }
+
+    function renderDaysConfigForm() {
+      const container = document.getElementById("days-config-container");
+      let html = "";
+
+      DAYS_LIST.forEach(day => {
+        const active = localStorage.getItem(`DAY_ACTIVE_${day.key}`) !== "false";
+        const pagiStart = localStorage.getItem(`TIME_${day.key}_PAGI_START`) || "06:00";
+        const pagiLimit = localStorage.getItem(`TIME_${day.key}_PAGI_LIMIT`) || "07:15";
+        const siangStart = localStorage.getItem(`TIME_${day.key}_SIANG_START`) || "12:00";
+        const siangLimit = localStorage.getItem(`TIME_${day.key}_SIANG_LIMIT`) || "16:00";
+
+        html += `
+          <div class="p-3 bg-slate-50 border border-gray-200 rounded-xl space-y-2">
+            <div class="flex items-center justify-between border-b border-gray-200 pb-1.5">
+              <span class="font-bold text-xs text-gray-800">${day.label}</span>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="toggle-${day.key}" ${active ? 'checked' : ''} class="sr-only peer" onchange="toggleDayActiveUI('${day.key}')">
+                <div class="w-9 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                <span id="label-status-${day.key}" class="ml-2 text-[10px] font-bold ${active ? 'text-blue-600' : 'text-gray-400'}">${active ? 'Aktif' : 'Libur'}</span>
+              </label>
+            </div>
+
+            <div id="inputs-box-${day.key}" class="grid grid-cols-2 gap-2 ${active ? '' : 'opacity-40 pointer-events-none'}">
+              <div>
+                <label class="block text-[9px] font-semibold text-gray-600 mb-0.5">Mulai Pagi</label>
+                <input type="time" id="pagi-start-${day.key}" value="${pagiStart}" class="w-full px-2 py-1 bg-white border border-gray-200 rounded-lg text-xs font-bold text-gray-800">
+              </div>
+              <div>
+                <label class="block text-[9px] font-semibold text-gray-600 mb-0.5">Toleransi Pagi (Alpa)</label>
+                <input type="time" id="pagi-limit-${day.key}" value="${pagiLimit}" class="w-full px-2 py-1 bg-white border border-gray-200 rounded-lg text-xs font-bold text-gray-800">
+              </div>
+              <div>
+                <label class="block text-[9px] font-semibold text-gray-600 mb-0.5">Mulai Siang</label>
+                <input type="time" id="siang-start-${day.key}" value="${siangStart}" class="w-full px-2 py-1 bg-white border border-gray-200 rounded-lg text-xs font-bold text-gray-800">
+              </div>
+              <div>
+                <label class="block text-[9px] font-semibold text-gray-600 mb-0.5">Batas Siang (Bolos)</label>
+                <input type="time" id="siang-limit-${day.key}" value="${siangLimit}" class="w-full px-2 py-1 bg-white border border-gray-200 rounded-lg text-xs font-bold text-gray-800">
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    function toggleDayActiveUI(dayKey) {
+      const isChecked = document.getElementById(`toggle-${dayKey}`).checked;
+      const inputsBox = document.getElementById(`inputs-box-${dayKey}`);
+      const labelStatus = document.getElementById(`label-status-${dayKey}`);
+
+      if (isChecked) {
+        inputsBox.classList.remove('opacity-40', 'pointer-events-none');
+        labelStatus.innerText = "Aktif";
+        labelStatus.className = "ml-2 text-[10px] font-bold text-blue-600";
+      } else {
+        inputsBox.classList.add('opacity-40', 'pointer-events-none');
+        labelStatus.innerText = "Libur";
+        labelStatus.className = "ml-2 text-[10px] font-bold text-gray-400";
+      }
+    }
+
+    function saveDaysTimeSettings() {
+      DAYS_LIST.forEach(day => {
+        const active = document.getElementById(`toggle-${day.key}`).checked;
+        localStorage.setItem(`DAY_ACTIVE_${day.key}`, active);
+
+        localStorage.setItem(`TIME_${day.key}_PAGI_START`, document.getElementById(`pagi-start-${day.key}`).value);
+        localStorage.setItem(`TIME_${day.key}_PAGI_LIMIT`, document.getElementById(`pagi-limit-${day.key}`).value);
+        localStorage.setItem(`TIME_${day.key}_SIANG_START`, document.getElementById(`siang-start-${day.key}`).value);
+        localStorage.setItem(`TIME_${day.key}_SIANG_LIMIT`, document.getElementById(`siang-limit-${day.key}`).value);
+      });
 
       autoUpdateShiftLabel();
+      alert("Pengaturan jam presensi berbasis hari berhasil disimpan!");
+    }
+
+    function getCurrentDayConfig() {
+      const dayIndex = new Date().getDay(); // 0: Minggu, 1: Senin, ..., 6: Sabtu
+      const dayKeys = [null, "mon", "tue", "wed", "thu", "fri", "sat"];
+
+      if (dayIndex === 0) return { isHoliday: true, name: "Minggu" }; // Minggu Otomatis Libur
+
+      const key = dayKeys[dayIndex];
+      const active = localStorage.getItem(`DAY_ACTIVE_${key}`) !== "false";
+
+      return {
+        isHoliday: !active,
+        key: key,
+        pagiStart: localStorage.getItem(`TIME_${key}_PAGI_START`) || "06:00",
+        pagiLimit: localStorage.getItem(`TIME_${key}_PAGI_LIMIT`) || "07:15",
+        siangStart: localStorage.getItem(`TIME_${key}_SIANG_START`) || "12:00",
+        siangLimit: localStorage.getItem(`TIME_${key}_SIANG_LIMIT`) || "16:00"
+      };
     }
 
     function saveSchoolSettings() {
@@ -512,22 +607,15 @@
       alert("Pengaturan sekolah berhasil disimpan!");
     }
 
-    function saveTimeSettings() {
-      localStorage.setItem("TIME_PAGI_START", document.getElementById("time-pagi-start").value);
-      localStorage.setItem("TIME_PAGI_LIMIT", document.getElementById("time-pagi-limit").value);
-      localStorage.setItem("TIME_SIANG_START", document.getElementById("time-siang-start").value);
-      localStorage.setItem("TIME_SIANG_LIMIT", document.getElementById("time-siang-limit").value);
-
-      autoUpdateShiftLabel();
-      alert("Konfigurasi jam presensi berhasil disimpan!");
-    }
-
     function autoUpdateShiftLabel() {
-      const now = new Date();
-      const currentHM = now.toTimeString().substring(0, 5);
-      const siangStart = localStorage.getItem("TIME_SIANG_START") || "12:00";
+      const dayCfg = getCurrentDayConfig();
+      if (dayCfg.isHoliday) {
+        document.getElementById("header-shift-label").innerText = "Hari Libur";
+        return;
+      }
 
-      if (currentHM >= siangStart) {
+      const nowHM = new Date().toTimeString().substring(0, 5);
+      if (nowHM >= dayCfg.siangStart) {
         document.getElementById("header-shift-label").innerText = "Piket Siang";
         if (currentScanSession === "PAGI") toggleScanSessionMode();
       } else {
@@ -625,7 +713,7 @@
       }
     }
 
-    // 5. PROCESS SCAN & STATUS PINATAS (SAKIT, IZIN, KEGIATAN, BOLOS)
+    // 5. PROCESS SCAN & STATUS
     async function onScanSuccess(decodedText) {
       if (isCameraActive) {
         await html5QrCode.stop();
@@ -743,16 +831,27 @@
       `).join('');
     }
 
-    // 8. DASHBOARD MONITORING & KALKULASI ALPA/BOLOS
+    // 8. DASHBOARD MONITORING & DUAL FILTER (KELAS & SESI)
     async function updateMonitoringDashboard() {
       const selectedClass = document.getElementById('monitoring-class-filter').value;
+      const selectedSession = document.getElementById('monitoring-session-filter').value; // ALL / PAGI / SIANG
+      
       const todayStr = new Date().toISOString().split('T')[0];
       const nowHM = new Date().toTimeString().substring(0, 5);
 
-      const pagiLimit = localStorage.getItem("TIME_PAGI_LIMIT") || "07:15";
-      const siangLimit = localStorage.getItem("TIME_SIANG_LIMIT") || "16:00";
+      const dayCfg = getCurrentDayConfig();
 
-      // Gabungkan antrean lokal HP dengan riwayat dari Google Sheets
+      // Jika hari libur, tampilkan info khusus
+      if (dayCfg.isHoliday) {
+        document.getElementById('unscanned-students-container').innerHTML = `
+          <div class="bg-blue-50 border border-blue-200 p-4 rounded-2xl text-center text-blue-800 text-xs font-bold">
+            <i class="fa-solid fa-mug-hot text-blue-600 text-lg mb-1 block"></i>
+            Hari Ini Libur Absensi (${dayCfg.name || 'Non-Aktif'}).
+          </div>
+        `;
+        return;
+      }
+
       const queueRecords = await getAllQueueFromDB();
       const allTodayRecords = [...fetchedTodayAttendance, ...queueRecords.filter(r => r.tanggal === todayStr)];
 
@@ -766,30 +865,70 @@
         const studentSiang = allTodayRecords.find(r => r.id_siswa === student.id_siswa && (r.sesi === "SIANG" || r.jam_siang));
         const anyRecord = allTodayRecords.find(r => r.id_siswa === student.id_siswa);
 
-        if (anyRecord) {
-          const st = anyRecord.status_presensi || "HADIR";
-          if (st === "HADIR") {
-            // Evaluasi Bolos (Hadir Pagi, lewat jam siang belum scan Siang)
-            if (studentPagi && !studentSiang && nowHM > siangLimit) {
-              countBolos++;
-              unresolvedStudents.push({ ...student, reason: "Sudah Hadir Pagi, Siang Tidak Scan (Bolos)" });
-            } else {
-              countHadir++;
-            }
-          } else if (st === "SAKIT") countSakit++;
-          else if (st === "IZIN") countIzin++;
-          else if (st === "KEGIATAN") countKegiatan++;
-          else if (st === "BOLOS") {
-            countBolos++;
-            unresolvedStudents.push({ ...student, reason: "Dicatat Bolos" });
-          }
-        } else {
-          // Evaluasi Alpa (Belum scan & telah lewat batas waktu pagi)
-          if (nowHM > pagiLimit) {
-            countAlpa++;
-            unresolvedStudents.push({ ...student, reason: "Belum Scan Sama Sekali (Alpa)" });
+        // Filter Spesifik Sesi Pagi
+        if (selectedSession === "PAGI") {
+          if (studentPagi) {
+            const st = studentPagi.status_presensi || "HADIR";
+            if (st === "HADIR") countHadir++;
+            else if (st === "SAKIT") countSakit++;
+            else if (st === "IZIN") countIzin++;
+            else if (st === "KEGIATAN") countKegiatan++;
           } else {
-            unresolvedStudents.push({ ...student, reason: "Belum Scan Hari Ini" });
+            if (nowHM > dayCfg.pagiLimit) {
+              countAlpa++;
+              unresolvedStudents.push({ ...student, reason: "Belum Absen Pagi (Alpa)" });
+            } else {
+              unresolvedStudents.push({ ...student, reason: "Belum Absen Pagi" });
+            }
+          }
+        } 
+        // Filter Spesifik Sesi Siang
+        else if (selectedSession === "SIANG") {
+          if (studentSiang) {
+            const st = studentSiang.status_presensi || "HADIR";
+            if (st === "HADIR") countHadir++;
+            else if (st === "SAKIT") countSakit++;
+            else if (st === "IZIN") countIzin++;
+            else if (st === "KEGIATAN") countKegiatan++;
+          } else {
+            if (nowHM > dayCfg.siangLimit) {
+              if (studentPagi) {
+                countBolos++;
+                unresolvedStudents.push({ ...student, reason: "Sudah Pagi, Siang Tidak Scan (Bolos)" });
+              } else {
+                countAlpa++;
+                unresolvedStudents.push({ ...student, reason: "Belum Absen Siang (Alpa)" });
+              }
+            } else {
+              unresolvedStudents.push({ ...student, reason: "Belum Absen Siang" });
+            }
+          }
+        } 
+        // Filter Semua Sesi (Awal)
+        else {
+          if (anyRecord) {
+            const st = anyRecord.status_presensi || "HADIR";
+            if (st === "HADIR") {
+              if (studentPagi && !studentSiang && nowHM > dayCfg.siangLimit) {
+                countBolos++;
+                unresolvedStudents.push({ ...student, reason: "Sudah Hadir Pagi, Siang Tidak Scan (Bolos)" });
+              } else {
+                countHadir++;
+              }
+            } else if (st === "SAKIT") countSakit++;
+            else if (st === "IZIN") countIzin++;
+            else if (st === "KEGIATAN") countKegiatan++;
+            else if (st === "BOLOS") {
+              countBolos++;
+              unresolvedStudents.push({ ...student, reason: "Dicatat Bolos" });
+            }
+          } else {
+            if (nowHM > dayCfg.pagiLimit) {
+              countAlpa++;
+              unresolvedStudents.push({ ...student, reason: "Belum Scan Sama Sekali (Alpa)" });
+            } else {
+              unresolvedStudents.push({ ...student, reason: "Belum Scan Hari Ini" });
+            }
           }
         }
       });
@@ -1040,11 +1179,8 @@
       if (navigator.onLine) syncQueueToGAS();
     }
 
-    // MONITORING NETWORK & CLOCK & SHIFT
+    // MONITORING NETWORK & SHIFT
     setInterval(() => {
-      const now = new Date();
-      document.getElementById('current-time-clock').innerText = now.toTimeString().substring(0, 5);
-      
       const isOnline = navigator.onLine;
       document.getElementById('status-dot').className = `w-2 h-2 rounded-full ${isOnline ? 'bg-green-400' : 'bg-amber-400'} inline-block`;
       document.getElementById('status-text').innerText = isOnline ? 'Online' : 'Offline';
