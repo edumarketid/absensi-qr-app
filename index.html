@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>QR First Online v13 - Absensi QR Code</title>
+  <title>QR First Offline - Absensi QR Code</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- FontAwesome Icons CDN -->
@@ -18,7 +18,6 @@
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     
-    /* Custom style overlay agar kamera pas dengan kotak scanner */
     #reader video {
       object-fit: cover !important;
       width: 100% !important;
@@ -29,10 +28,10 @@
 </head>
 <body class="flex justify-center items-center min-h-screen p-0 sm:p-4">
 
-  <!-- Container Simulasi Layar HP -->
+  <!-- Container Mobile -->
   <div class="w-full max-w-md h-[100vh] sm:h-[840px] bg-white flex flex-col justify-between shadow-2xl overflow-hidden sm:rounded-3xl relative border border-gray-200">
 
-    <!-- 1. HEADER UTAMA -->
+    <!-- HEADER UTAMA -->
     <header class="bg-[#0b3c5d] text-white pt-2 pb-3 px-4 z-20 shadow-md">
       <div class="flex justify-between items-center text-xs font-semibold pb-1 border-b border-blue-900/50 mb-2">
         <span id="current-time-clock">07.08</span>
@@ -47,14 +46,14 @@
         <div class="flex items-center space-x-3">
           <button class="text-xl focus:outline-none"><i class="fa-solid fa-bars"></i></button>
           <div>
-            <h1 class="font-bold text-base leading-tight">QR First Online</h1>
+            <h1 class="font-bold text-base leading-tight">QR First Offline</h1>
             <p class="text-xs text-gray-300">SMK Negeri 1 Contoh</p>
           </div>
         </div>
         <div class="text-right">
           <div class="flex items-center justify-end space-x-1">
-            <span id="status-dot" class="w-2 h-2 rounded-full bg-green-400 inline-block"></span>
-            <span id="status-text" class="text-xs font-medium">Offline</span>
+            <span id="status-dot" class="w-2 h-2 rounded-full bg-amber-400 inline-block"></span>
+            <span id="status-text" class="text-xs font-medium">Memeriksa...</span>
           </div>
           <p class="text-[10px] text-gray-300 mt-0.5">Petugas: Budi Santoso</p>
           <p class="text-[10px] text-gray-300">Piket Pagi</p>
@@ -68,13 +67,9 @@
     <!-- ========================================================= -->
     <main id="view-scanner" class="flex-1 flex flex-col justify-between relative bg-gray-900 overflow-hidden">
       
-      <!-- Area Kamera Viewfinder -->
       <div class="flex-1 relative flex flex-col items-center justify-center p-4 bg-black">
-        
-        <!-- Element Kamera HTML5QRCode -->
         <div id="reader" class="w-full h-full max-h-[420px] overflow-hidden rounded-2xl relative"></div>
 
-        <!-- Frame Overlay Scanner UI -->
         <div class="absolute w-64 h-64 pointer-events-none flex items-center justify-center z-10">
           <div class="absolute -top-1 -left-1 w-8 h-8 border-t-4 border-l-4 border-green-400 rounded-tl-xl"></div>
           <div class="absolute -top-1 -right-1 w-8 h-8 border-t-4 border-r-4 border-green-400 rounded-tr-xl"></div>
@@ -86,7 +81,6 @@
           </div>
         </div>
 
-        <!-- Tombol Kontrol Kamera -->
         <div class="absolute bottom-4 left-4 right-4 flex items-center justify-between gap-2 z-20">
           <button onclick="toggleTorch()" class="bg-black/60 hover:bg-black/80 text-white flex-1 py-2.5 rounded-xl text-xs font-medium flex flex-col items-center justify-center gap-1 backdrop-blur-md">
             <i class="fa-solid fa-flashlight text-sm"></i>
@@ -105,7 +99,6 @@
         </div>
       </div>
 
-      <!-- Footer Info Mode Offline & Queue Bar -->
       <div class="bg-white p-3 border-t border-gray-100 flex items-center justify-between shadow-sm z-20">
         <div class="flex items-center space-x-3">
           <div class="w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center font-bold">
@@ -113,7 +106,7 @@
           </div>
           <div>
             <h4 class="text-xs font-bold text-gray-800">Mode Scan Cepat (Offline)</h4>
-            <p class="text-[10px] text-gray-500 leading-tight">Semua scan disimpan di HP, akan dikirim saat ada internet.</p>
+            <p id="sync-info-text" class="text-[10px] text-gray-500 leading-tight">Mengecek data siswa otomatis...</p>
           </div>
         </div>
         <div class="text-right pl-2 border-l border-gray-200 cursor-pointer" onclick="triggerManualSync()">
@@ -129,7 +122,6 @@
     <!-- ========================================================= -->
     <main id="view-success" class="flex-1 flex-col overflow-y-auto no-scrollbar bg-slate-50 hidden">
       
-      <!-- Banner Scan Berhasil / Peringatan -->
       <div id="success-banner" class="bg-emerald-600 text-white p-4 flex items-center space-x-3 shadow-md">
         <div id="success-icon" class="w-10 h-10 rounded-full bg-white text-emerald-600 flex items-center justify-center text-xl font-bold shadow-sm">
           <i class="fa-solid fa-check"></i>
@@ -141,17 +133,16 @@
       </div>
 
       <div class="p-4 space-y-3">
-        <!-- Card Profile Siswa -->
         <div class="bg-white p-3.5 rounded-2xl shadow-sm border border-gray-100 flex items-center space-x-4">
           <div class="w-20 h-24 bg-blue-500 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center border border-gray-200 shadow-inner">
             <i class="fa-solid fa-user text-white text-4xl"></i>
           </div>
           <div class="flex-1 min-w-0">
-            <h3 id="res-nama" class="font-bold text-gray-900 text-base truncate">Ahmad Fauzan</h3>
+            <h3 id="res-nama" class="font-bold text-gray-900 text-base truncate">-</h3>
             <div class="text-xs text-gray-600 space-y-0.5 mt-1">
-              <p><span class="text-gray-400">NISN</span> <span id="res-nisn" class="font-semibold text-gray-800">1234567890</span></p>
-              <p><span class="text-gray-400">Kelas</span> <span id="res-kelas" class="font-semibold text-gray-800">X TKJ</span></p>
-              <p><span class="text-gray-400">ID_SISWA</span> <span id="res-idsiswa" class="font-semibold text-gray-800">STD-000123</span></p>
+              <p><span class="text-gray-400">NISN</span> <span id="res-nisn" class="font-semibold text-gray-800">-</span></p>
+              <p><span class="text-gray-400">Kelas</span> <span id="res-kelas" class="font-semibold text-gray-800">-</span></p>
+              <p><span class="text-gray-400">ID_SISWA</span> <span id="res-idsiswa" class="font-semibold text-gray-800">-</span></p>
             </div>
             <span id="res-status-tag" class="inline-block mt-2 px-2.5 py-0.5 bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded-full">
               Siswa Aktif
@@ -159,7 +150,6 @@
           </div>
         </div>
 
-        <!-- Card Status Absen -->
         <div id="status-card-box" class="bg-emerald-50 border border-emerald-200 rounded-2xl p-3 text-center shadow-sm">
           <div class="flex items-center justify-center space-x-1.5 text-emerald-600 font-extrabold text-xl">
             <i class="fa-solid fa-circle-check"></i>
@@ -168,11 +158,10 @@
           <p id="res-sesi-text" class="text-xs font-semibold text-emerald-800 mt-0.5">Apel Pagi: HADIR</p>
           <p class="text-xs text-emerald-700 mt-1 flex items-center justify-center space-x-1 font-medium">
             <i class="fa-regular fa-clock"></i>
-            <span id="res-jam-scan">07:08:21</span>
+            <span id="res-jam-scan">00:00:00</span>
           </p>
         </div>
 
-        <!-- Card Pesan/Greeting -->
         <div class="bg-blue-50 border border-blue-100 rounded-2xl p-3 flex items-start space-x-3 text-blue-800">
           <div class="text-blue-500 text-lg mt-0.5"><i class="fa-solid fa-users"></i></div>
           <div class="text-xs">
@@ -181,20 +170,13 @@
           </div>
         </div>
 
-        <!-- Action Buttons -->
         <div class="space-y-2 pt-1">
           <button onclick="toggleView('scanner')" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl text-xs flex items-center justify-center space-x-2 shadow-md transition">
             <i class="fa-solid fa-qrcode text-sm"></i>
             <span>Scan Siswa Berikutnya</span>
           </button>
-          
-          <button onclick="downloadMasterStudents()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-2.5 rounded-xl text-xs flex items-center justify-center space-x-2 border border-slate-200 transition">
-            <i class="fa-solid fa-rotate text-blue-600"></i>
-            <span>Update / Sync Data Master Siswa</span>
-          </button>
         </div>
 
-        <!-- Banner Info Mode Offline Footer -->
         <div class="bg-white p-3 rounded-xl border border-gray-100 flex items-center justify-between text-xs text-gray-600 shadow-sm">
           <div class="flex items-center space-x-2">
             <i class="fa-solid fa-bolt text-green-500 font-bold"></i>
@@ -214,17 +196,99 @@
 
 
     <!-- ========================================================= -->
-    <!-- 3. BOTTOM NAVIGATION BAR -->
+    <!-- VIEW 3: TAMPILAN DAFTAR DATA SISWA -->
+    <!-- ========================================================= -->
+    <main id="view-students" class="flex-1 flex-col overflow-y-auto no-scrollbar bg-slate-50 p-4 hidden">
+      <div class="flex items-center justify-between mb-3">
+        <div>
+          <h2 class="font-bold text-lg text-gray-900">Data Master Siswa</h2>
+          <p class="text-xs text-gray-500">Tersimpan di Penyimpanan HP (Offline)</p>
+        </div>
+        <button onclick="autoDownloadMasterStudents()" class="bg-blue-50 text-blue-600 hover:bg-blue-100 p-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-blue-200">
+          <i class="fa-solid fa-rotate"></i>
+          <span>Sync</span>
+        </button>
+      </div>
+
+      <div class="relative mb-3">
+        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-gray-400 text-xs"></i>
+        <input type="text" id="search-student-input" onkeyup="filterStudentsList()" placeholder="Cari nama, NISN, atau kelas..." class="w-full pl-9 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-xs text-gray-800 focus:outline-none focus:border-blue-500 shadow-sm">
+      </div>
+
+      <div class="flex justify-between items-center text-xs text-gray-500 font-medium mb-2 px-1">
+        <span>Total Terdaftar:</span>
+        <span id="student-count-badge" class="font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-md">0 Siswa</span>
+      </div>
+
+      <div id="students-list-container" class="space-y-2.5 pb-4">
+        <!-- Item siswa di-render via JS -->
+      </div>
+    </main>
+
+
+    <!-- ========================================================= -->
+    <!-- VIEW 4: TAMPILAN PENGATURAN (SINKRONISASI & INTEGRASI GAS) -->
+    <!-- ========================================================= -->
+    <main id="view-settings" class="flex-1 flex-col overflow-y-auto no-scrollbar bg-slate-50 p-4 hidden">
+      <div class="mb-4">
+        <h2 class="font-bold text-lg text-gray-900">Pengaturan System</h2>
+        <p class="text-xs text-gray-500">Konfigurasi backend Google Apps Script & data lokal</p>
+      </div>
+
+      <!-- Status Card Backend Link -->
+      <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3 mb-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-2 text-blue-900 font-bold text-xs">
+            <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+              <i class="fa-solid fa-link text-xs"></i>
+            </div>
+            <span>Backend Web App GAS</span>
+          </div>
+          <span class="px-2 py-0.5 bg-green-100 text-green-700 text-[10px] font-bold rounded-md">Tersambung</span>
+        </div>
+
+        <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-[10px] font-mono text-gray-600 break-all select-all">
+          https://script.google.com/macros/s/AKfycbxVGAsO-sG7E9bHsSxQ-M16EykkO6jc6QpLzDY7sWg9qEHIbpk9Re32IGgDn1qPOmJ_/exec
+        </div>
+      </div>
+
+      <!-- Actions Card -->
+      <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3">
+        <h3 class="font-bold text-xs text-gray-800">Aksi Database Lokal</h3>
+
+        <button onclick="autoDownloadMasterStudents()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-xl text-xs flex items-center justify-center space-x-2 shadow-sm">
+          <i class="fa-solid fa-rotate"></i>
+          <span>Paksa Sync Data Siswa Sekarang</span>
+        </button>
+
+        <button onclick="triggerManualSync()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-xl text-xs flex items-center justify-center space-x-2 shadow-sm">
+          <i class="fa-solid fa-cloud-arrow-up"></i>
+          <span>Kirim Antrean Absen ke GAS</span>
+        </button>
+
+        <button onclick="clearLocalDatabaseCache()" class="w-full bg-rose-50 hover:bg-rose-100 text-rose-600 font-semibold py-2.5 rounded-xl text-xs flex items-center justify-center space-x-2 border border-rose-200">
+          <i class="fa-solid fa-trash-can"></i>
+          <span>Reset Cache Master Siswa HP</span>
+        </button>
+      </div>
+    </main>
+
+
+    <!-- ========================================================= -->
+    <!-- BOTTOM NAVIGATION -->
     <!-- ========================================================= -->
     <nav class="bg-white border-t border-gray-200 px-3 py-2 flex justify-between items-center text-center z-20">
-      <button onclick="toggleView('scanner')" class="flex-1 text-blue-600 flex flex-col items-center">
-        <div class="w-8 h-8 rounded-xl bg-blue-50 flex items-center justify-center mb-0.5">
-          <i class="fa-solid fa-qrcode text-base"></i>
+      
+      <!-- MENU PENGATURAN (Dulu Scanner) - ICON GERIGI RANTAI -->
+      <button id="nav-settings" onclick="toggleView('settings')" class="flex-1 text-gray-400 hover:text-gray-600 flex flex-col items-center">
+        <div class="w-8 h-8 flex items-center justify-center mb-0.5 relative">
+          <i class="fa-solid fa-gear text-sm"></i>
+          <i class="fa-solid fa-link text-[9px] absolute -bottom-0.5 -right-0.5 bg-white rounded-full p-0.5"></i>
         </div>
-        <span class="text-[10px] font-bold">Scanner</span>
+        <span class="text-[10px] font-medium">Pengaturan</span>
       </button>
 
-      <button class="flex-1 text-gray-400 hover:text-gray-600 flex flex-col items-center">
+      <button id="nav-students" onclick="toggleView('students')" class="flex-1 text-gray-400 hover:text-gray-600 flex flex-col items-center">
         <div class="w-8 h-8 flex items-center justify-center mb-0.5">
           <i class="fa-solid fa-user-group text-sm"></i>
         </div>
@@ -255,21 +319,18 @@
 
   </div>
 
-  <!-- SCRIPT INTEGRASI LOGIKA SCANNER & INDEXEDDB OFFLINE-FIRST -->
   <script>
     // =========================================================================
-    // KONFIGURASI APLIKASI
+    // URL GOOGLE APPS SCRIPT PERMANEN
     // =========================================================================
-    // TAMBAHKAN URL GAS WEB APP ANDA DI SINI
     const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxVGAsO-sG7E9bHsSxQ-M16EykkO6jc6QpLzDY7sWg9qEHIbpk9Re32IGgDn1qPOmJ_/exec"; 
 
     let html5QrCode = null;
     let isCameraActive = false;
     let db = null;
+    let cachedStudents = [];
 
-    // =========================================================================
-    // 1. INISIALISASI INDEXEDDB (OFFLINE-FIRST DATABASE HP)
-    // =========================================================================
+    // 1. INITIALIZE DATABASE
     function initDatabase() {
       return new Promise((resolve, reject) => {
         const request = indexedDB.open("AbsensiQR_DB", 1);
@@ -290,13 +351,50 @@
           resolve(db);
         };
 
-        request.onerror = (e) => reject("Gagal membuka database lokal: " + e.target.error);
+        request.onerror = (e) => reject("Database lokal gagal dimuat: " + e.target.error);
       });
     }
 
-    // =========================================================================
-    // 2. KAMERA SCANNER LOGIC (HTML5-QRCode)
-    // =========================================================================
+    // 2. AUTO DOWNLOAD MASTER SISWA DARI GOOGLE SHEETS
+    async function autoDownloadMasterStudents() {
+      if (!navigator.onLine) {
+        document.getElementById('sync-info-text').innerText = "Mode Offline - Menggunakan data HP.";
+        loadStudentsView();
+        return;
+      }
+
+      try {
+        document.getElementById('sync-info-text').innerText = "Mengunduh data siswa terbaru...";
+        const response = await fetch(`${GAS_WEB_APP_URL}?action=GET_ALL_STUDENTS`);
+        const result = await response.json();
+
+        if (result.success && result.students && result.students.length > 0) {
+          const tx = db.transaction("students", "readwrite");
+          const store = tx.objectStore("students");
+          
+          result.students.forEach(std => {
+            store.put({
+              id_siswa: std.qr_key || std.id_siswa,
+              nisn: std.nisn,
+              nama: std.nama,
+              kelas: std.kelas,
+              status: std.status
+            });
+          });
+
+          tx.oncomplete = () => {
+            document.getElementById('sync-info-text').innerText = `Terhubung! ${result.students.length} Siswa Siap.`;
+            loadStudentsView();
+          };
+        } else {
+          document.getElementById('sync-info-text').innerText = "Sheet Data_Siswa masih kosong.";
+        }
+      } catch (err) {
+        document.getElementById('sync-info-text').innerText = "Gagal terhubung ke Google Sheets.";
+      }
+    }
+
+    // 3. SCANNER CONTROLLER
     function initScanner() {
       if (!html5QrCode) {
         html5QrCode = new Html5Qrcode("reader");
@@ -309,8 +407,7 @@
           isCameraActive = true;
           document.getElementById('btn-camera-text').innerText = "Matikan Kamera";
         })
-        .catch((err) => {
-          console.warn("Kamera gagal diakses:", err);
+        .catch(() => {
           document.getElementById('btn-camera-text').innerText = "Nyalakan Kamera";
           isCameraActive = false;
         });
@@ -335,37 +432,26 @@
       }
     }
 
-    // =========================================================================
-    // 3. LOGIKA SCAN BERHASIL (OFFLINE PENCARIAN & PENCATATAN)
-    // =========================================================================
+    // 4. SCAN & MANUAL LOGIC
     async function onScanSuccess(decodedText) {
-      // Hentikan scanner sementara agar tidak scan berulang kali
       if (isCameraActive) {
         await html5QrCode.stop();
         isCameraActive = false;
       }
-
-      // Mainkan suara beeper/getaran saat berhasil
       if (navigator.vibrate) navigator.vibrate(200);
-
-      const qrCodeScanned = decodedText.trim();
-      processStudentAttendance(qrCodeScanned);
+      processStudentAttendance(decodedText.trim());
     }
 
     async function processStudentAttendance(qrCodeKey) {
-      // Cari siswa di IndexedDB Lokal HP
       const student = await getStudentFromDB(qrCodeKey);
 
       const now = new Date();
-      const dateStr = now.toISOString().split('T')[0]; // Format: YYYY-MM-DD
-      const timeStr = now.toTimeString().split(' ')[0]; // Format: HH:MM:SS
+      const dateStr = now.toISOString().split('T')[0];
+      const timeStr = now.toTimeString().split(' ')[0];
       const hour = now.getHours();
-      
-      // Tentukan sesi (Kurang dari jam 11:00 = PAGI, selebihnya = SIANG)
       const sesi = hour < 11 ? "PAGI" : "SIANG";
 
       if (student) {
-        // Buat record antrean absensi lokal
         const attendanceRecord = {
           queue_id: `${dateStr}_${student.id_siswa}_${sesi}`,
           tanggal: dateStr,
@@ -377,30 +463,81 @@
           timestamp: Date.now()
         };
 
-        // Simpan ke Queue lokal IndexedDB
         await saveToAttendanceQueue(attendanceRecord);
-
-        // Update Tampilan Hasil Scan (Sukses)
         showScanResultUI(student, timeStr, sesi, true);
 
-        // Pemicu otomatis kirim ke GAS jika terhubung internet
-        if (navigator.onLine) {
-          syncQueueToGAS();
-        }
+        if (navigator.onLine) syncQueueToGAS();
       } else {
-        // Siswa tidak ditemukan
         showScanResultUI({
           id_siswa: qrCodeKey,
-          nama: "Siswa Tidak Terdaftar",
+          nama: "Siswa Tidak Ditemukan",
           nisn: "-",
           kelas: "-"
         }, timeStr, sesi, false);
       }
     }
 
-    // =========================================================================
-    // 4. DATABASE OPERATORS (INDEXEDDB READ/WRITE)
-    // =========================================================================
+    // 5. READ & RENDER DAFTAR SISWA
+    function getAllStudentsFromDB() {
+      return new Promise((resolve) => {
+        const tx = db.transaction("students", "readonly");
+        const store = tx.objectStore("students");
+        const request = store.getAll();
+        request.onsuccess = () => resolve(request.result || []);
+        request.onerror = () => resolve([]);
+      });
+    }
+
+    async function loadStudentsView() {
+      cachedStudents = await getAllStudentsFromDB();
+      renderStudentsList(cachedStudents);
+    }
+
+    function renderStudentsList(students) {
+      const container = document.getElementById('students-list-container');
+      document.getElementById('student-count-badge').innerText = `${students.length} Siswa`;
+
+      if (students.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-10 bg-white rounded-2xl border border-gray-100 p-4">
+            <i class="fa-solid fa-user-slash text-gray-300 text-3xl mb-2"></i>
+            <p class="text-xs font-semibold text-gray-600">Belum ada data siswa di HP</p>
+            <p class="text-[10px] text-gray-400 mt-1">Pastikan Sheet 'Data_Siswa' terisi, lalu klik tombol Sync.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = students.map(std => `
+        <div class="bg-white p-3 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
+          <div class="flex items-center space-x-3 min-w-0">
+            <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-sm flex-shrink-0">
+              <i class="fa-solid fa-user"></i>
+            </div>
+            <div class="truncate">
+              <h4 class="font-bold text-xs text-gray-900 truncate">${std.nama}</h4>
+              <p class="text-[10px] text-gray-500">ID: ${std.id_siswa} | NISN: ${std.nisn || '-'}</p>
+            </div>
+          </div>
+          <span class="px-2 py-1 bg-slate-100 text-slate-700 font-bold text-[10px] rounded-lg border border-slate-200 ml-2 flex-shrink-0">
+            ${std.kelas}
+          </span>
+        </div>
+      `).join('');
+    }
+
+    function filterStudentsList() {
+      const keyword = document.getElementById('search-student-input').value.toLowerCase();
+      const filtered = cachedStudents.filter(std => 
+        std.nama.toLowerCase().includes(keyword) || 
+        std.id_siswa.toLowerCase().includes(keyword) || 
+        (std.kelas && std.kelas.toLowerCase().includes(keyword)) ||
+        (std.nisn && std.nisn.toString().includes(keyword))
+      );
+      renderStudentsList(filtered);
+    }
+
+    // 6. HELPER DATABASE & QUEUE
     function getStudentFromDB(qrKey) {
       return new Promise((resolve) => {
         const tx = db.transaction("students", "readonly");
@@ -444,6 +581,18 @@
       });
     }
 
+    function clearLocalDatabaseCache() {
+      if (confirm("Apakah Anda yakin ingin menghapus cache data master siswa di HP ini?")) {
+        const tx = db.transaction("students", "readwrite");
+        const store = tx.objectStore("students");
+        store.clear();
+        tx.oncomplete = () => {
+          alert("Cache berhasil dibersihkan!");
+          loadStudentsView();
+        };
+      }
+    }
+
     function updateQueueCountUI() {
       getAllQueueFromDB().then(records => {
         document.getElementById('queue-count').innerText = records.length;
@@ -451,12 +600,8 @@
       });
     }
 
-    // =========================================================================
-    // 5. SINKRONISASI KE GOOGLE APPS SCRIPT (GAS)
-    // =========================================================================
+    // 7. AUTO SYNC ANTREAN KE GOOGLE SHEETS
     async function syncQueueToGAS() {
-      if (!GAS_WEB_APP_URL || GAS_WEB_APP_URL.includes("AKfycbz_SESUSAI_DEPLOY_GAS_ANDA")) return;
-
       const queueData = await getAllQueueFromDB();
       if (queueData.length === 0) return;
 
@@ -475,62 +620,54 @@
         if (result.success) {
           const syncedIds = queueData.map(q => q.queue_id);
           await clearQueueFromDB(syncedIds);
-          console.log("Sinkronisasi sukses:", syncedIds.length, "data terkirim.");
         }
       } catch (err) {
-        console.warn("Gagal terhubung ke GAS (Tetap tersimpan aman di HP):", err);
+        console.warn("Gagal terhubung, data tersimpan di HP:", err);
       }
     }
 
-    async function downloadMasterStudents() {
-      if (!navigator.onLine) {
-        alert("Koneksi internet diperlukan untuk mengunduh Data Master Siswa.");
-        return;
-      }
-
-      try {
-        const response = await fetch(`${GAS_WEB_APP_URL}?action=GET_ALL_STUDENTS`);
-        const result = await response.json();
-
-        if (result.success && result.students) {
-          const tx = db.transaction("students", "readwrite");
-          const store = tx.objectStore("students");
-          
-          result.students.forEach(std => {
-            store.put({
-              id_siswa: std.qr_key || std.id_siswa,
-              nisn: std.nisn,
-              nama: std.nama,
-              kelas: std.kelas,
-              status: std.status
-            });
-          });
-
-          tx.oncomplete = () => alert(`Berhasil memperbarui ${result.students.length} Data Siswa di HP ini!`);
-        }
-      } catch (err) {
-        alert("Gagal mengunduh data dari Google Sheets. Periksa URL deployment GAS.");
-      }
-    }
-
-    // =========================================================================
-    // 6. UI TOGGLE & HELPER FUNCTIONS
-    // =========================================================================
+    // 8. TABS & VIEW TOGGLE MANAGEMENT
     function toggleView(viewName) {
       const scannerView = document.getElementById('view-scanner');
       const successView = document.getElementById('view-success');
+      const studentsView = document.getElementById('view-students');
+      const settingsView = document.getElementById('view-settings');
 
-      if (viewName === 'success') {
-        scannerView.classList.add('hidden');
-        scannerView.classList.remove('flex');
+      const navSettings = document.getElementById('nav-settings');
+      const navStudents = document.getElementById('nav-students');
+
+      navSettings.className = "flex-1 text-gray-400 hover:text-gray-600 flex flex-col items-center";
+      navStudents.className = "flex-1 text-gray-400 hover:text-gray-600 flex flex-col items-center";
+
+      scannerView.classList.add('hidden'); scannerView.classList.remove('flex');
+      successView.classList.add('hidden'); successView.classList.remove('flex');
+      studentsView.classList.add('hidden'); studentsView.classList.remove('flex');
+      settingsView.classList.add('hidden'); settingsView.classList.remove('flex');
+
+      if (viewName === 'students') {
+        studentsView.classList.remove('hidden');
+        studentsView.classList.add('flex');
+        navStudents.className = "flex-1 text-blue-600 flex flex-col items-center";
+        loadStudentsView();
+        stopCameraIfActive();
+      } else if (viewName === 'settings') {
+        settingsView.classList.remove('hidden');
+        settingsView.classList.add('flex');
+        navSettings.className = "flex-1 text-blue-600 flex flex-col items-center";
+        stopCameraIfActive();
+      } else if (viewName === 'success') {
         successView.classList.remove('hidden');
         successView.classList.add('flex');
       } else {
-        successView.classList.add('hidden');
-        successView.classList.remove('flex');
         scannerView.classList.remove('hidden');
         scannerView.classList.add('flex');
-        initScanner(); // Jalankan kamera kembali
+        initScanner();
+      }
+    }
+
+    function stopCameraIfActive() {
+      if (isCameraActive && html5QrCode) {
+        html5QrCode.stop().then(() => isCameraActive = false);
       }
     }
 
@@ -545,8 +682,8 @@
       const banner = document.getElementById('success-banner');
       if (!isSuccess) {
         banner.className = "bg-amber-600 text-white p-4 flex items-center space-x-3 shadow-md";
-        document.getElementById('success-title').innerText = "Data Tidak Ditemukan!";
-        document.getElementById('success-subtitle').innerText = "Siswa belum terdaftar di database HP.";
+        document.getElementById('success-title').innerText = "Siswa Tidak Ditemukan!";
+        document.getElementById('success-subtitle').innerText = "Belum terdaftar di Sheet Data_Siswa.";
       } else {
         banner.className = "bg-emerald-600 text-white p-4 flex items-center space-x-3 shadow-md";
         document.getElementById('success-title').innerText = "Scan Berhasil!";
@@ -557,19 +694,15 @@
     }
 
     function promptManualInput() {
-      const qrInput = prompt("Masukkan ID_SISWA atau Kode QR secara manual:");
+      const qrInput = prompt("Masukkan ID_SISWA atau Kode QR:");
       if (qrInput) processStudentAttendance(qrInput.trim());
     }
 
     function triggerManualSync() {
-      if (navigator.onLine) {
-        syncQueueToGAS();
-      } else {
-        alert("Perangkat Anda sedang Offline. Hubungkan ke internet untuk mengirim data.");
-      }
+      if (navigator.onLine) syncQueueToGAS();
     }
 
-    // Update Jam & Network Monitor
+    // MONITORING NETWORK & CLOCK
     setInterval(() => {
       const now = new Date();
       document.getElementById('current-time-clock').innerText = now.toTimeString().substring(0, 5);
@@ -579,12 +712,15 @@
       document.getElementById('status-text').innerText = isOnline ? 'Online' : 'Offline';
     }, 1000);
 
-    // Event listener jaringan internet
-    window.addEventListener('online', () => syncQueueToGAS());
+    window.addEventListener('online', () => {
+      autoDownloadMasterStudents();
+      syncQueueToGAS();
+    });
 
-    // STARTUP
+    // RUN INITIAL LOAD
     window.onload = async () => {
       await initDatabase();
+      await autoDownloadMasterStudents();
       initScanner();
     };
   </script>
