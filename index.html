@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- HTML5 QR Code Scanner Library -->
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-  <!-- Chart.js CDN untuk Grafik Monitoring -->
+  <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
@@ -48,7 +48,6 @@
         <div class="flex items-center space-x-3">
           <button onclick="toggleMenuModal()" class="text-xl focus:outline-none"><i class="fa-solid fa-bars"></i></button>
           <div class="min-w-0 flex-1">
-            <!-- NAMA APLIKASI DIUBAH MENJADI SISTEM ABSENSI MURID -->
             <h1 class="font-bold text-base leading-tight">Sistem Absensi Murid</h1>
             <p id="app-header-school-name" class="text-xs text-gray-300 truncate">SMK Negeri 1 Contoh</p>
           </div>
@@ -58,18 +57,16 @@
             <span id="status-dot" class="w-2 h-2 rounded-full bg-amber-400 inline-block"></span>
             <span id="status-text" class="text-xs font-medium">Memeriksa...</span>
           </div>
-          <p class="text-[10px] text-gray-300 mt-0.5">Petugas: Budi Santoso</p>
-          <p class="text-[10px] text-gray-300">Piket Pagi</p>
+          <!-- PETUGAS & SHIFT AUTO DARI CONFIG/JAM -->
+          <p class="text-[10px] text-gray-300 mt-0.5">Petugas: <span id="header-officer-name">Budi Santoso</span></p>
+          <p id="header-shift-label" class="text-[10px] text-gray-300">Piket Pagi</p>
         </div>
       </div>
     </header>
 
 
-    <!-- ========================================================= -->
-    <!-- VIEW 1: TAMPILAN KAMERA SCANNER -->
-    <!-- ========================================================= -->
+    <!-- VIEW 1: SCANNER -->
     <main id="view-scanner" class="flex-1 flex flex-col justify-between relative bg-gray-900 overflow-hidden">
-      
       <div class="flex-1 relative flex flex-col items-center justify-center p-4 bg-black">
         <div id="reader" class="w-full h-full max-h-[420px] overflow-hidden rounded-2xl relative"></div>
 
@@ -120,9 +117,7 @@
     </main>
 
 
-    <!-- ========================================================= -->
-    <!-- VIEW 2: HASIL SCAN BERHASIL -->
-    <!-- ========================================================= -->
+    <!-- VIEW 2: HASIL SCAN -->
     <main id="view-success" class="flex-1 flex-col overflow-y-auto no-scrollbar bg-slate-50 hidden">
       <div id="success-banner" class="bg-emerald-600 text-white p-4 flex items-center space-x-3 shadow-md">
         <div id="success-icon" class="w-10 h-10 rounded-full bg-white text-emerald-600 flex items-center justify-center text-xl font-bold shadow-sm">
@@ -182,9 +177,7 @@
     </main>
 
 
-    <!-- ========================================================= -->
-    <!-- VIEW 3: TAMPILAN DAFTAR DATA SISWA (WITH FILTER KELAS) -->
-    <!-- ========================================================= -->
+    <!-- VIEW 3: DATA SISWA -->
     <main id="view-students" class="flex-1 flex-col overflow-y-auto no-scrollbar bg-slate-50 p-4 hidden">
       <div class="flex items-center justify-between mb-3">
         <div>
@@ -197,14 +190,12 @@
         </button>
       </div>
 
-      <!-- SEARCH INPUT & FILTER KELAS -->
       <div class="space-y-2 mb-3">
         <div class="relative">
           <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-gray-400 text-xs"></i>
           <input type="text" id="search-student-input" onkeyup="filterStudentsList()" placeholder="Cari nama, NISN..." class="w-full pl-9 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-xs text-gray-800 focus:outline-none focus:border-blue-500 shadow-sm">
         </div>
 
-        <!-- DROPDOWN FILTER KELAS -->
         <div class="flex items-center space-x-2">
           <label class="text-xs font-medium text-gray-600 flex-shrink-0"><i class="fa-solid fa-filter text-blue-600"></i> Kelas:</label>
           <select id="filter-class-select" onchange="filterStudentsList()" class="flex-1 py-2 px-3 bg-white border border-gray-200 rounded-xl text-xs font-semibold text-gray-700 focus:outline-none focus:border-blue-500 shadow-sm">
@@ -222,9 +213,7 @@
     </main>
 
 
-    <!-- ========================================================= -->
-    <!-- VIEW 4: MONITORING PRESENSI HARI BERJALAN & GRAFIK (BARU) -->
-    <!-- ========================================================= -->
+    <!-- VIEW 4: MONITORING PRESENSI & EVALUASI ALPA/BOLOS -->
     <main id="view-monitoring" class="flex-1 flex-col overflow-y-auto no-scrollbar bg-slate-50 p-4 hidden">
       <div class="flex items-center justify-between mb-3">
         <div>
@@ -244,7 +233,7 @@
         </div>
       </div>
 
-      <!-- KARTU STATISTIK MATRIKS PRESENSI -->
+      <!-- MATRIKS DENGAN EVALUASI ALPA & BOLOS OTOMATIS -->
       <div class="grid grid-cols-3 gap-2 mb-4">
         <div class="bg-emerald-50 border border-emerald-100 p-2.5 rounded-xl text-center">
           <span class="block text-[10px] text-emerald-600 font-bold">Hadir</span>
@@ -252,8 +241,13 @@
         </div>
 
         <div class="bg-amber-50 border border-amber-100 p-2.5 rounded-xl text-center">
-          <span class="block text-[10px] text-amber-600 font-bold">Alpa (Belum)</span>
+          <span class="block text-[10px] text-amber-600 font-bold">Alpa</span>
           <span id="stat-alpa" class="text-base font-extrabold text-amber-800">0</span>
+        </div>
+
+        <div class="bg-rose-50 border border-rose-100 p-2.5 rounded-xl text-center">
+          <span class="block text-[10px] text-rose-600 font-bold">Bolos</span>
+          <span id="stat-bolos" class="text-base font-extrabold text-rose-800">0</span>
         </div>
 
         <div class="bg-blue-50 border border-blue-100 p-2.5 rounded-xl text-center">
@@ -270,17 +264,12 @@
           <span class="block text-[10px] text-purple-600 font-bold">Kegiatan</span>
           <span id="stat-kegiatan" class="text-base font-extrabold text-purple-800">0</span>
         </div>
-
-        <div class="bg-rose-50 border border-rose-100 p-2.5 rounded-xl text-center">
-          <span class="block text-[10px] text-rose-600 font-bold">Bolos</span>
-          <span id="stat-bolos" class="text-base font-extrabold text-rose-800">0</span>
-        </div>
       </div>
 
-      <!-- DAFTAR SISWA BELUM ABSEN (ALPA) -->
+      <!-- DAFTAR SISWA BELUM COMPLETE -->
       <div class="space-y-2">
         <h3 class="font-bold text-xs text-gray-800 flex items-center justify-between">
-          <span>Siswa Belum Scan Hari Ini</span>
+          <span>Siswa Belum Presensi / Bermasalah</span>
           <span id="unscanned-count-badge" class="text-[10px] bg-rose-100 text-rose-700 px-2 py-0.5 rounded-md font-bold">0 Murid</span>
         </h3>
 
@@ -289,15 +278,46 @@
     </main>
 
 
-    <!-- ========================================================= -->
-    <!-- VIEW 5: TAMPILAN PENGATURAN -->
-    <!-- ========================================================= -->
+    <!-- VIEW 5: PENGATURAN WAKTU ABSEN & IDENTITAS -->
     <main id="view-settings" class="flex-1 flex-col overflow-y-auto no-scrollbar bg-slate-50 p-4 hidden">
       <div class="mb-4">
         <h2 class="font-bold text-lg text-gray-900">Pengaturan System</h2>
-        <p class="text-xs text-gray-500">Konfigurasi identitas sekolah & database lokal</p>
+        <p class="text-xs text-gray-500">Konfigurasi waktu presensi & identitas sekolah</p>
       </div>
 
+      <!-- SETTING WAKTU ABSENSI & BATASAN OTOMATIS -->
+      <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3 mb-3">
+        <h3 class="font-bold text-xs text-blue-900 border-b border-gray-100 pb-2 flex items-center gap-2">
+          <i class="fa-solid fa-clock text-blue-600"></i>
+          <span>Pengaturan Jam Presensi & Toleransi</span>
+        </h3>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[10px] font-semibold text-gray-700 mb-1">Mulai Absen Pagi</label>
+            <input type="time" id="time-pagi-start" class="w-full px-2.5 py-1.5 bg-slate-50 border border-gray-200 rounded-xl text-xs font-bold text-gray-800">
+          </div>
+          <div>
+            <label class="block text-[10px] font-semibold text-gray-700 mb-1">Toleransi Pagi (Batas Alpa)</label>
+            <input type="time" id="time-pagi-limit" class="w-full px-2.5 py-1.5 bg-slate-50 border border-gray-200 rounded-xl text-xs font-bold text-gray-800">
+          </div>
+          <div>
+            <label class="block text-[10px] font-semibold text-gray-700 mb-1">Mulai Absen Siang</label>
+            <input type="time" id="time-siang-start" class="w-full px-2.5 py-1.5 bg-slate-50 border border-gray-200 rounded-xl text-xs font-bold text-gray-800">
+          </div>
+          <div>
+            <label class="block text-[10px] font-semibold text-gray-700 mb-1">Batas Absen Siang (Bolos)</label>
+            <input type="time" id="time-siang-limit" class="w-full px-2.5 py-1.5 bg-slate-50 border border-gray-200 rounded-xl text-xs font-bold text-gray-800">
+          </div>
+        </div>
+
+        <button onclick="saveTimeSettings()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-xl text-xs flex items-center justify-center space-x-1.5 shadow-sm">
+          <i class="fa-solid fa-clock"></i>
+          <span>Simpan Konfigurasi Jam</span>
+        </button>
+      </div>
+
+      <!-- FORM IDENTITAS SEKOLAH -->
       <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3 mb-3">
         <h3 class="font-bold text-xs text-blue-900 border-b border-gray-100 pb-2 flex items-center gap-2">
           <i class="fa-solid fa-school text-blue-600"></i>
@@ -306,45 +326,32 @@
 
         <div>
           <label class="block text-[11px] font-semibold text-gray-700 mb-1">Nama Sekolah</label>
-          <input type="text" id="input-school-name" placeholder="Contoh: SMK Negeri 1 Contoh" class="w-full px-3 py-2 bg-slate-50 border border-gray-200 rounded-xl text-xs text-gray-800 focus:outline-none focus:border-blue-500">
+          <input type="text" id="input-school-name" placeholder="SMK Negeri 1 Contoh" class="w-full px-3 py-2 bg-slate-50 border border-gray-200 rounded-xl text-xs text-gray-800 focus:outline-none focus:border-blue-500">
         </div>
 
         <div>
           <label class="block text-[11px] font-semibold text-gray-700 mb-1">Nama Kepala Sekolah</label>
-          <input type="text" id="input-principal-name" placeholder="Contoh: Drs. H. Ahmad Dahlan, M.Pd." class="w-full px-3 py-2 bg-slate-50 border border-gray-200 rounded-xl text-xs text-gray-800 focus:outline-none focus:border-blue-500">
+          <input type="text" id="input-principal-name" placeholder="Drs. H. Ahmad Dahlan, M.Pd." class="w-full px-3 py-2 bg-slate-50 border border-gray-200 rounded-xl text-xs text-gray-800 focus:outline-none focus:border-blue-500">
         </div>
 
         <div>
           <label class="block text-[11px] font-semibold text-gray-700 mb-1">NIP Kepala Sekolah</label>
-          <input type="text" id="input-principal-nip" placeholder="Contoh: 19750812 200003 1 002" class="w-full px-3 py-2 bg-slate-50 border border-gray-200 rounded-xl text-xs text-gray-800 focus:outline-none focus:border-blue-500">
+          <input type="text" id="input-principal-nip" placeholder="19750812 200003 1 002" class="w-full px-3 py-2 bg-slate-50 border border-gray-200 rounded-xl text-xs text-gray-800 focus:outline-none focus:border-blue-500">
         </div>
 
-        <button onclick="saveSchoolSettings()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-xl text-xs flex items-center justify-center space-x-2 shadow-sm transition">
+        <button onclick="saveSchoolSettings()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-semibold py-2 rounded-xl text-xs flex items-center justify-center space-x-1.5 shadow-sm">
           <i class="fa-solid fa-floppy-disk"></i>
           <span>Simpan Identitas Sekolah</span>
         </button>
       </div>
 
-      <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3 mb-3">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center space-x-2 text-blue-900 font-bold text-xs">
-            <i class="fa-solid fa-link text-blue-600"></i>
-            <span>Backend Web App GAS</span>
-          </div>
-          <span class="px-2 py-0.5 bg-green-100 text-green-700 text-[10px] font-bold rounded-md">Tersambung</span>
-        </div>
-
-        <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-[10px] font-mono text-gray-600 break-all select-all">
-          https://script.google.com/macros/s/AKfycbxVGAsO-sG7E9bHsSxQ-M16EykkO6jc6QpLzDY7sWg9qEHIbpk9Re32IGgDn1qPOmJ_/exec
-        </div>
-      </div>
-
+      <!-- AKSI DATABASE LOKAL -->
       <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3">
         <h3 class="font-bold text-xs text-gray-800">Aksi Database Lokal HP</h3>
 
         <button onclick="autoDownloadMasterStudents()" class="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold py-2.5 rounded-xl text-xs flex items-center justify-center space-x-2 border border-blue-200">
           <i class="fa-solid fa-rotate"></i>
-          <span>Paksa Sync Data Siswa Sekarang</span>
+          <span>Paksa Sync Data Siswa & Petugas</span>
         </button>
 
         <button onclick="clearLocalDatabaseCache()" class="w-full bg-rose-50 hover:bg-rose-100 text-rose-600 font-semibold py-2.5 rounded-xl text-xs flex items-center justify-center space-x-2 border border-rose-200">
@@ -389,20 +396,12 @@
             <span class="text-xs font-bold text-gray-800">Pengaturan</span>
           </button>
         </div>
-
-        <div class="pt-2 text-center border-t border-gray-100">
-          <span class="text-[10px] text-gray-400 italic">Menu lainnya akan disesuaikan secara bertahap...</span>
-        </div>
       </div>
     </div>
 
 
-    <!-- ========================================================= -->
-    <!-- BOTTOM NAVIGATION (SCANNER DI TENAH) -->
-    <!-- ========================================================= -->
+    <!-- BOTTOM NAVIGATION -->
     <nav class="bg-white border-t border-gray-200 px-3 py-1.5 flex justify-between items-center text-center z-20">
-      
-      <!-- MENU DATA SISWA (KIRI PERTAMA) -->
       <button id="nav-students" onclick="toggleView('students')" class="flex-1 text-gray-400 hover:text-gray-600 flex flex-col items-center">
         <div class="w-7 h-7 flex items-center justify-center mb-0.5">
           <i class="fa-solid fa-user-group text-sm"></i>
@@ -410,7 +409,6 @@
         <span class="text-[10px] font-medium">Data Siswa</span>
       </button>
 
-      <!-- MENU MONITORING (KIRI KEDUA - DULU ABSENSI) -->
       <button id="nav-monitoring" onclick="toggleView('monitoring')" class="flex-1 text-gray-400 hover:text-gray-600 flex flex-col items-center">
         <div class="w-7 h-7 flex items-center justify-center mb-0.5">
           <i class="fa-solid fa-chart-pie text-sm"></i>
@@ -418,7 +416,6 @@
         <span class="text-[10px] font-medium">Monitoring</span>
       </button>
 
-      <!-- MENU SCANNER DIPINDAHKAN KE TENGAH -->
       <button id="nav-scanner" onclick="toggleView('scanner')" class="flex-1 text-blue-600 flex flex-col items-center -mt-4">
         <div class="w-12 h-12 rounded-full bg-blue-600 text-white shadow-lg flex items-center justify-center border-4 border-white">
           <i class="fa-solid fa-qrcode text-lg"></i>
@@ -426,7 +423,6 @@
         <span class="text-[10px] font-bold mt-0.5">Scanner</span>
       </button>
 
-      <!-- MENU LAPORAN -->
       <button class="flex-1 text-gray-400 hover:text-gray-600 flex flex-col items-center">
         <div class="w-7 h-7 flex items-center justify-center mb-0.5">
           <i class="fa-solid fa-file-invoice text-sm"></i>
@@ -434,14 +430,12 @@
         <span class="text-[10px] font-medium">Laporan</span>
       </button>
 
-      <!-- MENU DROP POPUP (KANAN UJUNG) -->
       <button onclick="toggleMenuModal()" class="flex-1 text-gray-400 hover:text-gray-600 flex flex-col items-center">
         <div class="w-7 h-7 flex items-center justify-center mb-0.5">
           <i class="fa-solid fa-bars text-sm"></i>
         </div>
         <span class="text-[10px] font-medium">Menu</span>
       </button>
-
     </nav>
 
   </div>
@@ -454,7 +448,7 @@
     let db = null;
     let cachedStudents = [];
     let currentScanSession = "PAGI";
-    let myPieChart = null; // Chart Instance
+    let myPieChart = null;
 
     // 1. INITIALIZE DATABASE
     function initDatabase() {
@@ -481,16 +475,26 @@
       });
     }
 
-    // 2. SCHOOL SETTINGS MANAGEMENT
-    function loadSchoolSettings() {
+    // 2. CONFIGURATION MANAGEMENT (TIME & SCHOOL)
+    function loadAppConfigs() {
       const schoolName = localStorage.getItem("SCHOOL_NAME") || "SMK Negeri 1 Contoh";
       const principalName = localStorage.getItem("PRINCIPAL_NAME") || "";
       const principalNip = localStorage.getItem("PRINCIPAL_NIP") || "";
+      const officerName = localStorage.getItem("OFFICER_NAME") || "Budi Santoso";
 
       document.getElementById("app-header-school-name").innerText = schoolName;
       document.getElementById("input-school-name").value = schoolName;
       document.getElementById("input-principal-name").value = principalName;
       document.getElementById("input-principal-nip").value = principalNip;
+      document.getElementById("header-officer-name").innerText = officerName;
+
+      // Time Configs
+      document.getElementById("time-pagi-start").value = localStorage.getItem("TIME_PAGI_START") || "06:00";
+      document.getElementById("time-pagi-limit").value = localStorage.getItem("TIME_PAGI_LIMIT") || "07:15";
+      document.getElementById("time-siang-start").value = localStorage.getItem("TIME_SIANG_START") || "12:00";
+      document.getElementById("time-siang-limit").value = localStorage.getItem("TIME_SIANG_LIMIT") || "16:00";
+
+      autoUpdateShiftLabel();
     }
 
     function saveSchoolSettings() {
@@ -498,20 +502,39 @@
       const principalName = document.getElementById("input-principal-name").value.trim();
       const principalNip = document.getElementById("input-principal-nip").value.trim();
 
-      if (!schoolName) {
-        alert("Nama sekolah tidak boleh kosong!");
-        return;
-      }
+      if (!schoolName) return alert("Nama sekolah wajib diisi!");
 
       localStorage.setItem("SCHOOL_NAME", schoolName);
       localStorage.setItem("PRINCIPAL_NAME", principalName);
       localStorage.setItem("PRINCIPAL_NIP", principalNip);
 
       document.getElementById("app-header-school-name").innerText = schoolName;
-      alert("Pengaturan Identitas Sekolah berhasil disimpan!");
+      alert("Pengaturan sekolah berhasil disimpan!");
     }
 
-    // 3. SCAN SESSION MODE
+    function saveTimeSettings() {
+      localStorage.setItem("TIME_PAGI_START", document.getElementById("time-pagi-start").value);
+      localStorage.setItem("TIME_PAGI_LIMIT", document.getElementById("time-pagi-limit").value);
+      localStorage.setItem("TIME_SIANG_START", document.getElementById("time-siang-start").value);
+      localStorage.setItem("TIME_SIANG_LIMIT", document.getElementById("time-siang-limit").value);
+
+      autoUpdateShiftLabel();
+      alert("Konfigurasi jam presensi berhasil disimpan!");
+    }
+
+    function autoUpdateShiftLabel() {
+      const now = new Date();
+      const currentHM = now.toTimeString().substring(0, 5);
+      const siangStart = localStorage.getItem("TIME_SIANG_START") || "12:00";
+
+      if (currentHM >= siangStart) {
+        document.getElementById("header-shift-label").innerText = "Piket Siang";
+        if (currentScanSession === "PAGI") toggleScanSessionMode();
+      } else {
+        document.getElementById("header-shift-label").innerText = "Piket Pagi";
+      }
+    }
+
     function toggleScanSessionMode() {
       if (currentScanSession === "PAGI") {
         currentScanSession = "SIANG";
@@ -524,7 +547,7 @@
       }
     }
 
-    // 4. AUTO DOWNLOAD MASTER SISWA DARI SHEET
+    // 3. AUTO DOWNLOAD MASTER SISWA & PETUGAS
     async function autoDownloadMasterStudents() {
       if (!navigator.onLine) {
         document.getElementById('sync-info-text').innerText = "Mode Offline - Menggunakan data HP.";
@@ -537,39 +560,43 @@
         const response = await fetch(`${GAS_WEB_APP_URL}?action=GET_ALL_STUDENTS`);
         const result = await response.json();
 
-        if (result.success && result.students) {
-          const tx = db.transaction("students", "readwrite");
-          const store = tx.objectStore("students");
-          
-          store.clear(); // Hapus data lokal lama
+        if (result.success) {
+          if (result.officers && result.officers.length > 0) {
+            const officerName = result.officers[0].nama_petugas;
+            localStorage.setItem("OFFICER_NAME", officerName);
+            document.getElementById("header-officer-name").innerText = officerName;
+          }
 
-          result.students.forEach(std => {
-            store.put({
-              id_siswa: std.qr_key || std.id_siswa,
-              nisn: std.nisn,
-              nama: std.nama,
-              kelas: std.kelas,
-              status: std.status
+          if (result.students) {
+            const tx = db.transaction("students", "readwrite");
+            const store = tx.objectStore("students");
+            store.clear();
+
+            result.students.forEach(std => {
+              store.put({
+                id_siswa: std.qr_key || std.id_siswa,
+                nisn: std.nisn,
+                nama: std.nama,
+                kelas: std.kelas,
+                status: std.status
+              });
             });
-          });
 
-          tx.oncomplete = () => {
-            document.getElementById('sync-info-text').innerText = `Terhubung! ${result.students.length} Siswa Aktif.`;
-            loadStudentsView();
-            populateClassDropdowns();
-          };
+            tx.oncomplete = () => {
+              document.getElementById('sync-info-text').innerText = `Terhubung! ${result.students.length} Siswa Aktif.`;
+              loadStudentsView();
+              populateClassDropdowns();
+            };
+          }
         }
       } catch (err) {
         document.getElementById('sync-info-text').innerText = "Gagal terhubung ke Google Sheets.";
       }
     }
 
-    // 5. SCANNER CONTROLLER
+    // 4. SCANNER CONTROLLER
     function initScanner() {
-      if (!html5QrCode) {
-        html5QrCode = new Html5Qrcode("reader");
-      }
-
+      if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
       const config = { fps: 15, qrbox: { width: 250, height: 250 } };
 
       html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess)
@@ -594,7 +621,7 @@
       }
     }
 
-    // 6. PROCESS ATTENDANCE SCAN
+    // 5. PROCESS ATTENDANCE SCAN
     async function onScanSuccess(decodedText) {
       if (isCameraActive) {
         await html5QrCode.stop();
@@ -606,7 +633,6 @@
 
     async function processStudentAttendance(qrCodeKey, manualStatus = "HADIR") {
       const student = await getStudentFromDB(qrCodeKey);
-
       const now = new Date();
       const dateStr = now.toISOString().split('T')[0];
       const timeStr = now.toTimeString().split(' ')[0];
@@ -639,10 +665,9 @@
       }
     }
 
-    // 7. POPULATE CLASS DROPDOWNS
+    // 6. POPULATE CLASS DROPDOWNS
     function populateClassDropdowns() {
       const classes = [...new Set(cachedStudents.map(s => s.kelas))].filter(Boolean).sort();
-      
       const filterSelect = document.getElementById('filter-class-select');
       const monitoringSelect = document.getElementById('monitoring-class-filter');
 
@@ -650,7 +675,7 @@
       monitoringSelect.innerHTML = '<option value="ALL">Semua Kelas</option>' + classes.map(c => `<option value="${c}">${c}</option>`).join('');
     }
 
-    // 8. DATA SISWA & FILTER KELAS
+    // 7. DATA SISWA & FILTER KELAS
     function getAllStudentsFromDB() {
       return new Promise((resolve) => {
         const tx = db.transaction("students", "readonly");
@@ -676,7 +701,6 @@
                              std.id_siswa.toLowerCase().includes(keyword) || 
                              (std.nisn && std.nisn.toString().includes(keyword));
         const matchClass = (selectedClass === "ALL") || (std.kelas === selectedClass);
-
         return matchKeyword && matchClass;
       });
 
@@ -715,65 +739,77 @@
       `).join('');
     }
 
-    // 9. DASHBOARD MONITORING & GRAFIK (REALTIME HARI BERJALAN)
+    // 8. DASHBOARD MONITORING DENGAN OTOMATISASI ALPA & BOLOS
     async function updateMonitoringDashboard() {
       const selectedClass = document.getElementById('monitoring-class-filter').value;
       const todayStr = new Date().toISOString().split('T')[0];
+      const nowHM = new Date().toTimeString().substring(0, 5);
 
-      // Ambil antrean hari ini
+      const pagiLimit = localStorage.getItem("TIME_PAGI_LIMIT") || "07:15";
+      const siangLimit = localStorage.getItem("TIME_SIANG_LIMIT") || "16:00";
+
       const queueRecords = await getAllQueueFromDB();
       const todayRecords = queueRecords.filter(r => r.tanggal === todayStr);
 
-      // Filter siswa berdasarkan kelas
       const classStudents = selectedClass === "ALL" ? cachedStudents : cachedStudents.filter(s => s.kelas === selectedClass);
 
-      // Mapping status
-      const scannedIds = todayRecords.map(r => r.id_siswa);
-      
-      let countHadir = 0, countSakit = 0, countIzin = 0, countKegiatan = 0, countBolos = 0;
+      let countHadir = 0, countAlpa = 0, countBolos = 0, countSakit = 0, countIzin = 0, countKegiatan = 0;
+      let unresolvedStudents = [];
 
-      todayRecords.forEach(r => {
-        if (classStudents.some(s => s.id_siswa === r.id_siswa)) {
-          const st = r.status_presensi || "HADIR";
-          if (st === "HADIR") countHadir++;
-          else if (st === "SAKIT") countSakit++;
+      classStudents.forEach(student => {
+        const studentPagi = todayRecords.find(r => r.id_siswa === student.id_siswa && r.sesi === "PAGI");
+        const studentSiang = todayRecords.find(r => r.id_siswa === student.id_siswa && r.sesi === "SIANG");
+
+        if (studentPagi || studentSiang) {
+          const st = (studentPagi && studentPagi.status_presensi) || (studentSiang && studentSiang.status_presensi) || "HADIR";
+          if (st === "HADIR") {
+            if (studentPagi && !studentSiang && nowHM > siangLimit) {
+              countBolos++;
+              unresolvedStudents.push({ ...student, reason: "Hadir Pagi, Tidak Absen Siang (Bolos)" });
+            } else {
+              countHadir++;
+            }
+          } else if (st === "SAKIT") countSakit++;
           else if (st === "IZIN") countIzin++;
           else if (st === "KEGIATAN") countKegiatan++;
-          else if (st === "BOLOS") countBolos++;
+          else if (st === "BOLOS") {
+            countBolos++;
+            unresolvedStudents.push({ ...student, reason: "Dicatat Bolos" });
+          }
+        } else {
+          if (nowHM > pagiLimit) {
+            countAlpa++;
+            unresolvedStudents.push({ ...student, reason: "Belum Scan Sama Sekali (Alpa)" });
+          } else {
+            unresolvedStudents.push({ ...student, reason: "Belum Absen Hari Ini" });
+          }
         }
       });
 
-      const unscannedStudents = classStudents.filter(s => !scannedIds.includes(s.id_siswa));
-      const countAlpa = unscannedStudents.length;
-
-      // Update Card Stats
       document.getElementById('stat-hadir').innerText = countHadir;
       document.getElementById('stat-alpa').innerText = countAlpa;
+      document.getElementById('stat-bolos').innerText = countBolos;
       document.getElementById('stat-sakit').innerText = countSakit;
       document.getElementById('stat-izin').innerText = countIzin;
       document.getElementById('stat-kegiatan').innerText = countKegiatan;
-      document.getElementById('stat-bolos').innerText = countBolos;
 
-      document.getElementById('unscanned-count-badge').innerText = `${countAlpa} Murid`;
+      document.getElementById('unscanned-count-badge').innerText = `${unresolvedStudents.length} Murid`;
 
-      // Render Grafik Pie
-      renderPieChart(countHadir, countAlpa, countSakit, countIzin, countKegiatan, countBolos);
-
-      // Render List Siswa Belum Scan
-      renderUnscannedStudentsList(unscannedStudents);
+      renderPieChart(countHadir, countAlpa, countBolos, countSakit, countIzin, countKegiatan);
+      renderUnscannedStudentsList(unresolvedStudents);
     }
 
-    function renderPieChart(hadir, alpa, sakit, izin, kegiatan, bolos) {
+    function renderPieChart(hadir, alpa, bolos, sakit, izin, kegiatan) {
       const ctx = document.getElementById('attendancePieChart').getContext('2d');
       if (myPieChart) myPieChart.destroy();
 
       myPieChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
-          labels: ['Hadir', 'Belum (Alpa)', 'Sakit', 'Izin', 'Kegiatan', 'Bolos'],
+          labels: ['Hadir', 'Alpa', 'Bolos', 'Sakit', 'Izin', 'Kegiatan'],
           datasets: [{
-            data: [hadir, alpa, sakit, izin, kegiatan, bolos],
-            backgroundColor: ['#10b981', '#f59e0b', '#3b82f6', '#6366f1', '#a855f7', '#f43f5e']
+            data: [hadir, alpa, bolos, sakit, izin, kegiatan],
+            backgroundColor: ['#10b981', '#f59e0b', '#f43f5e', '#3b82f6', '#6366f1', '#a855f7']
           }]
         },
         options: {
@@ -784,26 +820,26 @@
       });
     }
 
-    function renderUnscannedStudentsList(unscanned) {
+    function renderUnscannedStudentsList(unresolved) {
       const container = document.getElementById('unscanned-students-container');
 
-      if (unscanned.length === 0) {
+      if (unresolved.length === 0) {
         container.innerHTML = `
           <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl text-center text-emerald-800 text-xs font-bold">
             <i class="fa-solid fa-circle-check text-emerald-600 text-lg mb-1 block"></i>
-            Luar Biasa! Semua siswa kelas ini sudah melakukan presensi.
+            Semua siswa telah selesai melakukan presensi!
           </div>
         `;
         return;
       }
 
-      container.innerHTML = unscanned.map(std => `
+      container.innerHTML = unresolved.map(std => `
         <div class="bg-white p-3 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
           <div class="truncate min-w-0 pr-2">
             <h4 class="font-bold text-xs text-gray-900 truncate">${std.nama}</h4>
-            <p class="text-[10px] text-gray-500">${std.kelas} | ID: ${std.id_siswa}</p>
+            <p class="text-[10px] text-amber-600 font-semibold">${std.reason}</p>
           </div>
-          <div class="flex items-center space-x-1">
+          <div class="flex items-center space-x-1 flex-shrink-0">
             <button onclick="setManualStudentStatus('${std.id_siswa}', 'SAKIT')" class="px-2 py-1 bg-blue-50 text-blue-600 font-bold text-[9px] rounded-lg border border-blue-200">Sakit</button>
             <button onclick="setManualStudentStatus('${std.id_siswa}', 'IZIN')" class="px-2 py-1 bg-indigo-50 text-indigo-600 font-bold text-[9px] rounded-lg border border-indigo-200">Izin</button>
             <button onclick="setManualStudentStatus('${std.id_siswa}', 'KEGIATAN')" class="px-2 py-1 bg-purple-50 text-purple-600 font-bold text-[9px] rounded-lg border border-purple-200">Keg.</button>
@@ -818,7 +854,7 @@
       updateMonitoringDashboard();
     }
 
-    // 10. HELPER DATABASE & QUEUE
+    // 9. HELPER DATABASE & QUEUE
     function getStudentFromDB(qrKey) {
       return new Promise((resolve) => {
         const tx = db.transaction("students", "readonly");
@@ -881,7 +917,7 @@
       });
     }
 
-    // 11. AUTO SYNC ANTREAN KE GOOGLE SHEETS
+    // 10. AUTO SYNC ANTREAN KE GOOGLE SHEETS
     async function syncQueueToGAS() {
       const queueData = await getAllQueueFromDB();
       if (queueData.length === 0) return;
@@ -907,7 +943,7 @@
       }
     }
 
-    // 12. NAVIGATION TOGGLE
+    // 11. NAVIGATION TOGGLE
     function toggleView(viewName) {
       const scannerView = document.getElementById('view-scanner');
       const successView = document.getElementById('view-success');
@@ -995,7 +1031,7 @@
       if (navigator.onLine) syncQueueToGAS();
     }
 
-    // MONITORING NETWORK & CLOCK
+    // MONITORING NETWORK & CLOCK & SHIFT
     setInterval(() => {
       const now = new Date();
       document.getElementById('current-time-clock').innerText = now.toTimeString().substring(0, 5);
@@ -1003,6 +1039,8 @@
       const isOnline = navigator.onLine;
       document.getElementById('status-dot').className = `w-2 h-2 rounded-full ${isOnline ? 'bg-green-400' : 'bg-amber-400'} inline-block`;
       document.getElementById('status-text').innerText = isOnline ? 'Online' : 'Offline';
+
+      autoUpdateShiftLabel();
     }, 1000);
 
     window.addEventListener('online', () => {
@@ -1012,7 +1050,7 @@
 
     // RUN INITIAL LOAD
     window.onload = async () => {
-      loadSchoolSettings();
+      loadAppConfigs();
       await initDatabase();
       await autoDownloadMasterStudents();
       initScanner();
