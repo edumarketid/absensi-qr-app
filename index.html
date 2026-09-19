@@ -74,12 +74,12 @@
     }
     .photo-in {
       width: 100%; height: 100%; border: 0.3mm solid #cbd5e1; border-radius: 1.5mm; background: #f8fafc;
-      display: flex; items-center: center; justify-content: center; color: #789; font-size: 3mm; font-weight: 800;
+      display: flex; align-items: center; justify-content: center; color: #789; font-size: 3mm; font-weight: 800;
     }
     .details-box { position: absolute; left: 24mm; top: 18.5mm; right: 26mm; z-index: 3; text-align: left; }
     .lbl { font-size: 2.2mm; font-weight: 900; color: var(--accent, #0b3b82); margin-bottom: 0.5mm; line-height: 1; }
     .val { font-size: 2.6mm; font-weight: 800; color: #111827; margin-bottom: 2mm; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.05; }
-    .card-qr { position: absolute; right: 3.7mm; top: 18.4mm; width: 23mm; height: 23mm; background: #fff; display: flex; items-center: center; justify-content: center; z-index: 4; }
+    .card-qr { position: absolute; right: 3.7mm; top: 18.4mm; width: 23mm; height: 23mm; background: #fff; display: flex; align-items: center; justify-content: center; z-index: 4; }
     .card-qr canvas, .card-qr img { width: 23mm !important; height: 23mm !important; }
     .footer-left { position: absolute; left: 4mm; bottom: 2mm; font-size: 2mm; color: #64748b; font-weight: bold; z-index: 4; }
     .footer-right { position: absolute; right: 4mm; bottom: 2mm; font-size: 2mm; color: #64748b; font-weight: bold; z-index: 4; text-transform: uppercase; }
@@ -508,7 +508,7 @@
     </main>
 
 
-    <!-- VIEW 7: LAPORAN REKAPITULASI ABSENSI (GABUNGAN LAPORAN.HTML) -->
+    <!-- VIEW 7: LAPORAN REKAPITULASI ABSENSI -->
     <main id="view-report" class="flex-1 flex-col overflow-y-auto no-scrollbar bg-slate-50 p-4 hidden">
       <div class="flex items-center justify-between mb-3 no-print">
         <div>
@@ -973,19 +973,32 @@
       }
     }
 
-    function saveDaysTimeSettings() {
+    async function saveDaysTimeSettings() {
+      const settingsToSave = {};
+
       DAYS_LIST.forEach(day => {
         const active = document.getElementById(`toggle-${day.key}`).checked;
-        localStorage.setItem(`DAY_ACTIVE_${day.key}`, active);
+        const pStart = document.getElementById(`pagi-start-${day.key}`).value;
+        const pLimit = document.getElementById(`pagi-limit-${day.key}`).value;
+        const sStart = document.getElementById(`siang-start-${day.key}`).value;
+        const sLimit = document.getElementById(`siang-limit-${day.key}`).value;
 
-        localStorage.setItem(`TIME_${day.key}_PAGI_START`, document.getElementById(`pagi-start-${day.key}`).value);
-        localStorage.setItem(`TIME_${day.key}_PAGI_LIMIT`, document.getElementById(`pagi-limit-${day.key}`).value);
-        localStorage.setItem(`TIME_${day.key}_SIANG_START`, document.getElementById(`siang-start-${day.key}`).value);
-        localStorage.setItem(`TIME_${day.key}_SIANG_LIMIT`, document.getElementById(`siang-limit-${day.key}`).value);
+        localStorage.setItem(`DAY_ACTIVE_${day.key}`, active);
+        localStorage.setItem(`TIME_${day.key}_PAGI_START`, pStart);
+        localStorage.setItem(`TIME_${day.key}_PAGI_LIMIT`, pLimit);
+        localStorage.setItem(`TIME_${day.key}_SIANG_START`, sStart);
+        localStorage.setItem(`TIME_${day.key}_SIANG_LIMIT`, sLimit);
+
+        settingsToSave[`DAY_ACTIVE_${day.key}`] = active;
+        settingsToSave[`TIME_${day.key}_PAGI_START`] = pStart;
+        settingsToSave[`TIME_${day.key}_PAGI_LIMIT`] = pLimit;
+        settingsToSave[`TIME_${day.key}_SIANG_START`] = sStart;
+        settingsToSave[`TIME_${day.key}_SIANG_LIMIT`] = sLimit;
       });
 
       autoUpdateShiftLabel();
-      alert("Pengaturan jam presensi berbasis hari berhasil disimpan!");
+      await pushSettingsToCloudSheet(settingsToSave);
+      alert("Pengaturan jam presensi berhasil disimpan ke Cloud Sheet & disinkronkan!");
     }
 
     function getCurrentDayConfig() {
@@ -1007,7 +1020,7 @@
       };
     }
 
-    function saveSchoolSettings() {
+    async function saveSchoolSettings() {
       const schoolName = document.getElementById("input-school-name").value.trim();
       const principalName = document.getElementById("input-principal-name").value.trim();
       const principalNip = document.getElementById("input-principal-nip").value.trim();
@@ -1019,7 +1032,44 @@
       localStorage.setItem("PRINCIPAL_NIP", principalNip);
 
       document.getElementById("app-header-school-name").innerText = schoolName;
-      alert("Pengaturan sekolah berhasil disimpan!");
+
+      const settingsToSave = {
+        "SCHOOL_NAME": schoolName,
+        "PRINCIPAL_NAME": principalName,
+        "PRINCIPAL_NIP": principalNip
+      };
+
+      await pushSettingsToCloudSheet(settingsToSave);
+      alert("Identitas sekolah berhasil disimpan ke Cloud Sheet!");
+    }
+
+    async function pushSettingsToCloudSheet(partialSettings) {
+      if (!navigator.onLine) {
+        alert("Perangkat offline. Pengaturan tersimpan lokal di HP ini.");
+        return;
+      }
+
+      const allSettings = {};
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        allSettings[k] = localStorage.getItem(k);
+      }
+
+      Object.assign(allSettings, partialSettings);
+
+      try {
+        await fetch(GAS_WEB_APP_URL, {
+          method: "POST",
+          mode: "cors",
+          headers: { "Content-Type": "text/plain" },
+          body: JSON.stringify({
+            action: "SAVE_SETTINGS",
+            settings: allSettings
+          })
+        });
+      } catch (err) {
+        console.warn("Gagal mengirim pengaturan ke Cloud Sheet:", err);
+      }
     }
 
     function autoUpdateShiftLabel() {
@@ -1043,156 +1093,68 @@
       }
     }
 
-    // 1. AUTO DOWNLOAD MASTER SISWA & PENGATURAN DARI SHEET
-async function autoDownloadMasterStudents() {
-  if (!navigator.onLine) {
-    document.getElementById('sync-info-text').innerText = "Mode Offline - Menggunakan data HP.";
-    loadStudentsView();
-    return;
-  }
-
-  try {
-    document.getElementById('sync-info-text').innerText = "Mengunduh data siswa & pengaturan...";
-    const response = await fetch(`${GAS_WEB_APP_URL}?action=GET_ALL_STUDENTS`);
-    const result = await response.json();
-
-    if (result.success) {
-      // Terapkan Pengaturan dari Cloud Sheet jika ada
-      if (result.settings && Object.keys(result.settings).length > 0) {
-        applySettingsFromCloud(result.settings);
+    // 3. AUTO DOWNLOAD MASTER SISWA & PENGATURAN
+    async function autoDownloadMasterStudents() {
+      if (!navigator.onLine) {
+        document.getElementById('sync-info-text').innerText = "Mode Offline - Menggunakan data HP.";
+        loadStudentsView();
+        return;
       }
 
-      if (result.today_attendance) {
-        fetchedTodayAttendance = result.today_attendance;
-      }
+      try {
+        document.getElementById('sync-info-text').innerText = "Mengunduh data siswa & pengaturan...";
+        const response = await fetch(`${GAS_WEB_APP_URL}?action=GET_ALL_STUDENTS`);
+        const result = await response.json();
 
-      if (result.students) {
-        const tx = db.transaction("students", "readwrite");
-        const store = tx.objectStore("students");
-        store.clear();
+        if (result.success) {
+          if (result.settings && Object.keys(result.settings).length > 0) {
+            applySettingsFromCloud(result.settings);
+          }
 
-        result.students.forEach(std => {
-          store.put({
-            id_siswa: std.qr_key || std.id_siswa,
-            nisn: std.nisn,
-            nama: std.nama,
-            kelas: std.kelas,
-            status: std.status
-          });
-        });
+          if (result.today_attendance) {
+            fetchedTodayAttendance = result.today_attendance;
+          }
 
-        tx.oncomplete = () => {
-          document.getElementById('sync-info-text').innerText = `Terhubung! ${result.students.length} Siswa Aktif.`;
-          loadStudentsView();
-          populateClassDropdowns();
-        };
+          if (result.students) {
+            const tx = db.transaction("students", "readwrite");
+            const store = tx.objectStore("students");
+            store.clear();
+
+            result.students.forEach(std => {
+              store.put({
+                id_siswa: std.qr_key || std.id_siswa,
+                nisn: std.nisn,
+                nama: std.nama,
+                kelas: std.kelas,
+                status: std.status
+              });
+            });
+
+            tx.oncomplete = () => {
+              document.getElementById('sync-info-text').innerText = `Terhubung! ${result.students.length} Siswa Aktif.`;
+              loadStudentsView();
+              populateClassDropdowns();
+            };
+          }
+        }
+      } catch (err) {
+        document.getElementById('sync-info-text').innerText = "Gagal terhubung ke Google Sheets.";
       }
     }
-  } catch (err) {
-    document.getElementById('sync-info-text').innerText = "Gagal terhubung ke Google Sheets.";
-  }
-}
 
-// 2. SINKRONISASI PENGATURAN DARI CLOUD KE LOCAL STORAGE HP
-function applySettingsFromCloud(settings) {
-  for (let key in settings) {
-    if (settings.hasOwnProperty(key)) {
-      localStorage.setItem(key, settings[key]);
+    function applySettingsFromCloud(settings) {
+      for (let key in settings) {
+        if (settings.hasOwnProperty(key)) {
+          localStorage.setItem(key, settings[key]);
+        }
+      }
+
+      if (settings["KOP_SURAT"]) kopSuratSrc = settings["KOP_SURAT"];
+      if (settings["LOGO_LEFT"]) logoLeftSrc = settings["LOGO_LEFT"];
+      if (settings["LOGO_RIGHT"]) logoRightSrc = settings["LOGO_RIGHT"];
+
+      loadAppConfigs();
     }
-  }
-
-  // Perbarui variabel Kop dan Logo
-  if (settings["KOP_SURAT"]) kopSuratSrc = settings["KOP_SURAT"];
-  if (settings["LOGO_LEFT"]) logoLeftSrc = settings["LOGO_LEFT"];
-  if (settings["LOGO_RIGHT"]) logoRightSrc = settings["LOGO_RIGHT"];
-
-  loadAppConfigs();
-}
-
-// 3. FUNGSI SIMPAN PENGATURAN JAM KE CLOUD SHEET & HP
-async function saveDaysTimeSettings() {
-  const settingsToSave = {};
-
-  DAYS_LIST.forEach(day => {
-    const active = document.getElementById(`toggle-${day.key}`).checked;
-    const pStart = document.getElementById(`pagi-start-${day.key}`).value;
-    const pLimit = document.getElementById(`pagi-limit-${day.key}`).value;
-    const sStart = document.getElementById(`siang-start-${day.key}`).value;
-    const sLimit = document.getElementById(`siang-limit-${day.key}`).value;
-
-    localStorage.setItem(`DAY_ACTIVE_${day.key}`, active);
-    localStorage.setItem(`TIME_${day.key}_PAGI_START`, pStart);
-    localStorage.setItem(`TIME_${day.key}_PAGI_LIMIT`, pLimit);
-    localStorage.setItem(`TIME_${day.key}_SIANG_START`, sStart);
-    localStorage.setItem(`TIME_${day.key}_SIANG_LIMIT`, sLimit);
-
-    settingsToSave[`DAY_ACTIVE_${day.key}`] = active;
-    settingsToSave[`TIME_${day.key}_PAGI_START`] = pStart;
-    settingsToSave[`TIME_${day.key}_PAGI_LIMIT`] = pLimit;
-    settingsToSave[`TIME_${day.key}_SIANG_START`] = sStart;
-    settingsToSave[`TIME_${day.key}_SIANG_LIMIT`] = sLimit;
-  });
-
-  autoUpdateShiftLabel();
-  await pushSettingsToCloudSheet(settingsToSave);
-  alert("Pengaturan jam presensi berhasil disimpan ke Cloud Sheet & disinkronkan!");
-}
-
-// 4. FUNGSI SIMPAN IDENTITAS SEKOLAH KE CLOUD SHEET & HP
-async function saveSchoolSettings() {
-  const schoolName = document.getElementById("input-school-name").value.trim();
-  const principalName = document.getElementById("input-principal-name").value.trim();
-  const principalNip = document.getElementById("input-principal-nip").value.trim();
-
-  if (!schoolName) return alert("Nama sekolah wajib diisi!");
-
-  localStorage.setItem("SCHOOL_NAME", schoolName);
-  localStorage.setItem("PRINCIPAL_NAME", principalName);
-  localStorage.setItem("PRINCIPAL_NIP", principalNip);
-
-  document.getElementById("app-header-school-name").innerText = schoolName;
-
-  const settingsToSave = {
-    "SCHOOL_NAME": schoolName,
-    "PRINCIPAL_NAME": principalName,
-    "PRINCIPAL_NIP": principalNip
-  };
-
-  await pushSettingsToCloudSheet(settingsToSave);
-  alert("Identitas sekolah berhasil disimpan ke Cloud Sheet!");
-}
-
-// 5. HELPER UNTUK MENGIRIM PENGATURAN LENGKAP KE GOOGLE SHEETS
-async function pushSettingsToCloudSheet(partialSettings) {
-  if (!navigator.onLine) {
-    alert("Perangkat offline. Pengaturan tersimpan lokal di HP ini.");
-    return;
-  }
-
-  // Kumpulkan seluruh data LocalStorage saat ini
-  const allSettings = {};
-  for (let i = 0; i < localStorage.length; i++) {
-    const k = localStorage.key(i);
-    allSettings[k] = localStorage.getItem(k);
-  }
-
-  // Gabungkan dengan pembaruan terbaru
-  Object.assign(allSettings, partialSettings);
-
-  try {
-    await fetch(GAS_WEB_APP_URL, {
-      method: "POST",
-      mode: "cors",
-      headers: { "Content-Type": "text/plain" },
-      body: JSON.stringify({
-        action: "SAVE_SETTINGS",
-        settings: allSettings
-      })
-    });
-  } catch (err) {
-    console.warn("Gagal mengirim pengaturan ke Cloud Sheet:", err);
-  }
-}
 
     // 4. FITUR TAMBAH SISWA BARU
     function toggleAddStudentModal() {
@@ -1235,21 +1197,27 @@ async function pushSettingsToCloudSheet(partialSettings) {
     }
 
     // 5. MODUL CETAK KARTU QR CODE SISWA
-    function handleLogoUpload(event, position) {
+    async function handleLogoUpload(event, position) {
       const file = event.target.files[0];
       if (!file) return;
 
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = async (e) => {
         const base64Data = e.target.result;
+        const settingsToSave = {};
+
         if (position === 'left') {
           logoLeftSrc = base64Data;
           localStorage.setItem("LOGO_LEFT", base64Data);
+          settingsToSave["LOGO_LEFT"] = base64Data;
         } else {
           logoRightSrc = base64Data;
           localStorage.setItem("LOGO_RIGHT", base64Data);
+          settingsToSave["LOGO_RIGHT"] = base64Data;
         }
+
         generateQRCardsToPrint();
+        await pushSettingsToCloudSheet(settingsToSave);
       };
       reader.readAsDataURL(file);
     }
@@ -1371,17 +1339,19 @@ async function pushSettingsToCloudSheet(partialSettings) {
       `;
     }
 
-    // 6. MODUL LAPORAN REKAPITULASI ABSENSI (TERINTEGRASI DARI LAPORAN.HTML)
-    function handleKopSuratUpload(event) {
+    // 6. MODUL LAPORAN REKAPITULASI ABSENSI
+    async function handleKopSuratUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
 
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = async (e) => {
         kopSuratSrc = e.target.result;
         localStorage.setItem("KOP_SURAT", kopSuratSrc);
         document.getElementById("report-kop-box").classList.remove('hidden');
         document.getElementById("report-kop-img").src = kopSuratSrc;
+
+        await pushSettingsToCloudSheet({ "KOP_SURAT": kopSuratSrc });
       };
       reader.readAsDataURL(file);
     }
@@ -1913,7 +1883,6 @@ async function pushSettingsToCloudSheet(partialSettings) {
     function updateQueueCountUI() {
       getAllQueueFromDB().then(records => {
         document.getElementById('queue-count').innerText = records.length;
-        document.getElementById('queue-count-success').innerText = records.length;
       });
     }
 
