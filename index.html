@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- HTML5 QR Code Scanner Library -->
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-  <!-- QRCode.js CDN untuk Generasi QR Code Cetak -->
+  <!-- QRCode.js CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -29,64 +29,196 @@
       border-radius: 1rem;
     }
 
-    /* KARTU ID CARD DESAIN PERSIS GAMBAR (85.6mm x 53.9mm) */
-    .id-card {
+    /* CSS KARTU QR CODE DARI KARTUQRCODE.HTML */
+    .card {
       width: 85.6mm;
-      height: 53.9mm;
-      box-sizing: border-box;
+      height: 53.98mm;
       position: relative;
-      background: #ffffff;
-      border-radius: 6px;
       overflow: hidden;
-      border: 1px solid #cbd5e1;
+      background: #fff;
+      flex: none;
+      color: var(--ink, #0b2c63);
+      border: 1.3mm solid var(--accent, #0b3b82);
+      border-radius: 4mm;
+      box-shadow: 0 1.5mm 4mm rgba(15,23,42,.18);
+      page-break-inside: avoid;
+      box-sizing: border-box;
+    }
+    .card:before {
+      content: "";
+      position: absolute;
+      left: 0; top: 0;
+      width: 22mm; height: 20mm;
+      background: var(--accent, #0b3b82);
+      clip-path: polygon(0 0, 100% 0, 42% 100%, 0 100%);
+    }
+    .card:after {
+      content: "";
+      position: absolute;
+      right: 0; bottom: 0;
+      width: 22mm; height: 18mm;
+      background: var(--accent, #0b3b82);
+      clip-path: polygon(100% 0, 100% 100%, 0 100%);
+    }
+    .accent-stripe {
+      position: absolute;
+      left: 4mm; top: 0;
+      width: 3mm; height: 20mm;
+      background: var(--secondary, #f5b700);
+      transform: skewX(-18deg);
+      z-index: 2;
+    }
+    .card-logo {
+      position: absolute;
+      top: 2.5mm;
+      width: 13mm; height: 13mm;
+      object-fit: contain;
+      z-index: 3;
+    }
+    .card-logo.left { left: 5mm; }
+    .card-logo.right { right: 5mm; }
+    .school-title {
+      position: absolute;
+      top: 2.8mm; left: 19mm; right: 19mm;
+      text-align: center;
+      font-size: 3.8mm;
+      line-height: 1.05;
+      font-weight: 900;
+      color: var(--ink, #0b2c63);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      z-index: 3;
+      text-transform: uppercase;
+    }
+    .card-badge {
+      position: absolute;
+      top: 10mm; left: 19mm; right: 19mm;
+      height: 6.5mm;
+      background: var(--accent, #0b3b82);
+      border-radius: 5mm;
+      text-align: center;
+      color: #fff;
+      font-size: 3mm;
+      font-weight: 900;
+      line-height: 6.5mm;
+      z-index: 3;
+    }
+    .photo-box {
+      position: absolute;
+      left: 3.8mm; top: 18.2mm;
+      width: 17mm; height: 23mm;
+      border: 0.5mm solid var(--accent, #0b3b82);
+      border-radius: 2mm;
+      padding: 1mm;
+      z-index: 3;
+      background: #fff;
+    }
+    .photo-in {
+      width: 100%; height: 100%;
+      border: 0.3mm solid #cbd5e1;
+      border-radius: 1.5mm;
+      background: #f8fafc;
       display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      padding: 4px 6px;
+      align-items: center; justify-content: center;
+      color: #789;
+      font-size: 3mm; font-weight: 800;
+    }
+    .details-box {
+      position: absolute;
+      left: 24mm; top: 18.5mm; right: 26mm;
+      z-index: 3;
+      text-align: left;
+    }
+    .lbl {
+      font-size: 2.2mm;
+      font-weight: 900;
+      color: var(--accent, #0b3b82);
+      margin-bottom: 0.5mm;
+      line-height: 1;
+    }
+    .val {
+      font-size: 2.6mm;
+      font-weight: 800;
+      color: #111827;
+      margin-bottom: 2mm;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.05;
+    }
+    .card-qr {
+      position: absolute;
+      right: 3.7mm; top: 18.4mm;
+      width: 23mm; height: 23mm;
+      background: #fff;
+      display: flex;
+      align-items: center; justify-content: center;
+      z-index: 4;
+    }
+    .card-qr canvas, .card-qr img {
+      width: 23mm !important;
+      height: 23mm !important;
+    }
+    .footer-left {
+      position: absolute;
+      left: 4mm; bottom: 2mm;
+      font-size: 2mm; color: #64748b; font-weight: bold;
+      z-index: 4;
+    }
+    .footer-right {
+      position: absolute;
+      right: 4mm; bottom: 2mm;
+      font-size: 2mm; color: #64748b; font-weight: bold;
+      z-index: 4;
+      text-transform: uppercase;
     }
 
-    /* ORNAMEN DEKORASI BLUE & GOLD CORNER */
-    .id-card::before {
-      content: "";
+    /* BINGKAI VARIASI */
+    .frame-ganda { border: 1.3mm solid var(--accent, #0b3b82); }
+    .frame-ganda .inner-frame {
       position: absolute;
-      top: 0; left: 0;
-      width: 12px; height: 100%;
-      background: linear-gradient(135deg, #f59e0b 35%, #0b3c5d 35%);
+      inset: 1.2mm;
+      border: 0.35mm solid var(--secondary, #f5b700);
+      border-radius: 3mm;
       z-index: 1;
     }
+    .frame-tunggal { border: 1.1mm solid var(--accent, #0b3b82); border-radius: 2mm; }
+    .frame-sudut { border: 1.1mm solid var(--accent, #0b3b82); border-radius: 4mm; }
+    .frame-minimalis { border: 0.45mm solid #cbd5e1; border-radius: 1.5mm; }
 
-    .id-card::after {
-      content: "";
-      position: absolute;
-      bottom: -15px; right: -15px;
-      width: 50px; height: 50px;
-      background: #0b3c5d;
-      transform: rotate(45deg);
-      z-index: 1;
-    }
+    /* TEMA WARNA */
+    .theme-biru { --accent: #0b3b82; --secondary: #f5b700; --ink: #0b2c63; }
+    .theme-hijau { --accent: #087443; --secondary: #eab308; --ink: #075331; }
+    .theme-merah { --accent: #a61b1b; --secondary: #f59e0b; --ink: #721c1c; }
+    .theme-ungu { --accent: #5425a8; --secondary: #f59e0b; --ink: #3b1b78; }
+    .theme-emas { --accent: #9a6a00; --secondary: #d4a72c; --ink: #624500; }
+    .theme-hitam { --accent: #111827; --secondary: #94a3b8; --ink: #111827; }
 
-    /* OPTIMASI CETAK KERTAS F4 (10 KARTU PER LEMBAR: 2 KOLOM x 5 BARIS) */
+    /* LAYOUT HALAMAN PRINT (10 KARTU PER LEMBAR A4/F4) */
     @media print {
       @page {
-        size: 215mm 330mm; /* UKURAN F4 */
-        margin: 8mm 6mm;
+        size: A4 portrait;
+        margin: 8mm 5mm;
       }
       body * { visibility: hidden; }
-      #print-area, #print-area * { visibility: visible; }
-      #print-area {
+      #printArea, #printArea * { visibility: visible; }
+      #printArea {
         position: absolute;
         left: 0; top: 0;
         width: 100%;
+        margin: 0; padding: 0;
+      }
+      .page-print {
         display: grid !important;
         grid-template-columns: repeat(2, 85.6mm) !important;
-        gap: 6mm 10mm !important;
+        grid-template-rows: repeat(5, 53.98mm) !important;
+        gap: 2mm 4mm !important;
         justify-content: center;
+        align-content: center;
+        page-break-after: always;
       }
-      .id-card {
-        page-break-inside: avoid;
-        break-inside: avoid;
-        box-shadow: none !important;
-      }
+      .page-print:last-child { page-break-after: auto; }
       .no-print { display: none !important; }
     }
   </style>
@@ -401,46 +533,85 @@
     </main>
 
 
-    <!-- VIEW 6: PRINT KARTU QR CODE SISWA (PERSIS DESAIN GAMBAR) -->
+    <!-- VIEW 6: PRINT KARTU QR CODE SISWA (TERINTEGRASI SAMA PERSIS KARTUQRCODE.HTML) -->
     <main id="view-print-qr" class="flex-1 flex-col overflow-y-auto no-scrollbar bg-slate-50 p-4 hidden">
       <div class="flex items-center justify-between mb-3 no-print">
         <div>
-          <h2 class="font-bold text-lg text-gray-900">Cetak Kartu QR Code</h2>
-          <p class="text-xs text-gray-500">Ukuran KTP/ID Card (10 Kartu per Lembar F4)</p>
+          <h2 class="font-bold text-lg text-gray-900">🪪 Cetak Kartu QR Code</h2>
+          <p class="text-xs text-gray-500">Ukuran KTP • 10 Kartu per Lembar A4/F4</p>
         </div>
-        <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-md">
+        <button onclick="window.print()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-md">
           <i class="fa-solid fa-print"></i>
-          <span>Cetak PDF</span>
+          <span>Cetak Kartu</span>
         </button>
       </div>
 
-      <!-- FORM UPLOAD LOGO KIRI & KANAN SEKOLAH -->
-      <div class="bg-white p-3 rounded-2xl border border-gray-200 shadow-sm space-y-2 mb-3 no-print">
-        <h4 class="text-xs font-bold text-blue-900 border-b border-gray-100 pb-1 flex items-center gap-1">
-          <i class="fa-solid fa-image text-blue-600"></i> Upload Logo Kartu
+      <!-- PANEL PENGATURAN TEMA, BINGKAI & LOGO KARTU -->
+      <div class="bg-white p-3.5 rounded-2xl border border-gray-200 shadow-sm space-y-3 mb-3 no-print">
+        <h4 class="text-xs font-bold text-blue-900 border-b border-gray-100 pb-1.5 flex items-center gap-1.5">
+          <i class="fa-solid fa-sliders text-blue-600"></i>
+          <span>Pengaturan Desain Kartu</span>
         </h4>
+
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <div>
+            <label class="block text-[10px] font-bold text-gray-600 mb-1">Warna Tema</label>
+            <select id="card-theme-select" onchange="generateQRCardsToPrint()" class="w-full py-1.5 px-2 bg-slate-50 border border-gray-200 rounded-xl text-xs font-bold text-gray-800">
+              <option value="biru">Biru Classic</option>
+              <option value="hijau">Hijau Edukasi</option>
+              <option value="merah">Merah Premium</option>
+              <option value="ungu">Ungu Elegan</option>
+              <option value="emas">Emas Mewah</option>
+              <option value="hitam">Hitam Dark</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-[10px] font-bold text-gray-600 mb-1">Model Bingkai</label>
+            <select id="card-frame-select" onchange="generateQRCardsToPrint()" class="w-full py-1.5 px-2 bg-slate-50 border border-gray-200 rounded-xl text-xs font-bold text-gray-800">
+              <option value="ganda">Bingkai Ganda</option>
+              <option value="tunggal">Bingkai Tunggal</option>
+              <option value="sudut">Bingkai Sudut</option>
+              <option value="minimalis">Minimalis</option>
+            </select>
+          </div>
+        </div>
+
         <div class="grid grid-cols-2 gap-2 text-[10px]">
           <div>
-            <label class="block font-semibold text-gray-700 mb-0.5">Logo Kiri (Pemda/Dinas)</label>
-            <input type="file" id="upload-logo-left" accept="image/*" onchange="handleLogoUpload(event, 'left')" class="w-full text-[9px] text-gray-500 file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:bg-blue-50 file:text-blue-700">
+            <label class="block font-bold text-gray-700 mb-1">Logo Kiri (Pemda/Dinas)</label>
+            <input type="file" accept="image/*" onchange="handleLogoUpload(event, 'left')" class="w-full text-[9px] text-gray-500 file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:bg-blue-50 file:text-blue-700">
           </div>
           <div>
-            <label class="block font-semibold text-gray-700 mb-0.5">Logo Kanan (Sekolah)</label>
-            <input type="file" id="upload-logo-right" accept="image/*" onchange="handleLogoUpload(event, 'right')" class="w-full text-[9px] text-gray-500 file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:bg-blue-50 file:text-blue-700">
+            <label class="block font-bold text-gray-700 mb-1">Logo Kanan (Sekolah)</label>
+            <input type="file" accept="image/*" onchange="handleLogoUpload(event, 'right')" class="w-full text-[9px] text-gray-500 file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:bg-blue-50 file:text-blue-700">
           </div>
         </div>
       </div>
 
-      <!-- FILTER KELAS & PENCARIAN -->
-      <div class="grid grid-cols-2 gap-2 mb-3 no-print">
-        <select id="print-class-filter" onchange="generateQRCardsToPrint()" class="py-2 px-3 bg-white border border-gray-200 rounded-xl text-xs font-bold text-gray-800 shadow-sm focus:outline-none">
-          <option value="ALL">Semua Kelas</option>
-        </select>
-        <input type="text" id="print-search-input" onkeyup="generateQRCardsToPrint()" placeholder="Cari nama/NISN..." class="py-2 px-3 bg-white border border-gray-200 rounded-xl text-xs text-gray-800 shadow-sm focus:outline-none">
+      <!-- FILTER KELAS & DAFTAR PILIHAN SISWA -->
+      <div class="bg-white p-3.5 rounded-2xl border border-gray-200 shadow-sm space-y-2 mb-3 no-print">
+        <div class="flex items-center justify-between">
+          <h4 class="text-xs font-bold text-gray-800">Pilih Siswa untuk Dicetak</h4>
+          <div class="space-x-1">
+            <button onclick="selectAllStudentsToPrint(true)" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-bold rounded-lg">Pilih Semua</button>
+            <button onclick="selectAllStudentsToPrint(false)" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-bold rounded-lg">Hapus Semua</button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <select id="print-class-filter" onchange="renderStudentsChecklistToPrint()" class="py-1.5 px-2 bg-slate-50 border border-gray-200 rounded-xl text-xs font-bold text-gray-800">
+            <option value="ALL">Semua Kelas</option>
+          </select>
+          <input type="text" id="print-search-input" onkeyup="renderStudentsChecklistToPrint()" placeholder="Cari nama/NISN..." class="py-1.5 px-2 bg-slate-50 border border-gray-200 rounded-xl text-xs text-gray-800">
+        </div>
+
+        <div id="print-checklist-container" class="max-h-40 overflow-y-auto border border-gray-100 rounded-xl p-2 space-y-1.5 bg-slate-50/50"></div>
       </div>
 
-      <!-- AREA TEMPLATE CETAK KARTU (SITUASI HASIL LAYOUT CETAK) -->
-      <div id="print-area" class="flex flex-col items-center gap-3 pb-8"></div>
+      <!-- AREA PREVIEW LEMBAR KARTU YANG AKAN DICETAK -->
+      <div class="preview-title font-bold text-xs text-blue-900 mb-2 no-print">Preview Cetak Kartu:</div>
+      <div id="printArea" class="flex flex-col items-center gap-4 pb-8"></div>
     </main>
 
 
@@ -638,6 +809,7 @@
     let currentScanSession = "PAGI";
     let myPieChart = null;
 
+    let selectedStudentsToPrint = new Set();
     let logoLeftSrc = localStorage.getItem("LOGO_LEFT") || "";
     let logoRightSrc = localStorage.getItem("LOGO_RIGHT") || "";
 
@@ -908,7 +1080,7 @@
       }
     }
 
-    // 5. FITUR CETAK KARTU QR CODE SISWA (PERSIS PERSYARATAN DESAIN GAMBAR)
+    // 5. MODUL CETAK KARTU QR CODE SISWA (SESUAI DENGAN KARTUQRCODE.HTML)
     function handleLogoUpload(event, position) {
       const file = event.target.files[0];
       if (!file) return;
@@ -928,11 +1100,10 @@
       reader.readAsDataURL(file);
     }
 
-    function generateQRCardsToPrint() {
+    function renderStudentsChecklistToPrint() {
       const selectedClass = document.getElementById('print-class-filter').value;
       const searchKeyword = document.getElementById('print-search-input').value.toLowerCase();
-      const printContainer = document.getElementById('print-area');
-      const schoolName = localStorage.getItem("SCHOOL_NAME") || "SMK NEGERI 1 WAKATOBI";
+      const container = document.getElementById('print-checklist-container');
 
       const filtered = cachedStudents.filter(std => {
         const matchClass = selectedClass === "ALL" || std.kelas === selectedClass;
@@ -940,83 +1111,110 @@
         return matchClass && matchKey;
       });
 
-      printContainer.innerHTML = "";
-
       if (filtered.length === 0) {
-        printContainer.innerHTML = `<p class="col-span-2 text-center text-xs text-gray-400 py-8">Tidak ada data siswa untuk dicetak.</p>`;
+        container.innerHTML = `<p class="text-center text-[10px] text-gray-400 py-2">Tidak ada siswa ditemukan</p>`;
         return;
       }
 
-      filtered.forEach(std => {
-        const cardId = `qr-box-${std.id_siswa}`;
-        
-        const logoLeftImg = logoLeftSrc ? `<img src="${logoLeftSrc}" class="w-7 h-7 object-contain">` : `<div class="w-7 h-7 bg-amber-100 rounded-full flex items-center justify-center text-[8px] font-bold text-amber-700">LOGO</div>`;
-        const logoRightImg = logoRightSrc ? `<img src="${logoRightSrc}" class="w-7 h-7 object-contain">` : `<div class="w-7 h-7 bg-blue-100 rounded-full flex items-center justify-center text-[8px] font-bold text-blue-700">LOGO</div>`;
-
-        printContainer.innerHTML += `
-          <div class="id-card shadow-sm">
-            <!-- HEADER KARTU: LOGO KIRI, NAMA SEKOLAH, LOGO KANAN -->
-            <div class="flex items-center justify-between z-10 pl-2">
-              ${logoLeftImg}
-              <div class="text-center min-w-0 flex-1 px-1">
-                <h3 class="font-extrabold text-[11px] text-[#0b3c5d] tracking-wide truncate leading-tight uppercase">${schoolName}</h3>
-                <div class="bg-[#0b3c5d] text-white text-[8px] font-extrabold px-2 py-0.5 rounded-full inline-block mt-0.5 shadow-xs">
-                  KARTU QR CODE SISWA
-                </div>
-              </div>
-              ${logoRightImg}
-            </div>
-
-            <!-- BODY KARTU: BINGKAI FOTO, DATA SISWA (KELAS), DAN QR CODE -->
-            <div class="grid grid-cols-12 items-center gap-1 z-10 pl-2 pr-1 my-0.5">
-              <!-- BINGKAI FOTO (3 KOLOM) -->
-              <div class="col-span-3">
-                <div class="w-[19mm] h-[25mm] border-2 border-[#0b3c5d] rounded-md bg-slate-50 flex items-center justify-center text-gray-300 font-bold text-[9px] shadow-inner">
-                  FOTO
-                </div>
-              </div>
-
-              <!-- INFO SISWA: NAMA, NISN, KELAS (5 KOLOM) -->
-              <div class="col-span-5 text-left text-[8px] space-y-0.5 pl-0.5">
-                <div>
-                  <span class="block font-extrabold text-[#0b3c5d] leading-none">NAMA</span>
-                  <span class="font-bold text-gray-900 leading-tight block truncate">${std.nama}</span>
-                </div>
-                <div>
-                  <span class="block font-extrabold text-[#0b3c5d] leading-none">NISN</span>
-                  <span class="font-bold text-gray-900 leading-tight block">${std.nisn || '-'}</span>
-                </div>
-                <div>
-                  <span class="block font-extrabold text-[#0b3c5d] leading-none">KELAS</span>
-                  <span class="font-bold text-gray-900 leading-tight block truncate">${std.kelas}</span>
-                </div>
-              </div>
-
-              <!-- QR CODE (4 KOLOM) -->
-              <div class="col-span-4 flex justify-center items-center">
-                <div id="${cardId}" class="p-0.5 bg-white border border-gray-200 rounded"></div>
-              </div>
-            </div>
-
-            <!-- FOOTER KARTU -->
-            <div class="flex items-center justify-between text-[7px] text-gray-400 font-bold z-10 pl-2 pr-1 border-t border-gray-100 pt-0.5">
-              <span>KARTU IDENTITAS SISWA</span>
-              <span class="uppercase">${schoolName}</span>
-            </div>
+      container.innerHTML = filtered.map(std => `
+        <label class="flex items-center justify-between text-xs bg-white p-1.5 rounded-lg border border-gray-100 cursor-pointer hover:bg-blue-50">
+          <div class="flex items-center space-x-2 truncate">
+            <input type="checkbox" ${selectedStudentsToPrint.has(std.id_siswa) ? 'checked' : ''} onchange="toggleStudentPrintSelection('${std.id_siswa}', this.checked)" class="rounded text-blue-600">
+            <span class="font-bold text-gray-800 truncate text-[11px]">${std.nama}</span>
           </div>
-        `;
+          <span class="text-[9px] font-semibold text-gray-500 bg-slate-100 px-1.5 py-0.5 rounded">${std.kelas}</span>
+        </label>
+      `).join('');
+    }
 
-        setTimeout(() => {
-          const qrBox = document.getElementById(cardId);
-          if (qrBox && qrBox.innerHTML === "") {
-            new QRCode(qrBox, {
-              text: std.id_siswa,
-              width: 58,
-              height: 58
+    function toggleStudentPrintSelection(idSiswa, isChecked) {
+      if (isChecked) selectedStudentsToPrint.add(idSiswa);
+      else selectedStudentsToPrint.delete(idSiswa);
+      generateQRCardsToPrint();
+    }
+
+    function selectAllStudentsToPrint(select) {
+      const selectedClass = document.getElementById('print-class-filter').value;
+      const filtered = selectedClass === "ALL" ? cachedStudents : cachedStudents.filter(s => s.kelas === selectedClass);
+
+      filtered.forEach(s => {
+        if (select) selectedStudentsToPrint.add(s.id_siswa);
+        else selectedStudentsToPrint.delete(s.id_siswa);
+      });
+
+      renderStudentsChecklistToPrint();
+      generateQRCardsToPrint();
+    }
+
+    function generateQRCardsToPrint() {
+      const theme = document.getElementById('card-theme-select').value;
+      const frame = document.getElementById('card-frame-select').value;
+      const schoolName = localStorage.getItem("SCHOOL_NAME") || "SMK NEGERI 1 CONTOH";
+      const printContainer = document.getElementById('printArea');
+
+      const list = cachedStudents.filter(s => selectedStudentsToPrint.has(s.id_siswa));
+
+      if (list.length === 0) {
+        printContainer.innerHTML = `<div class="bg-white p-6 rounded-2xl border border-dashed border-gray-300 text-center text-xs text-gray-400">Pilih siswa di atas untuk melihat preview kartu.</div>`;
+        return;
+      }
+
+      let html = '';
+      for (let p = 0; p < list.length; p += 10) {
+        html += '<div class="page-print">';
+        list.slice(p, p + 10).forEach(s => {
+          html += kartuHtmlTemplate(s, theme, frame, schoolName);
+        });
+        html += '</div>';
+      }
+
+      printContainer.innerHTML = html;
+
+      setTimeout(() => {
+        list.forEach(s => {
+          const el = document.getElementById(`qr_${safeId(s.id_siswa)}`);
+          if (el && el.innerHTML === "") {
+            new QRCode(el, {
+              text: s.id_siswa,
+              width: 90,
+              height: 90,
+              colorDark: '#000000',
+              colorLight: '#ffffff',
+              correctLevel: QRCode.CorrectLevel.M
             });
           }
-        }, 100);
-      });
+        });
+      }, 100);
+    }
+
+    function safeId(x) { return String(x || '').replace(/[^A-Za-z0-9_-]/g, '_'); }
+
+    function kartuHtmlTemplate(s, theme, frame, schoolName) {
+      const logoL = logoLeftSrc ? `<img class="card-logo left" src="${logoLeftSrc}">` : '';
+      const logoR = logoRightSrc ? `<img class="card-logo right" src="${logoRightSrc}">` : '';
+
+      return `
+        <div class="card theme-${theme} frame-${frame}">
+          <div class="inner-frame"></div>
+          <div class="accent-stripe"></div>
+          ${logoL}
+          ${logoR}
+          <div class="school-title">${schoolName}</div>
+          <div class="card-badge">KARTU QR CODE SISWA</div>
+          <div class="photo-box"><div class="photo-in">FOTO</div></div>
+          <div class="details-box">
+            <div class="lbl">NAMA</div>
+            <div class="val">${s.nama || '-'}</div>
+            <div class="lbl">NISN</div>
+            <div class="val">${s.nisn || '-'}</div>
+            <div class="lbl">KELAS</div>
+            <div class="val">${s.kelas || '-'}</div>
+          </div>
+          <div class="card-qr" id="qr_${safeId(s.id_siswa)}"></div>
+          <div class="footer-left">KARTU IDENTITAS SISWA</div>
+          <div class="footer-right">${schoolName}</div>
+        </div>
+      `;
     }
 
     // 6. SCANNER CONTROLLER
@@ -1462,6 +1660,7 @@
       } else if (viewName === 'print-qr') {
         document.getElementById('view-print-qr').classList.remove('hidden');
         document.getElementById('view-print-qr').classList.add('flex');
+        renderStudentsChecklistToPrint();
         generateQRCardsToPrint();
         stopCameraIfActive();
       } else if (viewName === 'settings') {
