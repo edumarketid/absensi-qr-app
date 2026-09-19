@@ -671,7 +671,45 @@
     </main>
 
 
-    <!-- VIEW 9: PENGATURAN SYSTEM -->
+    <!-- VIEW 9: FITUR ATUR HARI LIBUR NASIONAL & HARI BESAR -->
+    <main id="view-hari-libur" class="flex-1 flex-col overflow-y-auto no-scrollbar bg-slate-50 p-4 hidden">
+      <div class="flex items-center justify-between mb-3">
+        <div>
+          <h2 class="font-bold text-lg text-gray-900">📅 Atur Hari Libur</h2>
+          <p class="text-xs text-gray-500">Tandai Hari Besar (17 Ags, Libur Semester, dll)</p>
+        </div>
+      </div>
+
+      <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3 mb-3">
+        <h4 class="text-xs font-bold text-blue-900 border-b border-gray-100 pb-1.5 flex items-center gap-1.5">
+          <i class="fa-solid fa-calendar-plus text-blue-600"></i>
+          <span>Tambah Hari Libur Baru</span>
+        </h4>
+
+        <div>
+          <label class="block text-[10px] font-bold text-gray-600 mb-1">Pilih Tanggal Libur</label>
+          <input type="date" id="input-libur-tanggal" class="w-full px-3 py-2 bg-slate-50 border border-gray-200 rounded-xl text-xs font-bold text-gray-800">
+        </div>
+
+        <div>
+          <label class="block text-[10px] font-bold text-gray-600 mb-1">Keterangan Libur / Nama Hari Besar</label>
+          <input type="text" id="input-libur-ket" placeholder="Contoh: HUT Kemerdekaan RI Ke-81" class="w-full px-3 py-2 bg-slate-50 border border-gray-200 rounded-xl text-xs text-gray-800">
+        </div>
+
+        <button onclick="saveHariLiburNew()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center space-x-1.5 shadow-md">
+          <i class="fa-solid fa-floppy-disk"></i>
+          <span>Simpan Hari Libur</span>
+        </button>
+      </div>
+
+      <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3">
+        <h4 class="text-xs font-bold text-gray-800 border-b border-gray-100 pb-2">Daftar Hari Libur Terdaftar:</h4>
+        <div id="hari-libur-list-container" class="space-y-2"></div>
+      </div>
+    </main>
+
+
+    <!-- VIEW 10: PENGATURAN SYSTEM -->
     <main id="view-settings" class="flex-1 flex-col overflow-y-auto no-scrollbar bg-slate-50 p-4 hidden">
       <div class="mb-4">
         <h2 class="font-bold text-lg text-gray-900">Pengaturan System</h2>
@@ -684,7 +722,7 @@
             <i class="fa-solid fa-calendar-days text-blue-600"></i>
             <span>Jam Presensi Per Hari</span>
           </span>
-          <span class="text-[10px] font-normal text-rose-500">*Minggu otomatis libur</span>
+          <span class="text-[10px] font-normal text-blue-600">*Termasuk Minggu (Ekstrakurikuler)</span>
         </h3>
 
         <div id="days-config-container" class="space-y-3"></div>
@@ -795,8 +833,14 @@
             <span class="text-xs font-bold text-gray-800">Absensi Manual</span>
           </button>
 
+          <!-- MENU FITUR ATUR HARI LIBUR -->
+          <button onclick="toggleMenuModal(); toggleView('hari-libur');" class="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col items-center justify-center gap-1.5 hover:bg-amber-50 hover:border-amber-200 transition">
+            <i class="fa-solid fa-calendar-day text-xl text-amber-600"></i>
+            <span class="text-xs font-bold text-gray-800">Atur Hari Libur</span>
+          </button>
+
           <!-- MENU FITUR TINDAK LANJUT -->
-          <button onclick="toggleMenuModal(); toggleView('tindak-lanjut');" class="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col items-center justify-center gap-1.5 hover:bg-rose-50 hover:border-rose-200 transition relative">
+          <button onclick="toggleMenuModal(); toggleView('tindak-lanjut');" class="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col items-center justify-center gap-1.5 hover:bg-rose-50 hover:border-rose-200 transition">
             <i class="fa-solid fa-user-shield text-xl text-rose-600"></i>
             <span class="text-xs font-bold text-gray-800">Tindak Lanjut</span>
           </button>
@@ -812,9 +856,9 @@
             <span class="text-xs font-bold text-gray-800">Cetak QR Code</span>
           </button>
 
-          <button onclick="toggleMenuModal(); toggleView('settings');" class="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col items-center justify-center gap-1.5 hover:bg-purple-50 hover:border-purple-200 transition col-span-2">
+          <button onclick="toggleMenuModal(); toggleView('settings');" class="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col items-center justify-center gap-1.5 hover:bg-purple-50 hover:border-purple-200 transition">
             <i class="fa-solid fa-gear text-xl text-purple-600"></i>
-            <span class="text-xs font-bold text-gray-800">Pengaturan System</span>
+            <span class="text-xs font-bold text-gray-800">Pengaturan</span>
           </button>
         </div>
       </div>
@@ -871,6 +915,7 @@
     let fetchedTodayAttendance = [];
     let fetchedAttendanceHistory = [];
     let fetchedTindakLanjutHistory = [];
+    let fetchedHariLiburList = [];
     let currentScanSession = "PAGI";
     let myPieChart = null;
 
@@ -880,7 +925,9 @@
     let kopSuratSrc = localStorage.getItem("KOP_SURAT") || "";
     let currentReportType = "HARIAN";
 
+    // MINGGU DITAMBAHKAN KEDALAM CONFIGURE HARI (UNTUK EKSTRAKURIKULER)
     const DAYS_LIST = [
+      { key: "sun", label: "Minggu (Ekstrakurikuler)" },
       { key: "mon", label: "Senin" },
       { key: "tue", label: "Selasa" },
       { key: "wed", label: "Rabu" },
@@ -929,6 +976,7 @@
       document.getElementById("rep-date-single").value = todayStr;
       document.getElementById("rep-date-start").value = todayStr;
       document.getElementById("rep-date-end").value = todayStr;
+      document.getElementById("input-libur-tanggal").value = todayStr;
 
       if (kopSuratSrc) {
         document.getElementById("report-kop-box").classList.remove('hidden');
@@ -944,7 +992,9 @@
       let html = "";
 
       DAYS_LIST.forEach(day => {
-        const active = localStorage.getItem(`DAY_ACTIVE_${day.key}`) !== "false";
+        const defaultActive = day.key !== "sun";
+        const active = localStorage.getItem(`DAY_ACTIVE_${day.key}`) !== null ? (localStorage.getItem(`DAY_ACTIVE_${day.key}`) === "true") : defaultActive;
+        
         const pagiStart = localStorage.getItem(`TIME_${day.key}_PAGI_START`) || "06:00";
         const pagiLimit = localStorage.getItem(`TIME_${day.key}_PAGI_LIMIT`) || "07:15";
         const siangStart = localStorage.getItem(`TIME_${day.key}_SIANG_START`) || "12:00";
@@ -953,7 +1003,7 @@
         html += `
           <div class="p-3 bg-slate-50 border border-gray-200 rounded-xl space-y-2">
             <div class="flex items-center justify-between border-b border-gray-200 pb-1.5">
-              <span class="font-bold text-xs text-gray-800">${day.label}</span>
+              <span class="font-bold text-xs ${day.key === 'sun' ? 'text-amber-700' : 'text-gray-800'}">${day.label}</span>
               <label class="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" id="toggle-${day.key}" ${active ? 'checked' : ''} class="sr-only peer" onchange="toggleDayActiveUI('${day.key}')">
                 <div class="w-9 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
@@ -1031,17 +1081,24 @@
     }
 
     function getCurrentDayConfig() {
+      const todayStr = new Date().toISOString().split('T')[0];
+      const holObj = fetchedHariLiburList.find(h => h.tanggal === todayStr);
+
+      if (holObj) {
+        return { isHoliday: true, name: `Hari Libur (${holObj.keterangan})` };
+      }
+
       const dayIndex = new Date().getDay();
-      const dayKeys = [null, "mon", "tue", "wed", "thu", "fri", "sat"];
-
-      if (dayIndex === 0) return { isHoliday: true, name: "Minggu" };
-
+      const dayKeys = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
       const key = dayKeys[dayIndex];
-      const active = localStorage.getItem(`DAY_ACTIVE_${key}`) !== "false";
+
+      const defaultActive = key !== "sun";
+      const active = localStorage.getItem(`DAY_ACTIVE_${key}`) !== null ? (localStorage.getItem(`DAY_ACTIVE_${key}`) === "true") : defaultActive;
 
       return {
         isHoliday: !active,
         key: key,
+        name: key === "sun" ? "Minggu" : "Hari Rutin",
         pagiStart: localStorage.getItem(`TIME_${key}_PAGI_START`) || "06:00",
         pagiLimit: localStorage.getItem(`TIME_${key}_PAGI_LIMIT`) || "07:15",
         siangStart: localStorage.getItem(`TIME_${key}_SIANG_START`) || "12:00",
@@ -1122,7 +1179,7 @@
       }
     }
 
-    // 3. AUTO DOWNLOAD MASTER SISWA & PENGATURAN
+    // 3. AUTO DOWNLOAD MASTER SISWA, PENGATURAN & HARI LIBUR
     async function autoDownloadMasterStudents() {
       if (!navigator.onLine) {
         document.getElementById('sync-info-text').innerText = "Mode Offline - Menggunakan data HP.";
@@ -1143,6 +1200,7 @@
           if (result.today_attendance) fetchedTodayAttendance = result.today_attendance;
           if (result.attendance_history) fetchedAttendanceHistory = result.attendance_history;
           if (result.tindak_lanjut) fetchedTindakLanjutHistory = result.tindak_lanjut;
+          if (result.hari_libur) fetchedHariLiburList = result.hari_libur;
 
           if (result.students) {
             const tx = db.transaction("students", "readwrite");
@@ -1225,7 +1283,87 @@
       }
     }
 
-    // 5. MODUL CETAK KARTU QR CODE SISWA
+    // 5. MODUL ATUR HARI LIBUR NASIONAL & HARI BESAR
+    function renderHariLiburView() {
+      const container = document.getElementById("hari-libur-list-container");
+
+      if (fetchedHariLiburList.length === 0) {
+        container.innerHTML = `<p class="text-center text-xs text-gray-400 py-4">Belum ada hari libur terdaftar.</p>`;
+        return;
+      }
+
+      const sortedList = [...fetchedHariLiburList].sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
+
+      container.innerHTML = sortedList.map(item => `
+        <div class="bg-slate-50 p-3 rounded-xl border border-gray-200 flex items-center justify-between text-xs">
+          <div>
+            <span class="font-bold text-blue-900 block">${item.tanggal}</span>
+            <span class="text-gray-600 font-medium">${item.keterangan}</span>
+          </div>
+          <button onclick="deleteHariLiburItem('${item.tanggal}')" class="px-2 py-1 bg-rose-50 text-rose-600 hover:bg-rose-100 font-bold rounded-lg border border-rose-200">
+            <i class="fa-solid fa-trash-can"></i>
+          </button>
+        </div>
+      `).join('');
+    }
+
+    async function saveHariLiburNew() {
+      const tgl = document.getElementById("input-libur-tanggal").value;
+      const ket = document.getElementById("input-libur-ket").value.trim();
+
+      if (!tgl || !ket) {
+        alert("Tanggal dan Keterangan Libur wajib diisi!");
+        return;
+      }
+
+      const newItem = { tanggal: tgl, keterangan: ket };
+
+      const existingIndex = fetchedHariLiburList.findIndex(h => h.tanggal === tgl);
+      if (existingIndex !== -1) {
+        fetchedHariLiburList[existingIndex].keterangan = ket;
+      } else {
+        fetchedHariLiburList.push(newItem);
+      }
+
+      document.getElementById("input-libur-ket").value = "";
+      renderHariLiburView();
+
+      if (navigator.onLine) {
+        try {
+          await fetch(GAS_WEB_APP_URL, {
+            method: "POST",
+            mode: "cors",
+            headers: { "Content-Type": "text/plain" },
+            body: JSON.stringify({ action: "SAVE_HARI_LIBUR", data: newItem })
+          });
+          alert("Hari libur berhasil disimpan ke Cloud Sheet!");
+        } catch (e) {
+          console.warn("Gagal simpan libur ke server:", e);
+        }
+      }
+    }
+
+    async function deleteHariLiburItem(tanggal) {
+      if (!confirm(`Hapus hari libur tanggal ${tanggal}?`)) return;
+
+      fetchedHariLiburList = fetchedHariLiburList.filter(h => h.tanggal !== tanggal);
+      renderHariLiburView();
+
+      if (navigator.onLine) {
+        try {
+          await fetch(GAS_WEB_APP_URL, {
+            method: "POST",
+            mode: "cors",
+            headers: { "Content-Type": "text/plain" },
+            body: JSON.stringify({ action: "DELETE_HARI_LIBUR", tanggal: tanggal })
+          });
+        } catch (e) {
+          console.warn("Gagal hapus libur dari server:", e);
+        }
+      }
+    }
+
+    // 6. MODUL CETAK KARTU QR CODE SISWA
     async function handleLogoUpload(event, position) {
       const file = event.target.files[0];
       if (!file) return;
@@ -1368,7 +1506,7 @@
       `;
     }
 
-    // 6. MODUL LAPORAN REKAPITULASI ABSENSI
+    // 7. MODUL LAPORAN REKAPITULASI ABSENSI
     async function handleKopSuratUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -1543,7 +1681,7 @@
       return selected === "ALL" ? list : list.filter(s => s.kelas === selected);
     }
 
-    // 7. MODUL FITUR TINDAK LANJUT SISWA BERMASALAH
+    // 8. MODUL FITUR TINDAK LANJUT SISWA BERMASALAH
     async function renderTindakLanjutView() {
       const container = document.getElementById("tindak-lanjut-list-container");
       container.innerHTML = `<div class="text-center py-6 text-gray-400 text-xs"><i class="fa-solid fa-spinner fa-spin mr-1"></i>Menganalisis data pelanggaran siswa...</div>`;
@@ -1672,7 +1810,7 @@
       }
     }
 
-    // 8. SCANNER CONTROLLER
+    // 9. SCANNER CONTROLLER
     function initScanner() {
       if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
       const config = { fps: 15, qrbox: { width: 250, height: 250 } };
@@ -1699,7 +1837,7 @@
       }
     }
 
-    // 9. PROCESS SCAN & STATUS
+    // 10. PROCESS SCAN & STATUS
     async function onScanSuccess(decodedText) {
       if (isCameraActive) {
         await html5QrCode.stop();
@@ -1743,7 +1881,7 @@
       }
     }
 
-    // 10. POPULATE CLASS DROPDOWNS
+    // 11. POPULATE CLASS DROPDOWNS
     function populateClassDropdowns() {
       const classes = [...new Set(cachedStudents.map(s => s.kelas))].filter(Boolean).sort();
       const filterSelect = document.getElementById('filter-class-select');
@@ -1759,7 +1897,7 @@
       if (repClassSelect) repClassSelect.innerHTML = classOptions;
     }
 
-    // 11. DATA SISWA & FILTER KELAS
+    // 12. DATA SISWA & FILTER KELAS
     function getAllStudentsFromDB() {
       return new Promise((resolve) => {
         const tx = db.transaction("students", "readonly");
@@ -1823,7 +1961,7 @@
       `).join('');
     }
 
-    // 12. DASHBOARD MONITORING & DUAL FILTER
+    // 13. DASHBOARD MONITORING & DUAL FILTER
     async function updateMonitoringDashboard() {
       const selectedClass = document.getElementById('monitoring-class-filter').value;
       const selectedSession = document.getElementById('monitoring-session-filter').value;
@@ -1989,7 +2127,7 @@
       updateMonitoringDashboard();
     }
 
-    // 13. HELPER DATABASE & QUEUE
+    // 14. HELPER DATABASE & QUEUE
     function getStudentFromDB(qrKey) {
       return new Promise((resolve) => {
         const tx = db.transaction("students", "readonly");
@@ -2051,7 +2189,7 @@
       });
     }
 
-    // 14. AUTO SYNC ANTREAN KE GOOGLE SHEETS
+    // 15. AUTO SYNC ANTREAN KE GOOGLE SHEETS
     async function syncQueueToGAS() {
       const queueData = await getAllQueueFromDB();
       if (queueData.length === 0) return;
@@ -2077,9 +2215,9 @@
       }
     }
 
-    // 15. NAVIGATION TOGGLE
+    // 16. NAVIGATION TOGGLE
     function toggleView(viewName) {
-      const views = ['view-scanner', 'view-success', 'view-students', 'view-monitoring', 'view-donation', 'view-print-qr', 'view-report', 'view-tindak-lanjut', 'view-settings'];
+      const views = ['view-scanner', 'view-success', 'view-students', 'view-monitoring', 'view-donation', 'view-print-qr', 'view-report', 'view-tindak-lanjut', 'view-hari-libur', 'view-settings'];
       views.forEach(v => {
         const el = document.getElementById(v);
         if (el) { el.classList.add('hidden'); el.classList.remove('flex'); }
@@ -2128,6 +2266,11 @@
         document.getElementById('view-tindak-lanjut').classList.remove('hidden');
         document.getElementById('view-tindak-lanjut').classList.add('flex');
         renderTindakLanjutView();
+        stopCameraIfActive();
+      } else if (viewName === 'hari-libur') {
+        document.getElementById('view-hari-libur').classList.remove('hidden');
+        document.getElementById('view-hari-libur').classList.add('flex');
+        renderHariLiburView();
         stopCameraIfActive();
       } else if (viewName === 'settings') {
         document.getElementById('view-settings').classList.remove('hidden');
