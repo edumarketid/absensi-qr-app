@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>QR First Online v13 - Absensi QR Code</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Styling khusus scrollbar & area viewfinder scanner */
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #f1f5f9;
+    }
+    .scanner-view {
+      background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('https://images.unsplash.com/photo-1577896851231-70ef18881754?q=80&w=600&auto=format&fit=crop') center/cover no-repeat;
+    }
+    .scanner-frame {
+      border: 3px solid #22c55e;
+      border-radius: 16px;
+      box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.4);
+    }
+    /* Hide scrollbar for clean app feel */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="flex justify-center items-center min-h-screen p-0 sm:p-4">
+
+  <!-- Container Simulasi Layar HP (Mobile Container) -->
+  <div class="w-full max-w-md h-[100vh] sm:h-[840px] bg-white flex flex-col justify-between shadow-2xl overflow-hidden sm:rounded-3xl relative border border-gray-200">
+
+    <!-- 1. HEADER UTAMA -->
+    <header class="bg-[#0b3c5d] text-white pt-2 pb-3 px-4 z-20 shadow-md">
+      <!-- Status Bar Waktu & Sinyal (Atas) -->
+      <div class="flex justify-between items-center text-xs font-semibold pb-1 border-b border-blue-900/50 mb-2">
+        <span>07.08</span>
+        <div class="flex items-center space-x-1.5 text-xs">
+          <i class="fa-solid font-bold fa-signal"></i>
+          <i class="fa-solid fa-wifi"></i>
+          <i class="fa-solid fa-battery-full"></i>
+        </div>
+      </div>
+
+      <!-- App Header Bar -->
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <button class="text-xl focus:outline-none"><i class="fa-solid fa-bars"></i></button>
+          <div>
+            <h1 class="font-bold text-base leading-tight">QR First Online</h1>
+            <p class="text-xs text-gray-300">SMK Negeri 1 Contoh</p>
+          </div>
+        </div>
+        <div class="text-right">
+          <div class="flex items-center justify-end space-x-1">
+            <span class="w-2 h-2 rounded-full bg-green-400 inline-block"></span>
+            <span class="text-xs font-medium">Offline</span>
+          </div>
+          <p class="text-[10px] text-gray-300 mt-0.5">Petugas: Budi Santoso</p>
+          <p class="text-[10px] text-gray-300">Piket Pagi</p>
+        </div>
+      </div>
+    </header>
+
+
+    <!-- ========================================================= -->
+    <!-- VIEW 1: TAMPILAN KAMERA SCANNER (Default Active) -->
+    <!-- ========================================================= -->
+    <main id="view-scanner" class="flex-1 flex flex-col justify-between relative bg-gray-900 overflow-hidden">
+      
+      <!-- Area Kamera Viewfinder -->
+      <div class="scanner-view flex-1 relative flex flex-col items-center justify-center p-6">
+        
+        <!-- Viewfinder Box (Kotak Frame Green Corners) -->
+        <div class="relative w-64 h-64 flex items-center justify-center">
+          <!-- Corner Indicators -->
+          <div class="absolute -top-1 -left-1 w-8 h-8 border-t-4 border-l-4 border-green-400 rounded-tl-xl"></div>
+          <div class="absolute -top-1 -right-1 w-8 h-8 border-t-4 border-r-4 border-green-400 rounded-tr-xl"></div>
+          <div class="absolute -bottom-1 -left-1 w-8 h-8 border-b-4 border-l-4 border-green-400 rounded-bl-xl"></div>
+          <div class="absolute -bottom-1 -right-1 w-8 h-8 border-b-4 border-r-4 border-green-400 rounded-br-xl"></div>
+          
+          <!-- Tooltip Instruction Badge -->
+          <div class="absolute bottom-6 bg-black/70 text-white text-xs px-4 py-1.5 rounded-full backdrop-blur-sm shadow-md border border-white/10">
+            Arahkan QR ke dalam kotak
+          </div>
+        </div>
+
+        <!-- Tombol Kontrol Kamera (Floating Bottom Controls) -->
+        <div class="absolute bottom-4 left-4 right-4 flex items-center justify-between gap-2">
+          <button class="bg-black/60 hover:bg-black/80 text-white flex-1 py-2.5 rounded-xl text-xs font-medium flex flex-col items-center justify-center gap-1 backdrop-blur-md">
+            <i class="fa-solid fa-flashlight text-sm"></i>
+            <span>Senter</span>
+          </button>
+          
+          <!-- Tombol Simulasi Scan Berhasil (Klik untuk pindah layar) -->
+          <button onclick="toggleView('success')" class="bg-blue-600 hover:bg-blue-700 text-white flex-[2] py-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 shadow-lg">
+            <i class="fa-solid fa-video"></i>
+            <span>Matikan Kamera</span>
+          </button>
+
+          <button class="bg-black/60 hover:bg-black/80 text-white flex-1 py-2.5 rounded-xl text-xs font-medium flex flex-col items-center justify-center gap-1 backdrop-blur-md">
+            <i class="fa-solid fa-keyboard text-sm"></i>
+            <span>Input Manual</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Footer Info Mode Offline & Queue Bar -->
+      <div class="bg-white p-3 border-t border-gray-100 flex items-center justify-between shadow-sm">
+        <div class="flex items-center space-x-3">
+          <div class="w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center font-bold">
+            <i class="fa-solid fa-bolt text-sm"></i>
+          </div>
+          <div>
+            <h4 class="text-xs font-bold text-gray-800">Mode Scan Cepat (Offline)</h4>
+            <p class="text-[10px] text-gray-500 leading-tight">Semua scan disimpan di HP, akan dikirim saat ada internet.</p>
+          </div>
+        </div>
+        <div class="text-right pl-2 border-l border-gray-200">
+          <span class="text-[10px] text-gray-400 block font-medium">Queue</span>
+          <span class="text-sm font-extrabold text-gray-800">12</span>
+        </div>
+      </div>
+    </main>
+
+
+    <!-- ========================================================= -->
+    <!-- VIEW 2: HASIL SCAN BERHASIL (Hidden by default) -->
+    <!-- ========================================================= -->
+    <main id="view-success" class="flex-1 flex-col overflow-y-auto no-scrollbar bg-slate-50 hidden">
+      
+      <!-- Banner Scan Berhasil -->
+      <div class="bg-emerald-600 text-white p-4 flex items-center space-x-3 shadow-md">
+        <div class="w-10 h-10 rounded-full bg-white text-emerald-600 flex items-center justify-center text-xl font-bold shadow-sm">
+          <i class="fa-solid fa-check"></i>
+        </div>
+        <div>
+          <h2 class="font-bold text-lg leading-snug">Scan Berhasil!</h2>
+          <p class="text-xs text-emerald-100">Siswa berhasil dicatat.</p>
+        </div>
+      </div>
+
+      <div class="p-4 space-y-3">
+        <!-- Card Profile Siswa -->
+        <div class="bg-white p-3.5 rounded-2xl shadow-sm border border-gray-100 flex items-center space-x-4">
+          <div class="w-20 h-24 bg-blue-500 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center border border-gray-200 shadow-inner">
+            <i class="fa-solid fa-user text-white text-4xl"></i>
+          </div>
+          <div class="flex-1 min-w-0">
+            <h3 class="font-bold text-gray-900 text-base truncate">Ahmad Fauzan</h3>
+            <div class="text-xs text-gray-600 space-y-0.5 mt-1">
+              <p><span class="text-gray-400">NISN</span> <span class="font-semibold text-gray-800">1234567890</span></p>
+              <p><span class="text-gray-400">Kelas</span> <span class="font-semibold text-gray-800">X TKJ</span></p>
+              <p><span class="text-gray-400">ID_SISWA</span> <span class="font-semibold text-gray-800">STD-000123</span></p>
+            </div>
+            <span class="inline-block mt-2 px-2.5 py-0.5 bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded-full">
+              Siswa Aktif
+            </span>
+          </div>
+        </div>
+
+        <!-- Card Status Absen (HADIR) -->
+        <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-3 text-center shadow-sm">
+          <div class="flex items-center justify-center space-x-1.5 text-emerald-600 font-extrabold text-xl">
+            <i class="fa-solid fa-circle-check"></i>
+            <span>HADIR</span>
+          </div>
+          <p class="text-xs font-semibold text-emerald-800 mt-0.5">Apel Pagi: HADIR</p>
+          <p class="text-xs text-emerald-700 mt-1 flex items-center justify-center space-x-1 font-medium">
+            <i class="fa-regular fa-clock"></i>
+            <span>07:08:21</span>
+          </p>
+        </div>
+
+        <!-- Card Pesan/Greeting -->
+        <div class="bg-blue-50 border border-blue-100 rounded-2xl p-3 flex items-start space-x-3 text-blue-800">
+          <div class="text-blue-500 text-lg mt-0.5"><i class="fa-solid fa-users"></i></div>
+          <div class="text-xs">
+            <p class="font-bold">Terima kasih</p>
+            <p class="text-blue-600 mt-0.5">Selamat mengikuti kegiatan belajar hari ini.</p>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="space-y-2 pt-1">
+          <button onclick="toggleView('scanner')" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl text-xs flex items-center justify-center space-x-2 shadow-md transition">
+            <i class="fa-solid fa-qrcode text-sm"></i>
+            <span>Scan Siswa Berikutnya</span>
+          </button>
+          
+          <button class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-2.5 rounded-xl text-xs flex items-center justify-center space-x-2 border border-slate-200 transition">
+            <i class="fa-solid fa-file-lines text-blue-600"></i>
+            <span>Lihat Riwayat Scan Hari Ini</span>
+          </button>
+        </div>
+
+        <!-- Banner Info Mode Offline Footer (Hasil Scan) -->
+        <div class="bg-white p-3 rounded-xl border border-gray-100 flex items-center justify-between text-xs text-gray-600 shadow-sm">
+          <div class="flex items-center space-x-2">
+            <i class="fa-solid fa-bolt text-green-500 font-bold"></i>
+            <div>
+              <p class="font-bold text-gray-800 text-[11px]">Mode Offline</p>
+              <p class="text-[10px] text-gray-400">Queue: 12</p>
+            </div>
+          </div>
+          <div class="flex items-center space-x-1.5 text-[10px] text-gray-500">
+            <i class="fa-solid fa-wifi text-blue-500"></i>
+            <span>Akan disinkronkan saat ada internet</span>
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+
+    <!-- ========================================================= -->
+    <!-- 3. BOTTOM NAVIGATION BAR -->
+    <!-- ========================================================= -->
+    <nav class="bg-white border-t border-gray-200 px-3 py-2 flex justify-between items-center text-center z-20">
+      
+      <button onclick="toggleView('scanner')" class="flex-1 text-blue-600 flex flex-col items-center">
+        <div class="w-8 h-8 rounded-xl bg-blue-50 flex items-center justify-center mb-0.5">
+          <i class="fa-solid fa-qrcode text-base"></i>
+        </div>
+        <span class="text-[10px] font-bold">Scanner</span>
+      </button>
+
+      <button class="flex-1 text-gray-400 hover:text-gray-600 flex flex-col items-center">
+        <div class="w-8 h-8 flex items-center justify-center mb-0.5">
+          <i class="fa-solid fa-user-group text-sm"></i>
+        </div>
+        <span class="text-[10px] font-medium">Data Siswa</span>
+      </button>
+
+      <button class="flex-1 text-gray-400 hover:text-gray-600 flex flex-col items-center">
+        <div class="w-8 h-8 flex items-center justify-center mb-0.5">
+          <i class="fa-solid fa-clipboard-user text-sm"></i>
+        </div>
+        <span class="text-[10px] font-medium">Absensi</span>
+      </button>
+
+      <button class="flex-1 text-gray-400 hover:text-gray-600 flex flex-col items-center">
+        <div class="w-8 h-8 flex items-center justify-center mb-0.5">
+          <i class="fa-solid fa-file-invoice text-sm"></i>
+        </div>
+        <span class="text-[10px] font-medium">Laporan</span>
+      </button>
+
+      <button class="flex-1 text-gray-400 hover:text-gray-600 flex flex-col items-center">
+        <div class="w-8 h-8 flex items-center justify-center mb-0.5">
+          <i class="fa-solid fa-bars text-sm"></i>
+        </div>
+        <span class="text-[10px] font-medium">Menu</span>
+      </button>
+
+    </nav>
+
+  </div>
+
+  <!-- SCRIPT SWITCH TOGGLE UNTUK MENAMPILKAN KEDUA TAMPILAN GAMBAR -->
+  <script>
+    function toggleView(viewName) {
+      const scannerView = document.getElementById('view-scanner');
+      const successView = document.getElementById('view-success');
+
+      if (viewName === 'success') {
+        scannerView.classList.add('hidden');
+        scannerView.classList.remove('flex');
+        
+        successView.classList.remove('hidden');
+        successView.classList.add('flex');
+      } else {
+        successView.classList.add('hidden');
+        successView.classList.remove('flex');
+
+        scannerView.classList.remove('hidden');
+        scannerView.classList.add('flex');
+      }
+    }
+  </script>
+
+</body>
+</html>
