@@ -8,48 +8,41 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- FontAwesome Icons CDN -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- HTML5 QR Code Scanner Library -->
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <style>
-    /* Styling khusus scrollbar & area viewfinder scanner */
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       background-color: #f1f5f9;
     }
-    .scanner-view {
-      background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('https://images.unsplash.com/photo-1577896851231-70ef18881754?q=80&w=600&auto=format&fit=crop') center/cover no-repeat;
-    }
-    .scanner-frame {
-      border: 3px solid #22c55e;
-      border-radius: 16px;
-      box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.4);
-    }
-    /* Hide scrollbar for clean app feel */
-    .no-scrollbar::-webkit-scrollbar {
-      display: none;
-    }
-    .no-scrollbar {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    
+    /* Custom style overlay agar kamera pas dengan kotak scanner */
+    #reader video {
+      object-fit: cover !important;
+      width: 100% !important;
+      height: 100% !important;
+      border-radius: 1rem;
     }
   </style>
 </head>
 <body class="flex justify-center items-center min-h-screen p-0 sm:p-4">
 
-  <!-- Container Simulasi Layar HP (Mobile Container) -->
+  <!-- Container Simulasi Layar HP -->
   <div class="w-full max-w-md h-[100vh] sm:h-[840px] bg-white flex flex-col justify-between shadow-2xl overflow-hidden sm:rounded-3xl relative border border-gray-200">
 
     <!-- 1. HEADER UTAMA -->
     <header class="bg-[#0b3c5d] text-white pt-2 pb-3 px-4 z-20 shadow-md">
-      <!-- Status Bar Waktu & Sinyal (Atas) -->
       <div class="flex justify-between items-center text-xs font-semibold pb-1 border-b border-blue-900/50 mb-2">
-        <span>07.08</span>
+        <span id="current-time-clock">07.08</span>
         <div class="flex items-center space-x-1.5 text-xs">
           <i class="fa-solid font-bold fa-signal"></i>
-          <i class="fa-solid fa-wifi"></i>
+          <i class="fa-solid fa-wifi" id="wifi-icon"></i>
           <i class="fa-solid fa-battery-full"></i>
         </div>
       </div>
 
-      <!-- App Header Bar -->
       <div class="flex items-center justify-between">
         <div class="flex items-center space-x-3">
           <button class="text-xl focus:outline-none"><i class="fa-solid fa-bars"></i></button>
@@ -60,8 +53,8 @@
         </div>
         <div class="text-right">
           <div class="flex items-center justify-end space-x-1">
-            <span class="w-2 h-2 rounded-full bg-green-400 inline-block"></span>
-            <span class="text-xs font-medium">Offline</span>
+            <span id="status-dot" class="w-2 h-2 rounded-full bg-green-400 inline-block"></span>
+            <span id="status-text" class="text-xs font-medium">Offline</span>
           </div>
           <p class="text-[10px] text-gray-300 mt-0.5">Petugas: Budi Santoso</p>
           <p class="text-[10px] text-gray-300">Piket Pagi</p>
@@ -71,41 +64,41 @@
 
 
     <!-- ========================================================= -->
-    <!-- VIEW 1: TAMPILAN KAMERA SCANNER (Default Active) -->
+    <!-- VIEW 1: TAMPILAN KAMERA SCANNER -->
     <!-- ========================================================= -->
     <main id="view-scanner" class="flex-1 flex flex-col justify-between relative bg-gray-900 overflow-hidden">
       
       <!-- Area Kamera Viewfinder -->
-      <div class="scanner-view flex-1 relative flex flex-col items-center justify-center p-6">
+      <div class="flex-1 relative flex flex-col items-center justify-center p-4 bg-black">
         
-        <!-- Viewfinder Box (Kotak Frame Green Corners) -->
-        <div class="relative w-64 h-64 flex items-center justify-center">
-          <!-- Corner Indicators -->
+        <!-- Element Kamera HTML5QRCode -->
+        <div id="reader" class="w-full h-full max-h-[420px] overflow-hidden rounded-2xl relative"></div>
+
+        <!-- Frame Overlay Scanner UI -->
+        <div class="absolute w-64 h-64 pointer-events-none flex items-center justify-center z-10">
           <div class="absolute -top-1 -left-1 w-8 h-8 border-t-4 border-l-4 border-green-400 rounded-tl-xl"></div>
           <div class="absolute -top-1 -right-1 w-8 h-8 border-t-4 border-r-4 border-green-400 rounded-tr-xl"></div>
           <div class="absolute -bottom-1 -left-1 w-8 h-8 border-b-4 border-l-4 border-green-400 rounded-bl-xl"></div>
           <div class="absolute -bottom-1 -right-1 w-8 h-8 border-b-4 border-r-4 border-green-400 rounded-br-xl"></div>
           
-          <!-- Tooltip Instruction Badge -->
-          <div class="absolute bottom-6 bg-black/70 text-white text-xs px-4 py-1.5 rounded-full backdrop-blur-sm shadow-md border border-white/10">
+          <div class="absolute bottom-4 bg-black/70 text-white text-xs px-4 py-1.5 rounded-full backdrop-blur-sm shadow-md border border-white/10">
             Arahkan QR ke dalam kotak
           </div>
         </div>
 
-        <!-- Tombol Kontrol Kamera (Floating Bottom Controls) -->
-        <div class="absolute bottom-4 left-4 right-4 flex items-center justify-between gap-2">
-          <button class="bg-black/60 hover:bg-black/80 text-white flex-1 py-2.5 rounded-xl text-xs font-medium flex flex-col items-center justify-center gap-1 backdrop-blur-md">
+        <!-- Tombol Kontrol Kamera -->
+        <div class="absolute bottom-4 left-4 right-4 flex items-center justify-between gap-2 z-20">
+          <button onclick="toggleTorch()" class="bg-black/60 hover:bg-black/80 text-white flex-1 py-2.5 rounded-xl text-xs font-medium flex flex-col items-center justify-center gap-1 backdrop-blur-md">
             <i class="fa-solid fa-flashlight text-sm"></i>
             <span>Senter</span>
           </button>
           
-          <!-- Tombol Simulasi Scan Berhasil (Klik untuk pindah layar) -->
-          <button onclick="toggleView('success')" class="bg-blue-600 hover:bg-blue-700 text-white flex-[2] py-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 shadow-lg">
+          <button id="btn-toggle-camera" onclick="toggleCameraState()" class="bg-blue-600 hover:bg-blue-700 text-white flex-[2] py-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 shadow-lg">
             <i class="fa-solid fa-video"></i>
-            <span>Matikan Kamera</span>
+            <span id="btn-camera-text">Matikan Kamera</span>
           </button>
 
-          <button class="bg-black/60 hover:bg-black/80 text-white flex-1 py-2.5 rounded-xl text-xs font-medium flex flex-col items-center justify-center gap-1 backdrop-blur-md">
+          <button onclick="promptManualInput()" class="bg-black/60 hover:bg-black/80 text-white flex-1 py-2.5 rounded-xl text-xs font-medium flex flex-col items-center justify-center gap-1 backdrop-blur-md">
             <i class="fa-solid fa-keyboard text-sm"></i>
             <span>Input Manual</span>
           </button>
@@ -113,7 +106,7 @@
       </div>
 
       <!-- Footer Info Mode Offline & Queue Bar -->
-      <div class="bg-white p-3 border-t border-gray-100 flex items-center justify-between shadow-sm">
+      <div class="bg-white p-3 border-t border-gray-100 flex items-center justify-between shadow-sm z-20">
         <div class="flex items-center space-x-3">
           <div class="w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center font-bold">
             <i class="fa-solid fa-bolt text-sm"></i>
@@ -123,27 +116,27 @@
             <p class="text-[10px] text-gray-500 leading-tight">Semua scan disimpan di HP, akan dikirim saat ada internet.</p>
           </div>
         </div>
-        <div class="text-right pl-2 border-l border-gray-200">
+        <div class="text-right pl-2 border-l border-gray-200 cursor-pointer" onclick="triggerManualSync()">
           <span class="text-[10px] text-gray-400 block font-medium">Queue</span>
-          <span class="text-sm font-extrabold text-gray-800">12</span>
+          <span id="queue-count" class="text-sm font-extrabold text-gray-800">0</span>
         </div>
       </div>
     </main>
 
 
     <!-- ========================================================= -->
-    <!-- VIEW 2: HASIL SCAN BERHASIL (Hidden by default) -->
+    <!-- VIEW 2: HASIL SCAN BERHASIL -->
     <!-- ========================================================= -->
     <main id="view-success" class="flex-1 flex-col overflow-y-auto no-scrollbar bg-slate-50 hidden">
       
-      <!-- Banner Scan Berhasil -->
-      <div class="bg-emerald-600 text-white p-4 flex items-center space-x-3 shadow-md">
-        <div class="w-10 h-10 rounded-full bg-white text-emerald-600 flex items-center justify-center text-xl font-bold shadow-sm">
+      <!-- Banner Scan Berhasil / Peringatan -->
+      <div id="success-banner" class="bg-emerald-600 text-white p-4 flex items-center space-x-3 shadow-md">
+        <div id="success-icon" class="w-10 h-10 rounded-full bg-white text-emerald-600 flex items-center justify-center text-xl font-bold shadow-sm">
           <i class="fa-solid fa-check"></i>
         </div>
         <div>
-          <h2 class="font-bold text-lg leading-snug">Scan Berhasil!</h2>
-          <p class="text-xs text-emerald-100">Siswa berhasil dicatat.</p>
+          <h2 id="success-title" class="font-bold text-lg leading-snug">Scan Berhasil!</h2>
+          <p id="success-subtitle" class="text-xs text-emerald-100">Siswa berhasil dicatat.</p>
         </div>
       </div>
 
@@ -154,28 +147,28 @@
             <i class="fa-solid fa-user text-white text-4xl"></i>
           </div>
           <div class="flex-1 min-w-0">
-            <h3 class="font-bold text-gray-900 text-base truncate">Ahmad Fauzan</h3>
+            <h3 id="res-nama" class="font-bold text-gray-900 text-base truncate">Ahmad Fauzan</h3>
             <div class="text-xs text-gray-600 space-y-0.5 mt-1">
-              <p><span class="text-gray-400">NISN</span> <span class="font-semibold text-gray-800">1234567890</span></p>
-              <p><span class="text-gray-400">Kelas</span> <span class="font-semibold text-gray-800">X TKJ</span></p>
-              <p><span class="text-gray-400">ID_SISWA</span> <span class="font-semibold text-gray-800">STD-000123</span></p>
+              <p><span class="text-gray-400">NISN</span> <span id="res-nisn" class="font-semibold text-gray-800">1234567890</span></p>
+              <p><span class="text-gray-400">Kelas</span> <span id="res-kelas" class="font-semibold text-gray-800">X TKJ</span></p>
+              <p><span class="text-gray-400">ID_SISWA</span> <span id="res-idsiswa" class="font-semibold text-gray-800">STD-000123</span></p>
             </div>
-            <span class="inline-block mt-2 px-2.5 py-0.5 bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded-full">
+            <span id="res-status-tag" class="inline-block mt-2 px-2.5 py-0.5 bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded-full">
               Siswa Aktif
             </span>
           </div>
         </div>
 
-        <!-- Card Status Absen (HADIR) -->
-        <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-3 text-center shadow-sm">
+        <!-- Card Status Absen -->
+        <div id="status-card-box" class="bg-emerald-50 border border-emerald-200 rounded-2xl p-3 text-center shadow-sm">
           <div class="flex items-center justify-center space-x-1.5 text-emerald-600 font-extrabold text-xl">
             <i class="fa-solid fa-circle-check"></i>
-            <span>HADIR</span>
+            <span id="res-presensi-status">HADIR</span>
           </div>
-          <p class="text-xs font-semibold text-emerald-800 mt-0.5">Apel Pagi: HADIR</p>
+          <p id="res-sesi-text" class="text-xs font-semibold text-emerald-800 mt-0.5">Apel Pagi: HADIR</p>
           <p class="text-xs text-emerald-700 mt-1 flex items-center justify-center space-x-1 font-medium">
             <i class="fa-regular fa-clock"></i>
-            <span>07:08:21</span>
+            <span id="res-jam-scan">07:08:21</span>
           </p>
         </div>
 
@@ -195,19 +188,19 @@
             <span>Scan Siswa Berikutnya</span>
           </button>
           
-          <button class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-2.5 rounded-xl text-xs flex items-center justify-center space-x-2 border border-slate-200 transition">
-            <i class="fa-solid fa-file-lines text-blue-600"></i>
-            <span>Lihat Riwayat Scan Hari Ini</span>
+          <button onclick="downloadMasterStudents()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-2.5 rounded-xl text-xs flex items-center justify-center space-x-2 border border-slate-200 transition">
+            <i class="fa-solid fa-rotate text-blue-600"></i>
+            <span>Update / Sync Data Master Siswa</span>
           </button>
         </div>
 
-        <!-- Banner Info Mode Offline Footer (Hasil Scan) -->
+        <!-- Banner Info Mode Offline Footer -->
         <div class="bg-white p-3 rounded-xl border border-gray-100 flex items-center justify-between text-xs text-gray-600 shadow-sm">
           <div class="flex items-center space-x-2">
             <i class="fa-solid fa-bolt text-green-500 font-bold"></i>
             <div>
               <p class="font-bold text-gray-800 text-[11px]">Mode Offline</p>
-              <p class="text-[10px] text-gray-400">Queue: 12</p>
+              <p class="text-[10px] text-gray-400">Queue: <span id="queue-count-success">0</span></p>
             </div>
           </div>
           <div class="flex items-center space-x-1.5 text-[10px] text-gray-500">
@@ -224,7 +217,6 @@
     <!-- 3. BOTTOM NAVIGATION BAR -->
     <!-- ========================================================= -->
     <nav class="bg-white border-t border-gray-200 px-3 py-2 flex justify-between items-center text-center z-20">
-      
       <button onclick="toggleView('scanner')" class="flex-1 text-blue-600 flex flex-col items-center">
         <div class="w-8 h-8 rounded-xl bg-blue-50 flex items-center justify-center mb-0.5">
           <i class="fa-solid fa-qrcode text-base"></i>
@@ -259,13 +251,271 @@
         </div>
         <span class="text-[10px] font-medium">Menu</span>
       </button>
-
     </nav>
 
   </div>
 
-  <!-- SCRIPT SWITCH TOGGLE UNTUK MENAMPILKAN KEDUA TAMPILAN GAMBAR -->
+  <!-- SCRIPT INTEGRASI LOGIKA SCANNER & INDEXEDDB OFFLINE-FIRST -->
   <script>
+    // =========================================================================
+    // KONFIGURASI APLIKASI
+    // =========================================================================
+    // TAMBAHKAN URL GAS WEB APP ANDA DI SINI
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxVGAsO-sG7E9bHsSxQ-M16EykkO6jc6QpLzDY7sWg9qEHIbpk9Re32IGgDn1qPOmJ_/exec"; 
+
+    let html5QrCode = null;
+    let isCameraActive = false;
+    let db = null;
+
+    // =========================================================================
+    // 1. INISIALISASI INDEXEDDB (OFFLINE-FIRST DATABASE HP)
+    // =========================================================================
+    function initDatabase() {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open("AbsensiQR_DB", 1);
+        
+        request.onupgradeneeded = (e) => {
+          const database = e.target.result;
+          if (!database.objectStoreNames.contains("students")) {
+            database.createObjectStore("students", { keyPath: "id_siswa" });
+          }
+          if (!database.objectStoreNames.contains("attendance_queue")) {
+            database.createObjectStore("attendance_queue", { keyPath: "queue_id" });
+          }
+        };
+
+        request.onsuccess = (e) => {
+          db = e.target.result;
+          updateQueueCountUI();
+          resolve(db);
+        };
+
+        request.onerror = (e) => reject("Gagal membuka database lokal: " + e.target.error);
+      });
+    }
+
+    // =========================================================================
+    // 2. KAMERA SCANNER LOGIC (HTML5-QRCode)
+    // =========================================================================
+    function initScanner() {
+      if (!html5QrCode) {
+        html5QrCode = new Html5Qrcode("reader");
+      }
+
+      const config = { fps: 15, qrbox: { width: 250, height: 250 } };
+
+      html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess)
+        .then(() => {
+          isCameraActive = true;
+          document.getElementById('btn-camera-text').innerText = "Matikan Kamera";
+        })
+        .catch((err) => {
+          console.warn("Kamera gagal diakses:", err);
+          document.getElementById('btn-camera-text').innerText = "Nyalakan Kamera";
+          isCameraActive = false;
+        });
+    }
+
+    function toggleCameraState() {
+      if (isCameraActive) {
+        html5QrCode.stop().then(() => {
+          isCameraActive = false;
+          document.getElementById('btn-camera-text').innerText = "Nyalakan Kamera";
+        });
+      } else {
+        initScanner();
+      }
+    }
+
+    function toggleTorch() {
+      if (isCameraActive) {
+        html5QrCode.applyVideoConstraints({
+          advanced: [{ torch: true }]
+        }).catch(() => alert("Senter tidak didukung pada perangkat ini"));
+      }
+    }
+
+    // =========================================================================
+    // 3. LOGIKA SCAN BERHASIL (OFFLINE PENCARIAN & PENCATATAN)
+    // =========================================================================
+    async function onScanSuccess(decodedText) {
+      // Hentikan scanner sementara agar tidak scan berulang kali
+      if (isCameraActive) {
+        await html5QrCode.stop();
+        isCameraActive = false;
+      }
+
+      // Mainkan suara beeper/getaran saat berhasil
+      if (navigator.vibrate) navigator.vibrate(200);
+
+      const qrCodeScanned = decodedText.trim();
+      processStudentAttendance(qrCodeScanned);
+    }
+
+    async function processStudentAttendance(qrCodeKey) {
+      // Cari siswa di IndexedDB Lokal HP
+      const student = await getStudentFromDB(qrCodeKey);
+
+      const now = new Date();
+      const dateStr = now.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+      const timeStr = now.toTimeString().split(' ')[0]; // Format: HH:MM:SS
+      const hour = now.getHours();
+      
+      // Tentukan sesi (Kurang dari jam 11:00 = PAGI, selebihnya = SIANG)
+      const sesi = hour < 11 ? "PAGI" : "SIANG";
+
+      if (student) {
+        // Buat record antrean absensi lokal
+        const attendanceRecord = {
+          queue_id: `${dateStr}_${student.id_siswa}_${sesi}`,
+          tanggal: dateStr,
+          jam: timeStr,
+          id_siswa: student.id_siswa,
+          nama: student.nama,
+          kelas: student.kelas,
+          sesi: sesi,
+          timestamp: Date.now()
+        };
+
+        // Simpan ke Queue lokal IndexedDB
+        await saveToAttendanceQueue(attendanceRecord);
+
+        // Update Tampilan Hasil Scan (Sukses)
+        showScanResultUI(student, timeStr, sesi, true);
+
+        // Pemicu otomatis kirim ke GAS jika terhubung internet
+        if (navigator.onLine) {
+          syncQueueToGAS();
+        }
+      } else {
+        // Siswa tidak ditemukan
+        showScanResultUI({
+          id_siswa: qrCodeKey,
+          nama: "Siswa Tidak Terdaftar",
+          nisn: "-",
+          kelas: "-"
+        }, timeStr, sesi, false);
+      }
+    }
+
+    // =========================================================================
+    // 4. DATABASE OPERATORS (INDEXEDDB READ/WRITE)
+    // =========================================================================
+    function getStudentFromDB(qrKey) {
+      return new Promise((resolve) => {
+        const tx = db.transaction("students", "readonly");
+        const store = tx.objectStore("students");
+        const request = store.get(qrKey);
+        request.onsuccess = () => resolve(request.result || null);
+        request.onerror = () => resolve(null);
+      });
+    }
+
+    function saveToAttendanceQueue(record) {
+      return new Promise((resolve) => {
+        const tx = db.transaction("attendance_queue", "readwrite");
+        const store = tx.objectStore("attendance_queue");
+        store.put(record);
+        tx.oncomplete = () => {
+          updateQueueCountUI();
+          resolve();
+        };
+      });
+    }
+
+    function getAllQueueFromDB() {
+      return new Promise((resolve) => {
+        const tx = db.transaction("attendance_queue", "readonly");
+        const store = tx.objectStore("attendance_queue");
+        const request = store.getAll();
+        request.onsuccess = () => resolve(request.result || []);
+      });
+    }
+
+    function clearQueueFromDB(queueIds) {
+      return new Promise((resolve) => {
+        const tx = db.transaction("attendance_queue", "readwrite");
+        const store = tx.objectStore("attendance_queue");
+        queueIds.forEach(id => store.delete(id));
+        tx.oncomplete = () => {
+          updateQueueCountUI();
+          resolve();
+        };
+      });
+    }
+
+    function updateQueueCountUI() {
+      getAllQueueFromDB().then(records => {
+        document.getElementById('queue-count').innerText = records.length;
+        document.getElementById('queue-count-success').innerText = records.length;
+      });
+    }
+
+    // =========================================================================
+    // 5. SINKRONISASI KE GOOGLE APPS SCRIPT (GAS)
+    // =========================================================================
+    async function syncQueueToGAS() {
+      if (!GAS_WEB_APP_URL || GAS_WEB_APP_URL.includes("AKfycbz_SESUSAI_DEPLOY_GAS_ANDA")) return;
+
+      const queueData = await getAllQueueFromDB();
+      if (queueData.length === 0) return;
+
+      try {
+        const response = await fetch(GAS_WEB_APP_URL, {
+          method: "POST",
+          mode: "cors",
+          headers: { "Content-Type": "text/plain" },
+          body: JSON.stringify({
+            action: "SYNC_ATTENDANCE_BATCH",
+            data: queueData
+          })
+        });
+
+        const result = await response.json();
+        if (result.success) {
+          const syncedIds = queueData.map(q => q.queue_id);
+          await clearQueueFromDB(syncedIds);
+          console.log("Sinkronisasi sukses:", syncedIds.length, "data terkirim.");
+        }
+      } catch (err) {
+        console.warn("Gagal terhubung ke GAS (Tetap tersimpan aman di HP):", err);
+      }
+    }
+
+    async function downloadMasterStudents() {
+      if (!navigator.onLine) {
+        alert("Koneksi internet diperlukan untuk mengunduh Data Master Siswa.");
+        return;
+      }
+
+      try {
+        const response = await fetch(`${GAS_WEB_APP_URL}?action=GET_ALL_STUDENTS`);
+        const result = await response.json();
+
+        if (result.success && result.students) {
+          const tx = db.transaction("students", "readwrite");
+          const store = tx.objectStore("students");
+          
+          result.students.forEach(std => {
+            store.put({
+              id_siswa: std.qr_key || std.id_siswa,
+              nisn: std.nisn,
+              nama: std.nama,
+              kelas: std.kelas,
+              status: std.status
+            });
+          });
+
+          tx.oncomplete = () => alert(`Berhasil memperbarui ${result.students.length} Data Siswa di HP ini!`);
+        }
+      } catch (err) {
+        alert("Gagal mengunduh data dari Google Sheets. Periksa URL deployment GAS.");
+      }
+    }
+
+    // =========================================================================
+    // 6. UI TOGGLE & HELPER FUNCTIONS
+    // =========================================================================
     function toggleView(viewName) {
       const scannerView = document.getElementById('view-scanner');
       const successView = document.getElementById('view-success');
@@ -273,17 +523,70 @@
       if (viewName === 'success') {
         scannerView.classList.add('hidden');
         scannerView.classList.remove('flex');
-        
         successView.classList.remove('hidden');
         successView.classList.add('flex');
       } else {
         successView.classList.add('hidden');
         successView.classList.remove('flex');
-
         scannerView.classList.remove('hidden');
         scannerView.classList.add('flex');
+        initScanner(); // Jalankan kamera kembali
       }
     }
+
+    function showScanResultUI(student, timeStr, sesi, isSuccess) {
+      document.getElementById('res-nama').innerText = student.nama;
+      document.getElementById('res-nisn').innerText = student.nisn || "-";
+      document.getElementById('res-kelas').innerText = student.kelas || "-";
+      document.getElementById('res-idsiswa').innerText = student.id_siswa;
+      document.getElementById('res-jam-scan').innerText = timeStr;
+      document.getElementById('res-sesi-text').innerText = `Apel ${sesi === 'PAGI' ? 'Pagi' : 'Siang'}: HADIR`;
+
+      const banner = document.getElementById('success-banner');
+      if (!isSuccess) {
+        banner.className = "bg-amber-600 text-white p-4 flex items-center space-x-3 shadow-md";
+        document.getElementById('success-title').innerText = "Data Tidak Ditemukan!";
+        document.getElementById('success-subtitle').innerText = "Siswa belum terdaftar di database HP.";
+      } else {
+        banner.className = "bg-emerald-600 text-white p-4 flex items-center space-x-3 shadow-md";
+        document.getElementById('success-title').innerText = "Scan Berhasil!";
+        document.getElementById('success-subtitle').innerText = "Siswa berhasil dicatat.";
+      }
+
+      toggleView('success');
+    }
+
+    function promptManualInput() {
+      const qrInput = prompt("Masukkan ID_SISWA atau Kode QR secara manual:");
+      if (qrInput) processStudentAttendance(qrInput.trim());
+    }
+
+    function triggerManualSync() {
+      if (navigator.onLine) {
+        syncQueueToGAS();
+      } else {
+        alert("Perangkat Anda sedang Offline. Hubungkan ke internet untuk mengirim data.");
+      }
+    }
+
+    // Update Jam & Network Monitor
+    setInterval(() => {
+      const now = new Date();
+      document.getElementById('current-time-clock').innerText = now.toTimeString().substring(0, 5);
+      
+      const isOnline = navigator.onLine;
+      document.getElementById('status-dot').className = `w-2 h-2 rounded-full ${isOnline ? 'bg-green-400' : 'bg-amber-400'} inline-block`;
+      document.getElementById('status-text').innerText = isOnline ? 'Online' : 'Offline';
+    }, 1000);
+
+    // Event listener jaringan internet
+    window.addEventListener('online', () => syncQueueToGAS());
+
+    // STARTUP
+    window.onload = async () => {
+      await initDatabase();
+      initScanner();
+    };
   </script>
 
 </body>
