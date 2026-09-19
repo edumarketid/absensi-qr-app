@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>QR First Offline - Absensi QR Code</title>
+  <title>Sistem Absensi Murid - QR First Offline</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- FontAwesome Icons CDN -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- HTML5 QR Code Scanner Library -->
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <!-- Chart.js CDN untuk Grafik Monitoring -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -46,8 +48,8 @@
         <div class="flex items-center space-x-3">
           <button onclick="toggleMenuModal()" class="text-xl focus:outline-none"><i class="fa-solid fa-bars"></i></button>
           <div class="min-w-0 flex-1">
-            <h1 class="font-bold text-base leading-tight">QR First Offline</h1>
-            <!-- NAMA SEKOLAH BISA DIUBAH DARI PENGATURAN -->
+            <!-- NAMA APLIKASI DIUBAH MENJADI SISTEM ABSENSI MURID -->
+            <h1 class="font-bold text-base leading-tight">Sistem Absensi Murid</h1>
             <p id="app-header-school-name" class="text-xs text-gray-300 truncate">SMK Negeri 1 Contoh</p>
           </div>
         </div>
@@ -64,7 +66,7 @@
 
 
     <!-- ========================================================= -->
-    <!-- VIEW 1: TAMPILAN KAMERA SCANNER (Default Active di Kiri) -->
+    <!-- VIEW 1: TAMPILAN KAMERA SCANNER -->
     <!-- ========================================================= -->
     <main id="view-scanner" class="flex-1 flex flex-col justify-between relative bg-gray-900 overflow-hidden">
       
@@ -82,9 +84,7 @@
           </div>
         </div>
 
-        <!-- CONTROL BUTTONS SCANNER -->
         <div class="absolute bottom-4 left-4 right-4 flex items-center justify-between gap-2 z-20">
-          <!-- FITUR MODUL SESI SCAN (MENGGANTIKAN SENTER) -->
           <button onclick="toggleScanSessionMode()" class="bg-black/60 hover:bg-black/80 text-white flex-1 py-2.5 rounded-xl text-xs font-medium flex flex-col items-center justify-center gap-1 backdrop-blur-md border border-white/10">
             <i id="session-icon" class="fa-solid fa-sun text-amber-400 text-sm"></i>
             <span id="session-mode-text">Mode Pagi</span>
@@ -124,7 +124,6 @@
     <!-- VIEW 2: HASIL SCAN BERHASIL -->
     <!-- ========================================================= -->
     <main id="view-success" class="flex-1 flex-col overflow-y-auto no-scrollbar bg-slate-50 hidden">
-      
       <div id="success-banner" class="bg-emerald-600 text-white p-4 flex items-center space-x-3 shadow-md">
         <div id="success-icon" class="w-10 h-10 rounded-full bg-white text-emerald-600 flex items-center justify-center text-xl font-bold shadow-sm">
           <i class="fa-solid fa-check"></i>
@@ -179,27 +178,12 @@
             <span>Scan Siswa Berikutnya</span>
           </button>
         </div>
-
-        <div class="bg-white p-3 rounded-xl border border-gray-100 flex items-center justify-between text-xs text-gray-600 shadow-sm">
-          <div class="flex items-center space-x-2">
-            <i class="fa-solid fa-bolt text-green-500 font-bold"></i>
-            <div>
-              <p class="font-bold text-gray-800 text-[11px]">Mode Offline</p>
-              <p class="text-[10px] text-gray-400">Queue: <span id="queue-count-success">0</span></p>
-            </div>
-          </div>
-          <div class="flex items-center space-x-1.5 text-[10px] text-gray-500">
-            <i class="fa-solid fa-wifi text-blue-500"></i>
-            <span>Akan disinkronkan saat ada internet</span>
-          </div>
-        </div>
-
       </div>
     </main>
 
 
     <!-- ========================================================= -->
-    <!-- VIEW 3: TAMPILAN DAFTAR DATA SISWA (HANYA MUNCUL STATUS AKTIF) -->
+    <!-- VIEW 3: TAMPILAN DAFTAR DATA SISWA (WITH FILTER KELAS) -->
     <!-- ========================================================= -->
     <main id="view-students" class="flex-1 flex-col overflow-y-auto no-scrollbar bg-slate-50 p-4 hidden">
       <div class="flex items-center justify-between mb-3">
@@ -213,13 +197,24 @@
         </button>
       </div>
 
-      <div class="relative mb-3">
-        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-gray-400 text-xs"></i>
-        <input type="text" id="search-student-input" onkeyup="filterStudentsList()" placeholder="Cari nama, NISN, atau kelas..." class="w-full pl-9 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-xs text-gray-800 focus:outline-none focus:border-blue-500 shadow-sm">
+      <!-- SEARCH INPUT & FILTER KELAS -->
+      <div class="space-y-2 mb-3">
+        <div class="relative">
+          <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-gray-400 text-xs"></i>
+          <input type="text" id="search-student-input" onkeyup="filterStudentsList()" placeholder="Cari nama, NISN..." class="w-full pl-9 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-xs text-gray-800 focus:outline-none focus:border-blue-500 shadow-sm">
+        </div>
+
+        <!-- DROPDOWN FILTER KELAS -->
+        <div class="flex items-center space-x-2">
+          <label class="text-xs font-medium text-gray-600 flex-shrink-0"><i class="fa-solid fa-filter text-blue-600"></i> Kelas:</label>
+          <select id="filter-class-select" onchange="filterStudentsList()" class="flex-1 py-2 px-3 bg-white border border-gray-200 rounded-xl text-xs font-semibold text-gray-700 focus:outline-none focus:border-blue-500 shadow-sm">
+            <option value="ALL">Semua Kelas</option>
+          </select>
+        </div>
       </div>
 
       <div class="flex justify-between items-center text-xs text-gray-500 font-medium mb-2 px-1">
-        <span>Siswa Aktif Terdaftar:</span>
+        <span>Siswa Terdaftar:</span>
         <span id="student-count-badge" class="font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-md">0 Siswa</span>
       </div>
 
@@ -228,7 +223,74 @@
 
 
     <!-- ========================================================= -->
-    <!-- VIEW 4: TAMPILAN PENGATURAN (INPUT IDENTITAS SEKOLAH) -->
+    <!-- VIEW 4: MONITORING PRESENSI HARI BERJALAN & GRAFIK (BARU) -->
+    <!-- ========================================================= -->
+    <main id="view-monitoring" class="flex-1 flex-col overflow-y-auto no-scrollbar bg-slate-50 p-4 hidden">
+      <div class="flex items-center justify-between mb-3">
+        <div>
+          <h2 class="font-bold text-lg text-gray-900">Monitoring Absensi</h2>
+          <p class="text-xs text-gray-500">Statistik Realtime Hari Berjalan</p>
+        </div>
+        <select id="monitoring-class-filter" onchange="updateMonitoringDashboard()" class="py-1.5 px-3 bg-white border border-gray-200 rounded-xl text-xs font-bold text-blue-900 shadow-sm focus:outline-none">
+          <option value="ALL">Semua Kelas</option>
+        </select>
+      </div>
+
+      <!-- GRAFIK CHART.JS -->
+      <div class="bg-white p-3.5 rounded-2xl border border-gray-100 shadow-sm mb-3 text-center">
+        <h4 class="text-xs font-bold text-gray-700 mb-2">Persentase Presensi Hari Ini</h4>
+        <div class="w-48 h-48 mx-auto relative">
+          <canvas id="attendancePieChart"></canvas>
+        </div>
+      </div>
+
+      <!-- KARTU STATISTIK MATRIKS PRESENSI -->
+      <div class="grid grid-cols-3 gap-2 mb-4">
+        <div class="bg-emerald-50 border border-emerald-100 p-2.5 rounded-xl text-center">
+          <span class="block text-[10px] text-emerald-600 font-bold">Hadir</span>
+          <span id="stat-hadir" class="text-base font-extrabold text-emerald-800">0</span>
+        </div>
+
+        <div class="bg-amber-50 border border-amber-100 p-2.5 rounded-xl text-center">
+          <span class="block text-[10px] text-amber-600 font-bold">Alpa (Belum)</span>
+          <span id="stat-alpa" class="text-base font-extrabold text-amber-800">0</span>
+        </div>
+
+        <div class="bg-blue-50 border border-blue-100 p-2.5 rounded-xl text-center">
+          <span class="block text-[10px] text-blue-600 font-bold">Sakit</span>
+          <span id="stat-sakit" class="text-base font-extrabold text-blue-800">0</span>
+        </div>
+
+        <div class="bg-indigo-50 border border-indigo-100 p-2.5 rounded-xl text-center">
+          <span class="block text-[10px] text-indigo-600 font-bold">Izin</span>
+          <span id="stat-izin" class="text-base font-extrabold text-indigo-800">0</span>
+        </div>
+
+        <div class="bg-purple-50 border border-purple-100 p-2.5 rounded-xl text-center">
+          <span class="block text-[10px] text-purple-600 font-bold">Kegiatan</span>
+          <span id="stat-kegiatan" class="text-base font-extrabold text-purple-800">0</span>
+        </div>
+
+        <div class="bg-rose-50 border border-rose-100 p-2.5 rounded-xl text-center">
+          <span class="block text-[10px] text-rose-600 font-bold">Bolos</span>
+          <span id="stat-bolos" class="text-base font-extrabold text-rose-800">0</span>
+        </div>
+      </div>
+
+      <!-- DAFTAR SISWA BELUM ABSEN (ALPA) -->
+      <div class="space-y-2">
+        <h3 class="font-bold text-xs text-gray-800 flex items-center justify-between">
+          <span>Siswa Belum Scan Hari Ini</span>
+          <span id="unscanned-count-badge" class="text-[10px] bg-rose-100 text-rose-700 px-2 py-0.5 rounded-md font-bold">0 Murid</span>
+        </h3>
+
+        <div id="unscanned-students-container" class="space-y-2 pb-4"></div>
+      </div>
+    </main>
+
+
+    <!-- ========================================================= -->
+    <!-- VIEW 5: TAMPILAN PENGATURAN -->
     <!-- ========================================================= -->
     <main id="view-settings" class="flex-1 flex-col overflow-y-auto no-scrollbar bg-slate-50 p-4 hidden">
       <div class="mb-4">
@@ -236,7 +298,6 @@
         <p class="text-xs text-gray-500">Konfigurasi identitas sekolah & database lokal</p>
       </div>
 
-      <!-- FORM IDENTITAS SEKOLAH DINAMIS -->
       <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3 mb-3">
         <h3 class="font-bold text-xs text-blue-900 border-b border-gray-100 pb-2 flex items-center gap-2">
           <i class="fa-solid fa-school text-blue-600"></i>
@@ -264,7 +325,6 @@
         </button>
       </div>
 
-      <!-- STATUS BACKEND GAS -->
       <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3 mb-3">
         <div class="flex items-center justify-between">
           <div class="flex items-center space-x-2 text-blue-900 font-bold text-xs">
@@ -279,7 +339,6 @@
         </div>
       </div>
 
-      <!-- AKSI DATABASE LOKAL -->
       <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3">
         <h3 class="font-bold text-xs text-gray-800">Aksi Database Lokal HP</h3>
 
@@ -296,9 +355,7 @@
     </main>
 
 
-    <!-- ========================================================= -->
-    <!-- MODAL MENU POP-UP (AKSES UJUNG KANAN BOTTOM BAR) -->
-    <!-- ========================================================= -->
+    <!-- MODAL MENU POP-UP -->
     <div id="menu-modal" class="absolute inset-0 bg-black/60 backdrop-blur-sm z-50 flex flex-col justify-end hidden">
       <div class="bg-white rounded-t-3xl p-5 space-y-4 shadow-2xl">
         <div class="flex items-center justify-between border-b border-gray-100 pb-3">
@@ -341,42 +398,45 @@
 
 
     <!-- ========================================================= -->
-    <!-- BOTTOM NAVIGATION (SCANNER TETAP DI KIRI POJOK) -->
+    <!-- BOTTOM NAVIGATION (SCANNER DI TENAH) -->
     <!-- ========================================================= -->
-    <nav class="bg-white border-t border-gray-200 px-3 py-2 flex justify-between items-center text-center z-20">
+    <nav class="bg-white border-t border-gray-200 px-3 py-1.5 flex justify-between items-center text-center z-20">
       
-      <!-- SCANNER TETAP DI POJOK KIRI -->
-      <button id="nav-scanner" onclick="toggleView('scanner')" class="flex-1 text-blue-600 flex flex-col items-center">
-        <div class="w-8 h-8 rounded-xl bg-blue-50 flex items-center justify-center mb-0.5">
-          <i class="fa-solid fa-qrcode text-base"></i>
-        </div>
-        <span class="text-[10px] font-bold">Scanner</span>
-      </button>
-
+      <!-- MENU DATA SISWA (KIRI PERTAMA) -->
       <button id="nav-students" onclick="toggleView('students')" class="flex-1 text-gray-400 hover:text-gray-600 flex flex-col items-center">
-        <div class="w-8 h-8 flex items-center justify-center mb-0.5">
+        <div class="w-7 h-7 flex items-center justify-center mb-0.5">
           <i class="fa-solid fa-user-group text-sm"></i>
         </div>
         <span class="text-[10px] font-medium">Data Siswa</span>
       </button>
 
-      <button class="flex-1 text-gray-400 hover:text-gray-600 flex flex-col items-center">
-        <div class="w-8 h-8 flex items-center justify-center mb-0.5">
-          <i class="fa-solid fa-clipboard-user text-sm"></i>
+      <!-- MENU MONITORING (KIRI KEDUA - DULU ABSENSI) -->
+      <button id="nav-monitoring" onclick="toggleView('monitoring')" class="flex-1 text-gray-400 hover:text-gray-600 flex flex-col items-center">
+        <div class="w-7 h-7 flex items-center justify-center mb-0.5">
+          <i class="fa-solid fa-chart-pie text-sm"></i>
         </div>
-        <span class="text-[10px] font-medium">Absensi</span>
+        <span class="text-[10px] font-medium">Monitoring</span>
       </button>
 
+      <!-- MENU SCANNER DIPINDAHKAN KE TENGAH -->
+      <button id="nav-scanner" onclick="toggleView('scanner')" class="flex-1 text-blue-600 flex flex-col items-center -mt-4">
+        <div class="w-12 h-12 rounded-full bg-blue-600 text-white shadow-lg flex items-center justify-center border-4 border-white">
+          <i class="fa-solid fa-qrcode text-lg"></i>
+        </div>
+        <span class="text-[10px] font-bold mt-0.5">Scanner</span>
+      </button>
+
+      <!-- MENU LAPORAN -->
       <button class="flex-1 text-gray-400 hover:text-gray-600 flex flex-col items-center">
-        <div class="w-8 h-8 flex items-center justify-center mb-0.5">
+        <div class="w-7 h-7 flex items-center justify-center mb-0.5">
           <i class="fa-solid fa-file-invoice text-sm"></i>
         </div>
         <span class="text-[10px] font-medium">Laporan</span>
       </button>
 
-      <!-- MENU DI POJOK KANAN UNTUK BUKA MODAL POPUP -->
+      <!-- MENU DROP POPUP (KANAN UJUNG) -->
       <button onclick="toggleMenuModal()" class="flex-1 text-gray-400 hover:text-gray-600 flex flex-col items-center">
-        <div class="w-8 h-8 flex items-center justify-center mb-0.5">
+        <div class="w-7 h-7 flex items-center justify-center mb-0.5">
           <i class="fa-solid fa-bars text-sm"></i>
         </div>
         <span class="text-[10px] font-medium">Menu</span>
@@ -387,14 +447,14 @@
   </div>
 
   <script>
-    // URL GOOGLE APPS SCRIPT PERMANEN
     const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxVGAsO-sG7E9bHsSxQ-M16EykkO6jc6QpLzDY7sWg9qEHIbpk9Re32IGgDn1qPOmJ_/exec"; 
 
     let html5QrCode = null;
     let isCameraActive = false;
     let db = null;
     let cachedStudents = [];
-    let currentScanSession = "PAGI"; // Sesi default 'PAGI' atau 'SIANG'
+    let currentScanSession = "PAGI";
+    let myPieChart = null; // Chart Instance
 
     // 1. INITIALIZE DATABASE
     function initDatabase() {
@@ -421,7 +481,7 @@
       });
     }
 
-    // 2. MANAJEMEN PENGATURAN IDENTITAS SEKOLAH (LOCAL STORAGE)
+    // 2. SCHOOL SETTINGS MANAGEMENT
     function loadSchoolSettings() {
       const schoolName = localStorage.getItem("SCHOOL_NAME") || "SMK Negeri 1 Contoh";
       const principalName = localStorage.getItem("PRINCIPAL_NAME") || "";
@@ -451,7 +511,7 @@
       alert("Pengaturan Identitas Sekolah berhasil disimpan!");
     }
 
-    // 3. FITUR PENGATURAN MODE SESI SCAN (PAGI / SIANG)
+    // 3. SCAN SESSION MODE
     function toggleScanSessionMode() {
       if (currentScanSession === "PAGI") {
         currentScanSession = "SIANG";
@@ -464,7 +524,7 @@
       }
     }
 
-    // 4. AUTO DOWNLOAD MASTER SISWA DARI GOOGLE SHEETS (HANYA AKTIF)
+    // 4. AUTO DOWNLOAD MASTER SISWA DARI SHEET
     async function autoDownloadMasterStudents() {
       if (!navigator.onLine) {
         document.getElementById('sync-info-text').innerText = "Mode Offline - Menggunakan data HP.";
@@ -481,8 +541,7 @@
           const tx = db.transaction("students", "readwrite");
           const store = tx.objectStore("students");
           
-          // Bersihkan data lama agar siswa yang diubah 'Tidak Aktif' terhapus dari lokal
-          store.clear();
+          store.clear(); // Hapus data lokal lama
 
           result.students.forEach(std => {
             store.put({
@@ -495,8 +554,9 @@
           });
 
           tx.oncomplete = () => {
-            document.getElementById('sync-info-text').innerText = `Terhubung! ${result.students.length} Siswa Aktif Siap.`;
+            document.getElementById('sync-info-text').innerText = `Terhubung! ${result.students.length} Siswa Aktif.`;
             loadStudentsView();
+            populateClassDropdowns();
           };
         }
       } catch (err) {
@@ -544,14 +604,12 @@
       processStudentAttendance(decodedText.trim());
     }
 
-    async function processStudentAttendance(qrCodeKey) {
+    async function processStudentAttendance(qrCodeKey, manualStatus = "HADIR") {
       const student = await getStudentFromDB(qrCodeKey);
 
       const now = new Date();
       const dateStr = now.toISOString().split('T')[0];
       const timeStr = now.toTimeString().split(' ')[0];
-      
-      // Sesi ditentukan oleh pilihan toggle/tombol pengguna
       const sesi = currentScanSession;
 
       if (student) {
@@ -563,6 +621,7 @@
           nama: student.nama,
           kelas: student.kelas,
           sesi: sesi,
+          status_presensi: manualStatus,
           timestamp: Date.now()
         };
 
@@ -580,7 +639,18 @@
       }
     }
 
-    // 7. READ & RENDER DAFTAR SISWA AKTIF
+    // 7. POPULATE CLASS DROPDOWNS
+    function populateClassDropdowns() {
+      const classes = [...new Set(cachedStudents.map(s => s.kelas))].filter(Boolean).sort();
+      
+      const filterSelect = document.getElementById('filter-class-select');
+      const monitoringSelect = document.getElementById('monitoring-class-filter');
+
+      filterSelect.innerHTML = '<option value="ALL">Semua Kelas</option>' + classes.map(c => `<option value="${c}">${c}</option>`).join('');
+      monitoringSelect.innerHTML = '<option value="ALL">Semua Kelas</option>' + classes.map(c => `<option value="${c}">${c}</option>`).join('');
+    }
+
+    // 8. DATA SISWA & FILTER KELAS
     function getAllStudentsFromDB() {
       return new Promise((resolve) => {
         const tx = db.transaction("students", "readonly");
@@ -593,7 +663,24 @@
 
     async function loadStudentsView() {
       cachedStudents = await getAllStudentsFromDB();
-      renderStudentsList(cachedStudents);
+      populateClassDropdowns();
+      filterStudentsList();
+    }
+
+    function filterStudentsList() {
+      const keyword = document.getElementById('search-student-input').value.toLowerCase();
+      const selectedClass = document.getElementById('filter-class-select').value;
+
+      const filtered = cachedStudents.filter(std => {
+        const matchKeyword = std.nama.toLowerCase().includes(keyword) || 
+                             std.id_siswa.toLowerCase().includes(keyword) || 
+                             (std.nisn && std.nisn.toString().includes(keyword));
+        const matchClass = (selectedClass === "ALL") || (std.kelas === selectedClass);
+
+        return matchKeyword && matchClass;
+      });
+
+      renderStudentsList(filtered);
     }
 
     function renderStudentsList(students) {
@@ -602,10 +689,9 @@
 
       if (students.length === 0) {
         container.innerHTML = `
-          <div class="text-center py-10 bg-white rounded-2xl border border-gray-100 p-4">
-            <i class="fa-solid fa-user-slash text-gray-300 text-3xl mb-2"></i>
-            <p class="text-xs font-semibold text-gray-600">Belum ada data siswa aktif di HP</p>
-            <p class="text-[10px] text-gray-400 mt-1">Pastikan Sheet 'Data_Siswa' memuat data siswa berstatus Aktif.</p>
+          <div class="text-center py-8 bg-white rounded-2xl border border-gray-100 p-4">
+            <i class="fa-solid fa-user-slash text-gray-300 text-2xl mb-1"></i>
+            <p class="text-xs font-semibold text-gray-600">Tidak ada siswa ditemukan</p>
           </div>
         `;
         return;
@@ -629,18 +715,110 @@
       `).join('');
     }
 
-    function filterStudentsList() {
-      const keyword = document.getElementById('search-student-input').value.toLowerCase();
-      const filtered = cachedStudents.filter(std => 
-        std.nama.toLowerCase().includes(keyword) || 
-        std.id_siswa.toLowerCase().includes(keyword) || 
-        (std.kelas && std.kelas.toLowerCase().includes(keyword)) ||
-        (std.nisn && std.nisn.toString().includes(keyword))
-      );
-      renderStudentsList(filtered);
+    // 9. DASHBOARD MONITORING & GRAFIK (REALTIME HARI BERJALAN)
+    async function updateMonitoringDashboard() {
+      const selectedClass = document.getElementById('monitoring-class-filter').value;
+      const todayStr = new Date().toISOString().split('T')[0];
+
+      // Ambil antrean hari ini
+      const queueRecords = await getAllQueueFromDB();
+      const todayRecords = queueRecords.filter(r => r.tanggal === todayStr);
+
+      // Filter siswa berdasarkan kelas
+      const classStudents = selectedClass === "ALL" ? cachedStudents : cachedStudents.filter(s => s.kelas === selectedClass);
+
+      // Mapping status
+      const scannedIds = todayRecords.map(r => r.id_siswa);
+      
+      let countHadir = 0, countSakit = 0, countIzin = 0, countKegiatan = 0, countBolos = 0;
+
+      todayRecords.forEach(r => {
+        if (classStudents.some(s => s.id_siswa === r.id_siswa)) {
+          const st = r.status_presensi || "HADIR";
+          if (st === "HADIR") countHadir++;
+          else if (st === "SAKIT") countSakit++;
+          else if (st === "IZIN") countIzin++;
+          else if (st === "KEGIATAN") countKegiatan++;
+          else if (st === "BOLOS") countBolos++;
+        }
+      });
+
+      const unscannedStudents = classStudents.filter(s => !scannedIds.includes(s.id_siswa));
+      const countAlpa = unscannedStudents.length;
+
+      // Update Card Stats
+      document.getElementById('stat-hadir').innerText = countHadir;
+      document.getElementById('stat-alpa').innerText = countAlpa;
+      document.getElementById('stat-sakit').innerText = countSakit;
+      document.getElementById('stat-izin').innerText = countIzin;
+      document.getElementById('stat-kegiatan').innerText = countKegiatan;
+      document.getElementById('stat-bolos').innerText = countBolos;
+
+      document.getElementById('unscanned-count-badge').innerText = `${countAlpa} Murid`;
+
+      // Render Grafik Pie
+      renderPieChart(countHadir, countAlpa, countSakit, countIzin, countKegiatan, countBolos);
+
+      // Render List Siswa Belum Scan
+      renderUnscannedStudentsList(unscannedStudents);
     }
 
-    // 8. HELPER DATABASE & QUEUE
+    function renderPieChart(hadir, alpa, sakit, izin, kegiatan, bolos) {
+      const ctx = document.getElementById('attendancePieChart').getContext('2d');
+      if (myPieChart) myPieChart.destroy();
+
+      myPieChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Hadir', 'Belum (Alpa)', 'Sakit', 'Izin', 'Kegiatan', 'Bolos'],
+          datasets: [{
+            data: [hadir, alpa, sakit, izin, kegiatan, bolos],
+            backgroundColor: ['#10b981', '#f59e0b', '#3b82f6', '#6366f1', '#a855f7', '#f43f5e']
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } }
+        }
+      });
+    }
+
+    function renderUnscannedStudentsList(unscanned) {
+      const container = document.getElementById('unscanned-students-container');
+
+      if (unscanned.length === 0) {
+        container.innerHTML = `
+          <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl text-center text-emerald-800 text-xs font-bold">
+            <i class="fa-solid fa-circle-check text-emerald-600 text-lg mb-1 block"></i>
+            Luar Biasa! Semua siswa kelas ini sudah melakukan presensi.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = unscanned.map(std => `
+        <div class="bg-white p-3 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
+          <div class="truncate min-w-0 pr-2">
+            <h4 class="font-bold text-xs text-gray-900 truncate">${std.nama}</h4>
+            <p class="text-[10px] text-gray-500">${std.kelas} | ID: ${std.id_siswa}</p>
+          </div>
+          <div class="flex items-center space-x-1">
+            <button onclick="setManualStudentStatus('${std.id_siswa}', 'SAKIT')" class="px-2 py-1 bg-blue-50 text-blue-600 font-bold text-[9px] rounded-lg border border-blue-200">Sakit</button>
+            <button onclick="setManualStudentStatus('${std.id_siswa}', 'IZIN')" class="px-2 py-1 bg-indigo-50 text-indigo-600 font-bold text-[9px] rounded-lg border border-indigo-200">Izin</button>
+            <button onclick="setManualStudentStatus('${std.id_siswa}', 'KEGIATAN')" class="px-2 py-1 bg-purple-50 text-purple-600 font-bold text-[9px] rounded-lg border border-purple-200">Keg.</button>
+            <button onclick="setManualStudentStatus('${std.id_siswa}', 'BOLOS')" class="px-2 py-1 bg-rose-50 text-rose-600 font-bold text-[9px] rounded-lg border border-rose-200">Bolos</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function setManualStudentStatus(idSiswa, status) {
+      await processStudentAttendance(idSiswa, status);
+      updateMonitoringDashboard();
+    }
+
+    // 10. HELPER DATABASE & QUEUE
     function getStudentFromDB(qrKey) {
       return new Promise((resolve) => {
         const tx = db.transaction("students", "readonly");
@@ -703,7 +881,7 @@
       });
     }
 
-    // 9. AUTO SYNC ANTREAN KE GOOGLE SHEETS
+    // 11. AUTO SYNC ANTREAN KE GOOGLE SHEETS
     async function syncQueueToGAS() {
       const queueData = await getAllQueueFromDB();
       if (queueData.length === 0) return;
@@ -729,48 +907,55 @@
       }
     }
 
-    // 10. NAVIGATION TOGGLE
+    // 12. NAVIGATION TOGGLE
     function toggleView(viewName) {
       const scannerView = document.getElementById('view-scanner');
       const successView = document.getElementById('view-success');
       const studentsView = document.getElementById('view-students');
+      const monitoringView = document.getElementById('view-monitoring');
       const settingsView = document.getElementById('view-settings');
 
       const navScanner = document.getElementById('nav-scanner');
       const navStudents = document.getElementById('nav-students');
+      const navMonitoring = document.getElementById('nav-monitoring');
 
-      navScanner.className = "flex-1 text-gray-400 hover:text-gray-600 flex flex-col items-center";
+      navScanner.className = "flex-1 text-gray-400 hover:text-gray-600 flex flex-col items-center -mt-4";
+      navScanner.children[0].className = "w-12 h-12 rounded-full bg-slate-500 text-white shadow-md flex items-center justify-center border-4 border-white";
+
       navStudents.className = "flex-1 text-gray-400 hover:text-gray-600 flex flex-col items-center";
+      navMonitoring.className = "flex-1 text-gray-400 hover:text-gray-600 flex flex-col items-center";
 
       scannerView.classList.add('hidden'); scannerView.classList.remove('flex');
       successView.classList.add('hidden'); successView.classList.remove('flex');
       studentsView.classList.add('hidden'); studentsView.classList.remove('flex');
+      monitoringView.classList.add('hidden'); monitoringView.classList.remove('flex');
       settingsView.classList.add('hidden'); settingsView.classList.remove('flex');
 
       if (viewName === 'students') {
-        studentsView.classList.remove('hidden');
-        studentsView.classList.add('flex');
+        studentsView.classList.remove('hidden'); studentsView.classList.add('flex');
         navStudents.className = "flex-1 text-blue-600 flex flex-col items-center";
         loadStudentsView();
         stopCameraIfActive();
+      } else if (viewName === 'monitoring') {
+        monitoringView.classList.remove('hidden'); monitoringView.classList.add('flex');
+        navMonitoring.className = "flex-1 text-blue-600 flex flex-col items-center";
+        updateMonitoringDashboard();
+        stopCameraIfActive();
       } else if (viewName === 'settings') {
-        settingsView.classList.remove('hidden');
-        settingsView.classList.add('flex');
+        settingsView.classList.remove('hidden'); settingsView.classList.add('flex');
         stopCameraIfActive();
       } else if (viewName === 'success') {
-        successView.classList.remove('hidden');
-        successView.classList.add('flex');
+        successView.classList.remove('hidden'); successView.classList.add('flex');
       } else {
-        scannerView.classList.remove('hidden');
-        scannerView.classList.add('flex');
-        navScanner.className = "flex-1 text-blue-600 flex flex-col items-center";
+        scannerView.classList.remove('hidden'); scannerView.classList.add('flex');
+        navScanner.className = "flex-1 text-blue-600 flex flex-col items-center -mt-4";
+        navScanner.children[0].className = "w-12 h-12 rounded-full bg-blue-600 text-white shadow-lg flex items-center justify-center border-4 border-white";
         initScanner();
       }
     }
 
     function toggleMenuModal() {
-      const modal = document.getElementById('menu-modal');
-      modal.classList.toggle('hidden');
+      document.getElementById('menu-modal').classList.toggle('hidden');
     }
 
     function stopCameraIfActive() {
