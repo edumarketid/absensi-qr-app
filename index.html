@@ -293,32 +293,46 @@
       <div class="flex items-center justify-between mb-3">
         <div>
           <h2 class="font-bold text-lg text-gray-900">Monitoring Absensi</h2>
-          <p class="text-xs text-gray-500">Statistik Realtime Hari Berjalan</p>
+          <p class="text-xs text-gray-500">Statistik Realtime Absensi Per Tanggal</p>
         </div>
       </div>
 
-      <div class="grid grid-cols-2 gap-2 mb-3">
+      <!-- FILTER TANGGAL, KELAS & SESI -->
+      <div class="bg-white p-3 rounded-2xl border border-gray-200 shadow-sm space-y-2 mb-3">
         <div>
-          <label class="block text-[10px] font-bold text-gray-600 mb-1"><i class="fa-solid fa-filter text-blue-600"></i> Filter Kelas</label>
-          <select id="monitoring-class-filter" onchange="updateMonitoringDashboard()" class="w-full py-1.5 px-2 bg-white border border-gray-200 rounded-xl text-xs font-bold text-blue-900 shadow-sm focus:outline-none">
-            <option value="ALL">Semua Kelas</option>
-          </select>
+          <label class="block text-[10px] font-bold text-gray-600 mb-1"><i class="fa-solid fa-calendar-day text-blue-600"></i> Pilih Tanggal Monitoring</label>
+          <input type="date" id="monitoring-date-filter" onchange="updateMonitoringDashboard()" class="w-full py-1.5 px-2 bg-slate-50 border border-gray-200 rounded-xl text-xs font-bold text-blue-900 shadow-xs focus:outline-none">
         </div>
 
-        <div>
-          <label class="block text-[10px] font-bold text-gray-600 mb-1"><i class="fa-solid fa-clock text-amber-600"></i> Filter Sesi</label>
-          <select id="monitoring-session-filter" onchange="updateMonitoringDashboard()" class="w-full py-1.5 px-2 bg-white border border-gray-200 rounded-xl text-xs font-bold text-blue-900 shadow-sm focus:outline-none">
-            <option value="ALL">Semua Sesi</option>
-            <option value="PAGI">Sesi Pagi</option>
-            <option value="SIANG">Sesi Siang</option>
-          </select>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[10px] font-bold text-gray-600 mb-1"><i class="fa-solid fa-filter text-blue-600"></i> Filter Kelas</label>
+            <select id="monitoring-class-filter" onchange="updateMonitoringDashboard()" class="w-full py-1.5 px-2 bg-slate-50 border border-gray-200 rounded-xl text-xs font-bold text-blue-900 shadow-xs focus:outline-none">
+              <option value="ALL">Semua Kelas</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-[10px] font-bold text-gray-600 mb-1"><i class="fa-solid fa-clock text-amber-600"></i> Filter Sesi</label>
+            <select id="monitoring-session-filter" onchange="updateMonitoringDashboard()" class="w-full py-1.5 px-2 bg-slate-50 border border-gray-200 rounded-xl text-xs font-bold text-blue-900 shadow-xs focus:outline-none">
+              <option value="ALL">Semua Sesi</option>
+              <option value="PAGI">Sesi Pagi</option>
+              <option value="SIANG">Sesi Siang</option>
+            </select>
+          </div>
         </div>
       </div>
 
+      <!-- GRAFIK PERSENTASE DENGAN ANGKA TEPAT DI TENGAH -->
       <div class="bg-white p-3.5 rounded-2xl border border-gray-100 shadow-sm mb-3 text-center">
-        <h4 class="text-xs font-bold text-gray-700 mb-2">Persentase Presensi Hari Ini</h4>
-        <div class="w-48 h-48 mx-auto relative">
+        <h4 class="text-xs font-bold text-gray-700 mb-2">Persentase Kehadiran</h4>
+        <div class="w-48 h-48 mx-auto relative flex items-center justify-center">
           <canvas id="attendancePieChart"></canvas>
+          <!-- ELEMEN ANGKA PERSENTASE TENGAH LINGKARAN -->
+          <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+            <span id="chart-center-percent" class="text-2xl font-black text-emerald-600 leading-none">0%</span>
+            <span class="text-[9px] font-bold text-gray-400 mt-0.5">Tingkat Hadir</span>
+          </div>
         </div>
       </div>
 
@@ -925,7 +939,6 @@
     let kopSuratSrc = localStorage.getItem("KOP_SURAT") || "";
     let currentReportType = "HARIAN";
 
-    // MINGGU DITAMBAHKAN KEDALAM CONFIGURE HARI (UNTUK EKSTRAKURIKULER)
     const DAYS_LIST = [
       { key: "sun", label: "Minggu (Ekstrakurikuler)" },
       { key: "mon", label: "Senin" },
@@ -977,6 +990,7 @@
       document.getElementById("rep-date-start").value = todayStr;
       document.getElementById("rep-date-end").value = todayStr;
       document.getElementById("input-libur-tanggal").value = todayStr;
+      document.getElementById("monitoring-date-filter").value = todayStr;
 
       if (kopSuratSrc) {
         document.getElementById("report-kop-box").classList.remove('hidden');
@@ -1080,15 +1094,16 @@
       alert("Pengaturan jam presensi berhasil disimpan ke Cloud Sheet & disinkronkan!");
     }
 
-    function getCurrentDayConfig() {
-      const todayStr = new Date().toISOString().split('T')[0];
-      const holObj = fetchedHariLiburList.find(h => h.tanggal === todayStr);
+    function getCurrentDayConfig(targetDateStr) {
+      const checkDateStr = targetDateStr || new Date().toISOString().split('T')[0];
+      const holObj = fetchedHariLiburList.find(h => h.tanggal === checkDateStr);
 
       if (holObj) {
         return { isHoliday: true, name: `Hari Libur (${holObj.keterangan})` };
       }
 
-      const dayIndex = new Date().getDay();
+      const targetDate = new Date(checkDateStr);
+      const dayIndex = targetDate.getDay();
       const dayKeys = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
       const key = dayKeys[dayIndex];
 
@@ -1180,72 +1195,54 @@
     }
 
     // 3. AUTO DOWNLOAD MASTER SISWA, PENGATURAN & HARI LIBUR
-   // AUTO DOWNLOAD MASTER SISWA, PENGATURAN & HARI LIBUR
-async function autoDownloadMasterStudents() {
-  // Cek apakah database lokal di HP sudah memiliki data siswa
-  cachedStudents = await getAllStudentsFromDB();
-
-  if (!navigator.onLine) {
-    if (cachedStudents.length === 0) {
-      // Jika pertama kali dibuka di HP ini TANPA INTERNET dan database lokal masih kosong
-      alert("⚠️ PERHATIAN: Ini pertama kali aplikasi dibuka di perangkat ini.\n\nHarap hubungkan internet terlebih dahulu selama beberapa detik untuk mengunduh Data Master Siswa dari Server Google Sheets.");
-      document.getElementById('sync-info-text').innerText = "⚠️ Butuh internet untuk sinkronisasi awal!";
-    } else {
-      // Jika hari berikutnya tanpa internet (Data siswa sudah tersimpan di HP)
-      document.getElementById('sync-info-text').innerText = ` Mode Offline - Terbaca ${cachedStudents.length} Siswa di HP.`;
-      loadStudentsView();
-    }
-    return;
-  }
-
-  // Jika ONLINE, perbarui data master dari Google Sheets ke HP
-  try {
-    document.getElementById('sync-info-text').innerText = "Syncing data dari Cloud...";
-    const response = await fetch(`${GAS_WEB_APP_URL}?action=GET_ALL_STUDENTS`);
-    const result = await response.json();
-
-    if (result.success) {
-      if (result.settings && Object.keys(result.settings).length > 0) {
-        applySettingsFromCloud(result.settings);
+    async function autoDownloadMasterStudents() {
+      if (!navigator.onLine) {
+        document.getElementById('sync-info-text').innerText = "Mode Offline - Menggunakan data HP.";
+        loadStudentsView();
+        return;
       }
 
-      if (result.today_attendance) fetchedTodayAttendance = result.today_attendance;
-      if (result.attendance_history) fetchedAttendanceHistory = result.attendance_history;
-      if (result.tindak_lanjut) fetchedTindakLanjutHistory = result.tindak_lanjut;
-      if (result.hari_libur) fetchedHariLiburList = result.hari_libur;
+      try {
+        document.getElementById('sync-info-text').innerText = "Mengunduh data siswa & pengaturan...";
+        const response = await fetch(`${GAS_WEB_APP_URL}?action=GET_ALL_STUDENTS`);
+        const result = await response.json();
 
-      if (result.students && result.students.length > 0) {
-        const tx = db.transaction("students", "readwrite");
-        const store = tx.objectStore("students");
-        store.clear(); // Bersihkan lalu timpa dengan data terbaru dari server
+        if (result.success) {
+          if (result.settings && Object.keys(result.settings).length > 0) {
+            applySettingsFromCloud(result.settings);
+          }
 
-        result.students.forEach(std => {
-          store.put({
-            id_siswa: std.qr_key || std.id_siswa,
-            nisn: std.nisn,
-            nama: std.nama,
-            kelas: std.kelas,
-            status: std.status
-          });
-        });
+          if (result.today_attendance) fetchedTodayAttendance = result.today_attendance;
+          if (result.attendance_history) fetchedAttendanceHistory = result.attendance_history;
+          if (result.tindak_lanjut) fetchedTindakLanjutHistory = result.tindak_lanjut;
+          if (result.hari_libur) fetchedHariLiburList = result.hari_libur;
 
-        tx.oncomplete = async () => {
-          cachedStudents = await getAllStudentsFromDB();
-          document.getElementById('sync-info-text').innerText = `Terhubung! ${cachedStudents.length} Siswa Siap Offline.`;
-          loadStudentsView();
-          populateClassDropdowns();
-        };
+          if (result.students) {
+            const tx = db.transaction("students", "readwrite");
+            const store = tx.objectStore("students");
+            store.clear();
+
+            result.students.forEach(std => {
+              store.put({
+                id_siswa: std.qr_key || std.id_siswa,
+                nisn: std.nisn,
+                nama: std.nama,
+                kelas: std.kelas,
+                status: std.status
+              });
+            });
+
+            tx.oncomplete = () => {
+              document.getElementById('sync-info-text').innerText = `Terhubung! ${result.students.length} Siswa Aktif.`;
+              loadStudentsView();
+              populateClassDropdowns();
+            };
+          }
+        }
+      } catch (err) {
+        document.getElementById('sync-info-text').innerText = "Gagal terhubung ke Google Sheets.";
       }
     }
-  } catch (err) {
-    if (cachedStudents.length > 0) {
-      document.getElementById('sync-info-text').innerText = ` Mode Offline - Terbaca ${cachedStudents.length} Siswa di HP.`;
-      loadStudentsView();
-    } else {
-      document.getElementById('sync-info-text').innerText = "Gagal terhubung ke Google Sheets.";
-    }
-  }
-}
 
     function applySettingsFromCloud(settings) {
       for (let key in settings) {
@@ -1979,38 +1976,43 @@ async function autoDownloadMasterStudents() {
       `).join('');
     }
 
-    // 13. DASHBOARD MONITORING & DUAL FILTER
+    // 13. DASHBOARD MONITORING DENGAN FILTER TANGGAL & DUAL FILTER
     async function updateMonitoringDashboard() {
+      const targetDateStr = document.getElementById('monitoring-date-filter').value || new Date().toISOString().split('T')[0];
       const selectedClass = document.getElementById('monitoring-class-filter').value;
       const selectedSession = document.getElementById('monitoring-session-filter').value;
       
       const todayStr = new Date().toISOString().split('T')[0];
       const nowHM = new Date().toTimeString().substring(0, 5);
 
-      const dayCfg = getCurrentDayConfig();
+      const dayCfg = getCurrentDayConfig(targetDateStr);
 
       if (dayCfg.isHoliday) {
         document.getElementById('unscanned-students-container').innerHTML = `
           <div class="bg-blue-50 border border-blue-200 p-4 rounded-2xl text-center text-blue-800 text-xs font-bold">
             <i class="fa-solid fa-mug-hot text-blue-600 text-lg mb-1 block"></i>
-            Hari Ini Libur Absensi (${dayCfg.name || 'Non-Aktif'}).
+            Tanggal ${targetDateStr} Libur Absensi (${dayCfg.name || 'Non-Aktif'}).
           </div>
         `;
+        renderPieChart(0, 0, 0, 0, 0, 0);
         return;
       }
 
       const queueRecords = await getAllQueueFromDB();
-      const allTodayRecords = [...fetchedTodayAttendance, ...queueRecords.filter(r => r.tanggal === todayStr)];
+      const allTargetRecords = [...fetchedTodayAttendance, ...fetchedAttendanceHistory, ...queueRecords]
+        .filter(r => r.tanggal === targetDateStr);
 
       const classStudents = selectedClass === "ALL" ? cachedStudents : cachedStudents.filter(s => s.kelas === selectedClass);
 
       let countHadir = 0, countAlpa = 0, countBolos = 0, countSakit = 0, countIzin = 0, countKegiatan = 0;
       let unresolvedStudents = [];
 
+      const isToday = targetDateStr === todayStr;
+
       classStudents.forEach(student => {
-        const studentPagi = allTodayRecords.find(r => r.id_siswa === student.id_siswa && (r.sesi === "PAGI" || r.jam_pagi));
-        const studentSiang = allTodayRecords.find(r => r.id_siswa === student.id_siswa && (r.sesi === "SIANG" || r.jam_siang));
-        const anyRecord = allTodayRecords.find(r => r.id_siswa === student.id_siswa);
+        const studentPagi = allTargetRecords.find(r => r.id_siswa === student.id_siswa && (r.sesi === "PAGI" || r.jam_pagi));
+        const studentSiang = allTargetRecords.find(r => r.id_siswa === student.id_siswa && (r.sesi === "SIANG" || r.jam_siang));
+        const anyRecord = allTargetRecords.find(r => r.id_siswa === student.id_siswa);
 
         if (selectedSession === "PAGI") {
           if (studentPagi) {
@@ -2020,7 +2022,7 @@ async function autoDownloadMasterStudents() {
             else if (st === "IZIN") countIzin++;
             else if (st === "KEGIATAN") countKegiatan++;
           } else {
-            if (nowHM > dayCfg.pagiLimit) {
+            if (!isToday || nowHM > dayCfg.pagiLimit) {
               countAlpa++;
               unresolvedStudents.push({ ...student, reason: "Belum Absen Pagi (Alpa)" });
             } else {
@@ -2036,7 +2038,7 @@ async function autoDownloadMasterStudents() {
             else if (st === "IZIN") countIzin++;
             else if (st === "KEGIATAN") countKegiatan++;
           } else {
-            if (nowHM > dayCfg.siangLimit) {
+            if (!isToday || nowHM > dayCfg.siangLimit) {
               if (studentPagi) {
                 countBolos++;
                 unresolvedStudents.push({ ...student, reason: "Sudah Pagi, Siang Tidak Scan (Bolos)" });
@@ -2053,7 +2055,7 @@ async function autoDownloadMasterStudents() {
           if (anyRecord) {
             const st = anyRecord.status_presensi || "HADIR";
             if (st === "HADIR") {
-              if (studentPagi && !studentSiang && nowHM > dayCfg.siangLimit) {
+              if (studentPagi && !studentSiang && (!isToday || nowHM > dayCfg.siangLimit)) {
                 countBolos++;
                 unresolvedStudents.push({ ...student, reason: "Sudah Hadir Pagi, Siang Tidak Scan (Bolos)" });
               } else {
@@ -2067,7 +2069,7 @@ async function autoDownloadMasterStudents() {
               unresolvedStudents.push({ ...student, reason: "Dicatat Bolos" });
             }
           } else {
-            if (nowHM > dayCfg.pagiLimit) {
+            if (!isToday || nowHM > dayCfg.pagiLimit) {
               countAlpa++;
               unresolvedStudents.push({ ...student, reason: "Belum Scan Sama Sekali (Alpa)" });
             } else {
@@ -2094,18 +2096,27 @@ async function autoDownloadMasterStudents() {
       const ctx = document.getElementById('attendancePieChart').getContext('2d');
       if (myPieChart) myPieChart.destroy();
 
+      const total = hadir + alpa + bolos + sakit + izin + kegiatan;
+      const pctHadir = total > 0 ? Math.round((hadir / total) * 100) : 0;
+
+      // UPDATE ANGKA PRESENTASE DI TENGAH GRAFIK
+      document.getElementById('chart-center-percent').innerText = `${pctHadir}%`;
+
       myPieChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
           labels: ['Hadir', 'Alpa', 'Bolos', 'Sakit', 'Izin', 'Kegiatan'],
           datasets: [{
             data: [hadir, alpa, bolos, sakit, izin, kegiatan],
-            backgroundColor: ['#10b981', '#f59e0b', '#f43f5e', '#3b82f6', '#6366f1', '#a855f7']
+            backgroundColor: ['#10b981', '#f59e0b', '#f43f5e', '#3b82f6', '#6366f1', '#a855f7'],
+            borderWidth: 2,
+            hoverOffset: 4
           }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          cutout: '72%',
           plugins: { legend: { display: false } }
         }
       });
