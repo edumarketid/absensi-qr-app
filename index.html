@@ -45,12 +45,13 @@
       <div class="flex items-center justify-between">
         <div class="flex items-center space-x-3">
           <button onclick="toggleMenuModal()" class="text-xl focus:outline-none"><i class="fa-solid fa-bars"></i></button>
-          <div>
+          <div class="min-w-0 flex-1">
             <h1 class="font-bold text-base leading-tight">QR First Offline</h1>
-            <p class="text-xs text-gray-300">SMK Negeri 1 Contoh</p>
+            <!-- NAMA SEKOLAH BISA DIUBAH DARI PENGATURAN -->
+            <p id="app-header-school-name" class="text-xs text-gray-300 truncate">SMK Negeri 1 Contoh</p>
           </div>
         </div>
-        <div class="text-right">
+        <div class="text-right flex-shrink-0">
           <div class="flex items-center justify-end space-x-1">
             <span id="status-dot" class="w-2 h-2 rounded-full bg-amber-400 inline-block"></span>
             <span id="status-text" class="text-xs font-medium">Memeriksa...</span>
@@ -81,10 +82,12 @@
           </div>
         </div>
 
+        <!-- CONTROL BUTTONS SCANNER -->
         <div class="absolute bottom-4 left-4 right-4 flex items-center justify-between gap-2 z-20">
-          <button onclick="toggleTorch()" class="bg-black/60 hover:bg-black/80 text-white flex-1 py-2.5 rounded-xl text-xs font-medium flex flex-col items-center justify-center gap-1 backdrop-blur-md">
-            <i class="fa-solid fa-flashlight text-sm"></i>
-            <span>Senter</span>
+          <!-- FITUR MODUL SESI SCAN (MENGGANTIKAN SENTER) -->
+          <button onclick="toggleScanSessionMode()" class="bg-black/60 hover:bg-black/80 text-white flex-1 py-2.5 rounded-xl text-xs font-medium flex flex-col items-center justify-center gap-1 backdrop-blur-md border border-white/10">
+            <i id="session-icon" class="fa-solid fa-sun text-amber-400 text-sm"></i>
+            <span id="session-mode-text">Mode Pagi</span>
           </button>
           
           <button id="btn-toggle-camera" onclick="toggleCameraState()" class="bg-blue-600 hover:bg-blue-700 text-white flex-[2] py-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 shadow-lg">
@@ -92,7 +95,7 @@
             <span id="btn-camera-text">Matikan Kamera</span>
           </button>
 
-          <button onclick="promptManualInput()" class="bg-black/60 hover:bg-black/80 text-white flex-1 py-2.5 rounded-xl text-xs font-medium flex flex-col items-center justify-center gap-1 backdrop-blur-md">
+          <button onclick="promptManualInput()" class="bg-black/60 hover:bg-black/80 text-white flex-1 py-2.5 rounded-xl text-xs font-medium flex flex-col items-center justify-center gap-1 backdrop-blur-md border border-white/10">
             <i class="fa-solid fa-keyboard text-sm"></i>
             <span>Input Manual</span>
           </button>
@@ -196,13 +199,13 @@
 
 
     <!-- ========================================================= -->
-    <!-- VIEW 3: TAMPILAN DAFTAR DATA SISWA -->
+    <!-- VIEW 3: TAMPILAN DAFTAR DATA SISWA (HANYA MUNCUL STATUS AKTIF) -->
     <!-- ========================================================= -->
     <main id="view-students" class="flex-1 flex-col overflow-y-auto no-scrollbar bg-slate-50 p-4 hidden">
       <div class="flex items-center justify-between mb-3">
         <div>
           <h2 class="font-bold text-lg text-gray-900">Data Master Siswa</h2>
-          <p class="text-xs text-gray-500">Tersimpan di Penyimpanan HP (Offline)</p>
+          <p class="text-xs text-gray-500">Hanya menampilkan siswa berstatus AKTIF</p>
         </div>
         <button onclick="autoDownloadMasterStudents()" class="bg-blue-50 text-blue-600 hover:bg-blue-100 p-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-blue-200">
           <i class="fa-solid fa-rotate"></i>
@@ -216,7 +219,7 @@
       </div>
 
       <div class="flex justify-between items-center text-xs text-gray-500 font-medium mb-2 px-1">
-        <span>Total Terdaftar:</span>
+        <span>Siswa Aktif Terdaftar:</span>
         <span id="student-count-badge" class="font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-md">0 Siswa</span>
       </div>
 
@@ -225,20 +228,47 @@
 
 
     <!-- ========================================================= -->
-    <!-- VIEW 4: TAMPILAN PENGATURAN (Diakses dari Modal Menu) -->
+    <!-- VIEW 4: TAMPILAN PENGATURAN (INPUT IDENTITAS SEKOLAH) -->
     <!-- ========================================================= -->
     <main id="view-settings" class="flex-1 flex-col overflow-y-auto no-scrollbar bg-slate-50 p-4 hidden">
       <div class="mb-4">
         <h2 class="font-bold text-lg text-gray-900">Pengaturan System</h2>
-        <p class="text-xs text-gray-500">Konfigurasi backend Google Apps Script & data lokal</p>
+        <p class="text-xs text-gray-500">Konfigurasi identitas sekolah & database lokal</p>
       </div>
 
+      <!-- FORM IDENTITAS SEKOLAH DINAMIS -->
+      <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3 mb-3">
+        <h3 class="font-bold text-xs text-blue-900 border-b border-gray-100 pb-2 flex items-center gap-2">
+          <i class="fa-solid fa-school text-blue-600"></i>
+          <span>Identitas Sekolah & Kepala Sekolah</span>
+        </h3>
+
+        <div>
+          <label class="block text-[11px] font-semibold text-gray-700 mb-1">Nama Sekolah</label>
+          <input type="text" id="input-school-name" placeholder="Contoh: SMK Negeri 1 Contoh" class="w-full px-3 py-2 bg-slate-50 border border-gray-200 rounded-xl text-xs text-gray-800 focus:outline-none focus:border-blue-500">
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-semibold text-gray-700 mb-1">Nama Kepala Sekolah</label>
+          <input type="text" id="input-principal-name" placeholder="Contoh: Drs. H. Ahmad Dahlan, M.Pd." class="w-full px-3 py-2 bg-slate-50 border border-gray-200 rounded-xl text-xs text-gray-800 focus:outline-none focus:border-blue-500">
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-semibold text-gray-700 mb-1">NIP Kepala Sekolah</label>
+          <input type="text" id="input-principal-nip" placeholder="Contoh: 19750812 200003 1 002" class="w-full px-3 py-2 bg-slate-50 border border-gray-200 rounded-xl text-xs text-gray-800 focus:outline-none focus:border-blue-500">
+        </div>
+
+        <button onclick="saveSchoolSettings()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-xl text-xs flex items-center justify-center space-x-2 shadow-sm transition">
+          <i class="fa-solid fa-floppy-disk"></i>
+          <span>Simpan Identitas Sekolah</span>
+        </button>
+      </div>
+
+      <!-- STATUS BACKEND GAS -->
       <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3 mb-3">
         <div class="flex items-center justify-between">
           <div class="flex items-center space-x-2 text-blue-900 font-bold text-xs">
-            <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
-              <i class="fa-solid fa-link text-xs"></i>
-            </div>
+            <i class="fa-solid fa-link text-blue-600"></i>
             <span>Backend Web App GAS</span>
           </div>
           <span class="px-2 py-0.5 bg-green-100 text-green-700 text-[10px] font-bold rounded-md">Tersambung</span>
@@ -249,17 +279,13 @@
         </div>
       </div>
 
+      <!-- AKSI DATABASE LOKAL -->
       <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3">
-        <h3 class="font-bold text-xs text-gray-800">Aksi Database Lokal</h3>
+        <h3 class="font-bold text-xs text-gray-800">Aksi Database Lokal HP</h3>
 
-        <button onclick="autoDownloadMasterStudents()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-xl text-xs flex items-center justify-center space-x-2 shadow-sm">
+        <button onclick="autoDownloadMasterStudents()" class="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold py-2.5 rounded-xl text-xs flex items-center justify-center space-x-2 border border-blue-200">
           <i class="fa-solid fa-rotate"></i>
           <span>Paksa Sync Data Siswa Sekarang</span>
-        </button>
-
-        <button onclick="triggerManualSync()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-xl text-xs flex items-center justify-center space-x-2 shadow-sm">
-          <i class="fa-solid fa-cloud-arrow-up"></i>
-          <span>Kirim Antrean Absen ke GAS</span>
         </button>
 
         <button onclick="clearLocalDatabaseCache()" class="w-full bg-rose-50 hover:bg-rose-100 text-rose-600 font-semibold py-2.5 rounded-xl text-xs flex items-center justify-center space-x-2 border border-rose-200">
@@ -274,11 +300,11 @@
     <!-- MODAL MENU POP-UP (AKSES UJUNG KANAN BOTTOM BAR) -->
     <!-- ========================================================= -->
     <div id="menu-modal" class="absolute inset-0 bg-black/60 backdrop-blur-sm z-50 flex flex-col justify-end hidden">
-      <div class="bg-white rounded-t-3xl p-5 space-y-4 shadow-2xl animate-in slide-in-from-bottom duration-200">
+      <div class="bg-white rounded-t-3xl p-5 space-y-4 shadow-2xl">
         <div class="flex items-center justify-between border-b border-gray-100 pb-3">
           <div class="flex items-center space-x-2">
             <i class="fa-solid fa-bars-staggered text-blue-600"></i>
-            <h3 class="font-bold text-gray-900 text-sm">Menu Fitur Aplikasi</h3>
+            <h3 class="font-bold text-gray-900 text-sm">Menu Utama Aplikasi</h3>
           </div>
           <button onclick="toggleMenuModal()" class="w-7 h-7 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center">
             <i class="fa-solid fa-xmark text-sm"></i>
@@ -302,10 +328,7 @@
           </button>
 
           <button onclick="toggleMenuModal(); toggleView('settings');" class="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col items-center justify-center gap-1.5 hover:bg-purple-50 hover:border-purple-200 transition">
-            <div class="relative">
-              <i class="fa-solid fa-gear text-xl text-purple-600"></i>
-              <i class="fa-solid fa-link text-[9px] absolute -bottom-1 -right-1 text-purple-800 bg-white rounded-full"></i>
-            </div>
+            <i class="fa-solid fa-gear text-xl text-purple-600"></i>
             <span class="text-xs font-bold text-gray-800">Pengaturan</span>
           </button>
         </div>
@@ -318,11 +341,11 @@
 
 
     <!-- ========================================================= -->
-    <!-- BOTTOM NAVIGATION (SCANNER TETAP DI KIRI) -->
+    <!-- BOTTOM NAVIGATION (SCANNER TETAP DI KIRI POJOK) -->
     <!-- ========================================================= -->
     <nav class="bg-white border-t border-gray-200 px-3 py-2 flex justify-between items-center text-center z-20">
       
-      <!-- MENU SCANNER KEMBALI DI KIRI BAWAH -->
+      <!-- SCANNER TETAP DI POJOK KIRI -->
       <button id="nav-scanner" onclick="toggleView('scanner')" class="flex-1 text-blue-600 flex flex-col items-center">
         <div class="w-8 h-8 rounded-xl bg-blue-50 flex items-center justify-center mb-0.5">
           <i class="fa-solid fa-qrcode text-base"></i>
@@ -351,7 +374,7 @@
         <span class="text-[10px] font-medium">Laporan</span>
       </button>
 
-      <!-- MENU POJOK KANAN UNTUK MEMBUKA POPUP MENU TAMBAHAN -->
+      <!-- MENU DI POJOK KANAN UNTUK BUKA MODAL POPUP -->
       <button onclick="toggleMenuModal()" class="flex-1 text-gray-400 hover:text-gray-600 flex flex-col items-center">
         <div class="w-8 h-8 flex items-center justify-center mb-0.5">
           <i class="fa-solid fa-bars text-sm"></i>
@@ -364,12 +387,14 @@
   </div>
 
   <script>
+    // URL GOOGLE APPS SCRIPT PERMANEN
     const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxVGAsO-sG7E9bHsSxQ-M16EykkO6jc6QpLzDY7sWg9qEHIbpk9Re32IGgDn1qPOmJ_/exec"; 
 
     let html5QrCode = null;
     let isCameraActive = false;
     let db = null;
     let cachedStudents = [];
+    let currentScanSession = "PAGI"; // Sesi default 'PAGI' atau 'SIANG'
 
     // 1. INITIALIZE DATABASE
     function initDatabase() {
@@ -396,7 +421,50 @@
       });
     }
 
-    // 2. AUTO DOWNLOAD MASTER SISWA
+    // 2. MANAJEMEN PENGATURAN IDENTITAS SEKOLAH (LOCAL STORAGE)
+    function loadSchoolSettings() {
+      const schoolName = localStorage.getItem("SCHOOL_NAME") || "SMK Negeri 1 Contoh";
+      const principalName = localStorage.getItem("PRINCIPAL_NAME") || "";
+      const principalNip = localStorage.getItem("PRINCIPAL_NIP") || "";
+
+      document.getElementById("app-header-school-name").innerText = schoolName;
+      document.getElementById("input-school-name").value = schoolName;
+      document.getElementById("input-principal-name").value = principalName;
+      document.getElementById("input-principal-nip").value = principalNip;
+    }
+
+    function saveSchoolSettings() {
+      const schoolName = document.getElementById("input-school-name").value.trim();
+      const principalName = document.getElementById("input-principal-name").value.trim();
+      const principalNip = document.getElementById("input-principal-nip").value.trim();
+
+      if (!schoolName) {
+        alert("Nama sekolah tidak boleh kosong!");
+        return;
+      }
+
+      localStorage.setItem("SCHOOL_NAME", schoolName);
+      localStorage.setItem("PRINCIPAL_NAME", principalName);
+      localStorage.setItem("PRINCIPAL_NIP", principalNip);
+
+      document.getElementById("app-header-school-name").innerText = schoolName;
+      alert("Pengaturan Identitas Sekolah berhasil disimpan!");
+    }
+
+    // 3. FITUR PENGATURAN MODE SESI SCAN (PAGI / SIANG)
+    function toggleScanSessionMode() {
+      if (currentScanSession === "PAGI") {
+        currentScanSession = "SIANG";
+        document.getElementById("session-icon").className = "fa-solid fa-moon text-indigo-400 text-sm";
+        document.getElementById("session-mode-text").innerText = "Mode Siang";
+      } else {
+        currentScanSession = "PAGI";
+        document.getElementById("session-icon").className = "fa-solid fa-sun text-amber-400 text-sm";
+        document.getElementById("session-mode-text").innerText = "Mode Pagi";
+      }
+    }
+
+    // 4. AUTO DOWNLOAD MASTER SISWA DARI GOOGLE SHEETS (HANYA AKTIF)
     async function autoDownloadMasterStudents() {
       if (!navigator.onLine) {
         document.getElementById('sync-info-text').innerText = "Mode Offline - Menggunakan data HP.";
@@ -409,10 +477,13 @@
         const response = await fetch(`${GAS_WEB_APP_URL}?action=GET_ALL_STUDENTS`);
         const result = await response.json();
 
-        if (result.success && result.students && result.students.length > 0) {
+        if (result.success && result.students) {
           const tx = db.transaction("students", "readwrite");
           const store = tx.objectStore("students");
           
+          // Bersihkan data lama agar siswa yang diubah 'Tidak Aktif' terhapus dari lokal
+          store.clear();
+
           result.students.forEach(std => {
             store.put({
               id_siswa: std.qr_key || std.id_siswa,
@@ -424,18 +495,16 @@
           });
 
           tx.oncomplete = () => {
-            document.getElementById('sync-info-text').innerText = `Terhubung! ${result.students.length} Siswa Siap.`;
+            document.getElementById('sync-info-text').innerText = `Terhubung! ${result.students.length} Siswa Aktif Siap.`;
             loadStudentsView();
           };
-        } else {
-          document.getElementById('sync-info-text').innerText = "Sheet Data_Siswa masih kosong.";
         }
       } catch (err) {
         document.getElementById('sync-info-text').innerText = "Gagal terhubung ke Google Sheets.";
       }
     }
 
-    // 3. SCANNER CONTROLLER
+    // 5. SCANNER CONTROLLER
     function initScanner() {
       if (!html5QrCode) {
         html5QrCode = new Html5Qrcode("reader");
@@ -465,15 +534,7 @@
       }
     }
 
-    function toggleTorch() {
-      if (isCameraActive) {
-        html5QrCode.applyVideoConstraints({
-          advanced: [{ torch: true }]
-        }).catch(() => alert("Senter tidak didukung pada perangkat ini"));
-      }
-    }
-
-    // 4. SCAN & MANUAL LOGIC
+    // 6. PROCESS ATTENDANCE SCAN
     async function onScanSuccess(decodedText) {
       if (isCameraActive) {
         await html5QrCode.stop();
@@ -489,8 +550,9 @@
       const now = new Date();
       const dateStr = now.toISOString().split('T')[0];
       const timeStr = now.toTimeString().split(' ')[0];
-      const hour = now.getHours();
-      const sesi = hour < 11 ? "PAGI" : "SIANG";
+      
+      // Sesi ditentukan oleh pilihan toggle/tombol pengguna
+      const sesi = currentScanSession;
 
       if (student) {
         const attendanceRecord = {
@@ -511,14 +573,14 @@
       } else {
         showScanResultUI({
           id_siswa: qrCodeKey,
-          nama: "Siswa Tidak Ditemukan",
+          nama: "Siswa Tidak Ditemukan / Non-Aktif",
           nisn: "-",
           kelas: "-"
         }, timeStr, sesi, false);
       }
     }
 
-    // 5. READ & RENDER DAFTAR SISWA
+    // 7. READ & RENDER DAFTAR SISWA AKTIF
     function getAllStudentsFromDB() {
       return new Promise((resolve) => {
         const tx = db.transaction("students", "readonly");
@@ -542,8 +604,8 @@
         container.innerHTML = `
           <div class="text-center py-10 bg-white rounded-2xl border border-gray-100 p-4">
             <i class="fa-solid fa-user-slash text-gray-300 text-3xl mb-2"></i>
-            <p class="text-xs font-semibold text-gray-600">Belum ada data siswa di HP</p>
-            <p class="text-[10px] text-gray-400 mt-1">Pastikan Sheet 'Data_Siswa' terisi, lalu klik tombol Sync.</p>
+            <p class="text-xs font-semibold text-gray-600">Belum ada data siswa aktif di HP</p>
+            <p class="text-[10px] text-gray-400 mt-1">Pastikan Sheet 'Data_Siswa' memuat data siswa berstatus Aktif.</p>
           </div>
         `;
         return;
@@ -560,7 +622,7 @@
               <p class="text-[10px] text-gray-500">ID: ${std.id_siswa} | NISN: ${std.nisn || '-'}</p>
             </div>
           </div>
-          <span class="px-2 py-1 bg-slate-100 text-slate-700 font-bold text-[10px] rounded-lg border border-slate-200 ml-2 flex-shrink-0">
+          <span class="px-2 py-1 bg-emerald-50 text-emerald-700 font-bold text-[10px] rounded-lg border border-emerald-200 ml-2 flex-shrink-0">
             ${std.kelas}
           </span>
         </div>
@@ -578,7 +640,7 @@
       renderStudentsList(filtered);
     }
 
-    // 6. HELPER DATABASE & QUEUE
+    // 8. HELPER DATABASE & QUEUE
     function getStudentFromDB(qrKey) {
       return new Promise((resolve) => {
         const tx = db.transaction("students", "readonly");
@@ -641,7 +703,7 @@
       });
     }
 
-    // 7. AUTO SYNC ANTREAN KE GOOGLE SHEETS
+    // 9. AUTO SYNC ANTREAN KE GOOGLE SHEETS
     async function syncQueueToGAS() {
       const queueData = await getAllQueueFromDB();
       if (queueData.length === 0) return;
@@ -667,7 +729,7 @@
       }
     }
 
-    // 8. TABS & MODAL MANAGEMENT
+    // 10. NAVIGATION TOGGLE
     function toggleView(viewName) {
       const scannerView = document.getElementById('view-scanner');
       const successView = document.getElementById('view-success');
@@ -699,7 +761,6 @@
         successView.classList.remove('hidden');
         successView.classList.add('flex');
       } else {
-        // Default View: Scanner di paling kiri
         scannerView.classList.remove('hidden');
         scannerView.classList.add('flex');
         navScanner.className = "flex-1 text-blue-600 flex flex-col items-center";
@@ -729,8 +790,8 @@
       const banner = document.getElementById('success-banner');
       if (!isSuccess) {
         banner.className = "bg-amber-600 text-white p-4 flex items-center space-x-3 shadow-md";
-        document.getElementById('success-title').innerText = "Siswa Tidak Ditemukan!";
-        document.getElementById('success-subtitle').innerText = "Belum terdaftar di Sheet Data_Siswa.";
+        document.getElementById('success-title').innerText = "Siswa Tidak Ditemukan / Non-Aktif!";
+        document.getElementById('success-subtitle').innerText = "Siswa belum terdaftar atau berstatus Tidak Aktif.";
       } else {
         banner.className = "bg-emerald-600 text-white p-4 flex items-center space-x-3 shadow-md";
         document.getElementById('success-title').innerText = "Scan Berhasil!";
@@ -766,6 +827,7 @@
 
     // RUN INITIAL LOAD
     window.onload = async () => {
+      loadSchoolSettings();
       await initDatabase();
       await autoDownloadMasterStudents();
       initScanner();
