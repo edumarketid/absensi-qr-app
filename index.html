@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0b3c5d">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Sistem Absensi Murid - v2.10</title>
+  <title>Sistem Absensi Murid - v2.11</title>
   
   <!-- MANIFEST INLINE UNTUK DUKUNGAN PWA OFFLINE MANDIRI -->
   <link rel="manifest" href='data:application/manifest+json,{"name":"Sistem Absensi Murid","short_name":"AbsensiQR","start_url":"./index.html","display":"standalone","background_color":"#0b3c5d","theme_color":"#0b3c5d","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/3135/3135715.png","sizes":"512x512","type":"image/png"}]}'>
@@ -41,7 +41,7 @@
             <span id="status-dot" class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span>
             <span id="status-text" class="text-xs font-semibold">Memeriksa...</span>
           </div>
-          <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30 block mt-0.5">v2.10</span>
+          <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30 block mt-0.5">v2.11</span>
         </div>
       </div>
     </header>
@@ -442,7 +442,7 @@
 
   </div>
 
-  <!-- REGISTRASI SERVICE WORKER UNTUK PWA OFFLINE MANDIRI -->
+  <!-- REGISTRASI SERVICE WORKER -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
@@ -499,14 +499,25 @@
       });
     }
 
-    function autoDetectOrSyncSessionMode(timeStr) {
-      const now = new Date();
+    // PENYEMPURNAAN LOGIKA WAKTU v2.11 (MENGIKUTI 100% PENGATURAN)
+    function getTodayTimeConfig(dateObj) {
       const dayKeys = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
-      const dayKey = dayKeys[now.getDay()];
+      const dayKey = dayKeys[dateObj.getDay()];
 
+      const active = localStorage.getItem(`DAY_ACTIVE_${dayKey}`) !== null ? (localStorage.getItem(`DAY_ACTIVE_${dayKey}`) === "true") : (dayKey !== "sun");
+      const pStart = localStorage.getItem(`TIME_${dayKey}_PAGI_START`) || DEFAULT_TIME_SETTINGS.pagiStart;
+      const pLimit = localStorage.getItem(`TIME_${dayKey}_PAGI_LIMIT`) || DEFAULT_TIME_SETTINGS.pagiLimit;
       const sStart = localStorage.getItem(`TIME_${dayKey}_SIANG_START`) || DEFAULT_TIME_SETTINGS.siangStart;
+      const sLimit = localStorage.getItem(`TIME_${dayKey}_SIANG_LIMIT`) || DEFAULT_TIME_SETTINGS.siangLimit;
 
-      if (timeStr >= sStart) {
+      return { dayKey, active, pStart, pLimit, sStart, sLimit };
+    }
+
+    function autoDetectOrSyncSessionMode(timeStr, targetDateObj = new Date()) {
+      const config = getTodayTimeConfig(targetDateObj);
+
+      // Mode Siang aktif jika jam >= Mulai Siang
+      if (timeStr >= config.sStart) {
         currentScanSession = "SIANG";
       } else {
         currentScanSession = "PAGI";
@@ -528,13 +539,13 @@
         customScanDateOverride = inputDate.trim();
         customScanTimeOverride = inputTime.trim();
 
-        autoDetectOrSyncSessionMode(customScanTimeOverride);
+        autoDetectOrSyncSessionMode(customScanTimeOverride, new Date(customScanDateOverride));
       } else {
         isManualTimeMode = false;
         customScanDateOverride = null;
         customScanTimeOverride = null;
         const nowTimeStr = new Date().toTimeString().split(' ')[0].substring(0, 5);
-        autoDetectOrSyncSessionMode(nowTimeStr);
+        autoDetectOrSyncSessionMode(nowTimeStr, new Date());
       }
       updateTimeModeIndicator();
     }
@@ -1168,6 +1179,7 @@
       }
     }
 
+    // FUNGSI SCAN DENGAN PEMERIKSAAN WAKTU KHUSUS (v2.11)
     async function onScanSuccess(text) {
       await stopCamera();
       
@@ -1175,32 +1187,32 @@
       const dateStr = (isManualTimeMode && customScanDateOverride) ? customScanDateOverride : now.toISOString().split('T')[0];
       const timeStr = (isManualTimeMode && customScanTimeOverride) ? customScanTimeOverride : now.toTimeString().split(' ')[0].substring(0, 5);
 
-      const dayKeys = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
       const scanDateObj = new Date(dateStr);
-      const dayKey = dayKeys[scanDateObj.getDay()];
+      const timeConfig = getTodayTimeConfig(scanDateObj);
 
-      const pStart = localStorage.getItem(`TIME_${dayKey}_PAGI_START`) || DEFAULT_TIME_SETTINGS.pagiStart;
-      const pLimit = localStorage.getItem(`TIME_${dayKey}_PAGI_LIMIT`) || DEFAULT_TIME_SETTINGS.pagiLimit;
-      const sStart = localStorage.getItem(`TIME_${dayKey}_SIANG_START`) || DEFAULT_TIME_SETTINGS.siangStart;
-      const sLimit = localStorage.getItem(`TIME_${dayKey}_SIANG_LIMIT`) || DEFAULT_TIME_SETTINGS.siangLimit;
+      // Cek Status Keaktifan Hari
+      if (!timeConfig.active) {
+        alert(`Presensi Ditolak! Hari ${timeConfig.dayKey.toUpperCase()} diatur sebagai Hari Libur / Non-Aktif.`);
+        return initScanner();
+      }
 
-      autoDetectOrSyncSessionMode(timeStr);
+      autoDetectOrSyncSessionMode(timeStr, scanDateObj);
 
       let computedStatus = "HADIR";
 
       if (currentScanSession === "PAGI") {
-        if (timeStr < pStart) {
-          alert(`Presensi Tersebut Ditolak! Belum memasuki jam presensi pagi (${pStart}).`);
+        if (timeStr < timeConfig.pStart) {
+          alert(`Presensi Pagi Ditolak! Belum memasuki jam mulai pagi (${timeConfig.pStart}).`);
           return initScanner();
-        } else if (timeStr > pLimit) {
+        } else if (timeStr > timeConfig.pLimit) {
           computedStatus = "TERLAMBAT";
         }
       } else if (currentScanSession === "SIANG") {
-        if (timeStr < sStart) {
-          alert(`Presensi Pulang Ditolak! Belum memasuki jam pulang (${sStart}).`);
+        if (timeStr < timeConfig.sStart) {
+          alert(`Presensi Siang Ditolak! Belum memasuki jam mulai siang (${timeConfig.sStart}).`);
           return initScanner();
-        } else if (timeStr > sLimit) {
-          alert(`Presensi Pulang Ditolak! Sudah melewati batas jam presensi siang (${sLimit}).`);
+        } else if (timeStr > timeConfig.sLimit) {
+          alert(`Presensi Siang Ditolak! Sudah melewati batas jam siang (${timeConfig.sLimit}).`);
           return initScanner();
         }
       }
@@ -1339,7 +1351,7 @@
       }
 
       const nowTimeStr = new Date().toTimeString().split(' ')[0].substring(0, 5);
-      autoDetectOrSyncSessionMode(nowTimeStr);
+      autoDetectOrSyncSessionMode(nowTimeStr, new Date());
     };
   </script>
 </body>
