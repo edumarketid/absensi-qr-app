@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Sistem Absensi Murid - v2.3</title>
+  <title>Sistem Absensi Murid - v2.4</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
@@ -33,7 +33,7 @@
             <span id="status-dot" class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span>
             <span id="status-text" class="text-xs font-semibold">Memeriksa...</span>
           </div>
-          <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30 block mt-0.5">v2.3</span>
+          <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30 block mt-0.5">v2.4</span>
         </div>
       </div>
     </header>
@@ -98,10 +98,11 @@
       <div id="status-card-box" class="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-center shadow-sm space-y-2">
         <h3 id="res-nama" class="font-bold text-gray-900 text-lg truncate">-</h3>
         <p class="text-xs text-gray-600">NISN: <span id="res-nisn" class="font-bold">-</span> | Kelas: <span id="res-kelas" class="font-bold">-</span></p>
-        <div class="text-emerald-600 font-extrabold text-xl"><i class="fa-solid fa-circle-check"></i> <span id="res-presensi-status">HADIR</span></div>
+        <div id="res-badge-box" class="text-emerald-600 font-extrabold text-xl"><i id="res-icon" class="fa-solid fa-circle-check"></i> <span id="res-presensi-status">HADIR</span></div>
         <p class="text-xs text-emerald-700"><i class="fa-regular fa-clock"></i> <span id="res-jam-scan">00:00:00</span></p>
       </div>
-      <button onclick="toggleView('scanner')" class="w-full mt-4 bg-blue-600 text-white font-semibold py-3 rounded-xl text-xs flex items-center justify-center gap-2 shadow-md">
+      <!-- FITUR 1: SCAN SISWA BERIKUTNYA LANGSUNG AKTIFKAN KAMERA -->
+      <button onclick="nextScanAndAutoStartCamera()" class="w-full mt-4 bg-blue-600 text-white font-semibold py-3 rounded-xl text-xs flex items-center justify-center gap-2 shadow-md">
         <i class="fa-solid fa-qrcode"></i> Scan Siswa Berikutnya
       </button>
     </main>
@@ -125,7 +126,7 @@
       <div id="students-list-container" class="space-y-2 pb-4"></div>
     </main>
 
-    <!-- VIEW 4: MONITORING PRESENSI (WITH PRECISE CLASS/DATE FILTERING) -->
+    <!-- VIEW 4: MONITORING PRESENSI & GRAFIK PERSENTASE PER KELAS -->
     <main id="view-monitoring" class="flex-1 flex-col overflow-y-auto no-scrollbar bg-slate-50 p-4 hidden">
       <div class="flex items-center justify-between mb-3">
         <div>
@@ -149,13 +150,24 @@
       </div>
 
       <div class="bg-white p-3.5 rounded-2xl border border-gray-100 shadow-sm mb-3 text-center">
-        <h4 class="text-xs font-bold text-gray-700 mb-2">Persentase Kehadiran Kelas</h4>
+        <h4 class="text-xs font-bold text-gray-700 mb-2">Persentase Kehadiran Total</h4>
         <div class="w-44 h-44 mx-auto relative flex items-center justify-center">
           <canvas id="attendancePieChart"></canvas>
           <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
             <span id="chart-center-percent" class="text-2xl font-black text-emerald-600 leading-none">0%</span>
             <span class="text-[9px] font-bold text-gray-400 mt-0.5">Tingkat Hadir</span>
           </div>
+        </div>
+      </div>
+
+      <!-- FITUR 4: GRAFIK PERSENTASE KEHADIRAN PER KELAS INTERAKTIF -->
+      <div class="bg-white p-3.5 rounded-2xl border border-gray-200 shadow-sm mb-3">
+        <h4 class="text-xs font-bold text-gray-800 mb-1 flex items-center justify-between">
+          <span>Persentase Kehadiran Per Kelas</span>
+          <span class="text-[9px] text-gray-400 font-normal">Klik batang kelas untuk memfilter</span>
+        </h4>
+        <div class="w-full h-40">
+          <canvas id="classBarChart"></canvas>
         </div>
       </div>
 
@@ -170,11 +182,11 @@
         <div class="bg-purple-50 border border-purple-100 p-2 rounded-xl text-center col-span-2"><span class="block text-[9px] text-purple-600 font-bold">Kegiatan</span><span id="stat-kegiatan" class="text-xs font-extrabold text-purple-800">0</span></div>
       </div>
 
-      <!-- DAFTAR SISWA & TOMBOL AKSI PRESENSI MANUAL -->
+      <!-- FITUR 5: DAFTAR SISWA BELUM ABSEN SAJA -->
       <div class="bg-white p-3 rounded-2xl border border-gray-200 shadow-sm mb-4">
         <h3 class="font-bold text-xs text-gray-800 mb-2 border-b border-gray-100 pb-1.5 flex items-center justify-between">
-          <span>Daftar Siswa & Aksi Presensi</span>
-          <span id="monitoring-count-badge" class="text-[10px] text-blue-600 font-bold bg-blue-50 px-2 py-0.5 rounded-md">0 Siswa</span>
+          <span>Siswa Belum Absen & Aksi Presensi</span>
+          <span id="monitoring-count-badge" class="text-[10px] text-rose-600 font-bold bg-rose-50 px-2 py-0.5 rounded-md">0 Siswa Belum</span>
         </h3>
         <div id="monitoring-student-action-list" class="space-y-2.5 max-h-[380px] overflow-y-auto no-scrollbar pr-1"></div>
       </div>
@@ -402,7 +414,7 @@
 
     let html5QrCode = null, isCameraActive = false, db = null, cachedStudents = [];
     let fetchedTodayAttendance = [], fetchedAttendanceHistory = [], fetchedTindakLanjutHistory = [], fetchedHariLiburList = [];
-    let currentScanSession = "PAGI", myPieChart = null;
+    let currentScanSession = "PAGI", myPieChart = null, myBarChart = null;
 
     let isManualTimeMode = false;
     let customScanDateOverride = null;
@@ -435,6 +447,23 @@
       });
     }
 
+    // FITUR 3: PENENTUAN MODE PAGI/SIANG OTOMATIS DAN INTERAKTIF
+    function autoDetectOrSyncSessionMode(timeStr) {
+      const now = new Date();
+      const dayKeys = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+      const dayKey = dayKeys[now.getDay()];
+
+      const pStart = localStorage.getItem(`TIME_${dayKey}_PAGI_START`) || DEFAULT_TIME_SETTINGS.pagiStart;
+      const sStart = localStorage.getItem(`TIME_${dayKey}_SIANG_START`) || DEFAULT_TIME_SETTINGS.siangStart;
+
+      if (timeStr >= sStart) {
+        currentScanSession = "SIANG";
+      } else {
+        currentScanSession = "PAGI";
+      }
+      document.getElementById("session-mode-text").innerText = `Mode ${currentScanSession === 'PAGI' ? 'Pagi' : 'Siang'}`;
+    }
+
     function toggleTimeModeSetting() {
       if (!isManualTimeMode) {
         const todayStr = new Date().toISOString().split('T')[0];
@@ -448,10 +477,15 @@
         isManualTimeMode = true;
         customScanDateOverride = inputDate.trim();
         customScanTimeOverride = inputTime.trim();
+
+        // Mengikuti jam manual yang diatur
+        autoDetectOrSyncSessionMode(customScanTimeOverride);
       } else {
         isManualTimeMode = false;
         customScanDateOverride = null;
         customScanTimeOverride = null;
+        const nowTimeStr = new Date().toTimeString().split(' ')[0].substring(0, 5);
+        autoDetectOrSyncSessionMode(nowTimeStr);
       }
       updateTimeModeIndicator();
     }
@@ -691,7 +725,7 @@
     function toggleMenuModal() { document.getElementById('menu-modal').classList.toggle('hidden'); }
     function toggleAddStudentModal() { document.getElementById('add-student-modal').classList.toggle('hidden'); }
 
-    // METODOLOGI PERHITUNGAN DAN FILTERING KELAS REALTIME DI MONITORING
+    // FITUR 4 & 5: MONITORING DENGAN GRAFIK BAR PER KELAS & FILTER HANYA SISWA BELUM ABSEN
     async function updateMonitoringDashboard() {
       const targetDate = document.getElementById('monitoring-date-filter').value || new Date().toISOString().split('T')[0];
       const selectedClass = document.getElementById('monitoring-class-filter').value;
@@ -699,22 +733,21 @@
       const queueRecords = await getAllQueueFromDB();
       const rawRecords = [...fetchedTodayAttendance, ...fetchedAttendanceHistory, ...queueRecords].filter(r => r.tanggal === targetDate);
 
-      // Filter siswa berdasarkan kelas terdaftar di master
       const classStudents = cachedStudents.filter(s => selectedClass === "ALL" || s.kelas === selectedClass);
 
       let hadir = 0, terlambat = 0, alpa = 0, bolos = 0, sakit = 0, izin = 0, kegiatan = 0;
+      const unabsentedStudents = [];
 
       classStudents.forEach(std => {
         const stdRec = rawRecords.find(r => r.id_siswa === std.id_siswa);
         if (!stdRec) {
-          // Belum absen sama sekali -> Otomatis ALPA
           alpa++;
+          unabsentedStudents.push(std);
         } else {
           const st = String(stdRec.status_presensi || "HADIR").toUpperCase();
           const jamPagi = stdRec.jam_pagi || stdRec.jam || "";
           const jamSiang = stdRec.jam_siang || "";
 
-          // Otomatis Bolos jika hanya scan pagi (siang kosong) & status presensi masih HADIR
           if (jamPagi && !jamSiang && st === "HADIR" && currentScanSession === "SIANG") {
             bolos++;
           } else if (st === "HADIR") {
@@ -723,6 +756,7 @@
             terlambat++;
           } else if (st === "ALPA") {
             alpa++;
+            unabsentedStudents.push(std);
           } else if (st === "BOLOS") {
             bolos++;
           } else if (st === "SAKIT") {
@@ -744,29 +778,75 @@
       document.getElementById('stat-kegiatan').innerText = kegiatan;
 
       renderPieChart(hadir, terlambat, alpa, bolos, sakit, izin, kegiatan);
-      renderMonitoringActionList(targetDate, selectedClass, rawRecords, classStudents);
+      renderClassBarChart(rawRecords);
+      renderMonitoringActionListOnlyUnabsented(targetDate, unabsentedStudents);
     }
 
-    function renderMonitoringActionList(targetDate, selectedClass, attendanceRecords, filteredStudents) {
-      const container = document.getElementById('monitoring-student-action-list');
-      document.getElementById('monitoring-count-badge').innerText = `${filteredStudents.length} Siswa`;
+    function renderClassBarChart(attendanceRecords) {
+      const ctx = document.getElementById('classBarChart').getContext('2d');
+      if (myBarChart) myBarChart.destroy();
 
-      if (filteredStudents.length === 0) {
-        container.innerHTML = `<p class="text-center text-xs text-gray-400 py-4">Tidak ada data siswa untuk kelas terpilih.</p>`;
+      const classes = [...new Set(cachedStudents.map(s => s.kelas))].filter(Boolean).sort();
+      const labels = [];
+      const percentages = [];
+
+      classes.forEach(cls => {
+        const studentsInCls = cachedStudents.filter(s => s.kelas === cls);
+        let countHadirVal = 0;
+        studentsInCls.forEach(std => {
+          const stdRec = attendanceRecords.find(r => r.id_siswa === std.id_siswa);
+          if (stdRec) {
+            const st = String(stdRec.status_presensi || "HADIR").toUpperCase();
+            if (st === "HADIR" || st === "TERLAMBAT") countHadirVal++;
+          }
+        });
+        const pct = studentsInCls.length > 0 ? Math.round((countHadirVal / studentsInCls.length) * 100) : 0;
+        labels.push(cls);
+        percentages.push(pct);
+      });
+
+      myBarChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: '% Kehadiran',
+            data: percentages,
+            backgroundColor: '#0b3c5d',
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' } },
+            x: { ticks: { font: { size: 9 } } }
+          },
+          onClick: (e, elements) => {
+            if (elements.length > 0) {
+              const idx = elements[0].index;
+              const selectedCls = labels[idx];
+              document.getElementById('monitoring-class-filter').value = selectedCls;
+              updateMonitoringDashboard();
+            }
+          }
+        }
+      });
+    }
+
+    // FITUR 5: FITUR DAFTAR HANYA SISWA YANG BELUM ABSEN SAJA
+    function renderMonitoringActionListOnlyUnabsented(targetDate, unabsentedStudents) {
+      const container = document.getElementById('monitoring-student-action-list');
+      document.getElementById('monitoring-count-badge').innerText = `${unabsentedStudents.length} Siswa Belum Absen`;
+
+      if (unabsentedStudents.length === 0) {
+        container.innerHTML = `<div class="bg-emerald-50 border border-emerald-200 p-4 rounded-xl text-center text-xs text-emerald-800 font-bold"><i class="fa-solid fa-circle-check"></i> Semua siswa pada kelas ini sudah melakukan presensi!</div>`;
         return;
       }
 
-      container.innerHTML = filteredStudents.map(std => {
-        const stdRec = attendanceRecords.find(r => r.id_siswa === std.id_siswa);
-        let currentStatus = "ALPA"; // Default otomatis bagi yang belum scan
-
-        if (stdRec) {
-          currentStatus = String(stdRec.status_presensi).toUpperCase();
-          if (stdRec.jam_pagi && !stdRec.jam_siang && currentStatus === "HADIR" && currentScanSession === "SIANG") {
-            currentStatus = "BOLOS";
-          }
-        }
-
+      container.innerHTML = unabsentedStudents.map(std => {
         return `
           <div class="p-2.5 bg-slate-50 border border-gray-200 rounded-xl space-y-1.5">
             <div class="flex items-center justify-between">
@@ -774,9 +854,8 @@
                 <h5 class="font-bold text-xs text-gray-900 truncate">${std.nama}</h5>
                 <p class="text-[10px] text-gray-500">${std.kelas} | ID: ${std.id_siswa}</p>
               </div>
-              <span class="text-[9px] font-extrabold px-2 py-0.5 rounded-full ${getStatusBadgeClass(currentStatus)}">${currentStatus}</span>
+              <span class="text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-red-100 text-red-800">BELUM SCAN</span>
             </div>
-            <!-- BARIS AKSI MANUAL TERENDAH: HADIR, IZIN, SAKIT, KEG. (ALPA & BOLOS DITERAPKAN OTOMATIS) -->
             <div class="grid grid-cols-4 gap-1.5 pt-1">
               <button onclick="setManualPresensiAction('${std.id_siswa}', 'HADIR', '${targetDate}')" class="py-1 bg-emerald-600 text-white font-bold text-[9px] rounded-lg">Hadir</button>
               <button onclick="setManualPresensiAction('${std.id_siswa}', 'IZIN', '${targetDate}')" class="py-1 bg-indigo-600 text-white font-bold text-[9px] rounded-lg">Izin</button>
@@ -822,8 +901,8 @@
       if (myPieChart) myPieChart.destroy();
 
       const total = hadir + terlambat + alpa + bolos + sakit + izin + kegiatan;
-      const totalHadirValid = hadir + terlambat;
-      document.getElementById('chart-center-percent').innerText = `${total > 0 ? Math.round((totalHadirValid / total) * 100) : 0}%`;
+      const totalHadirVal = hadir + terlambat;
+      document.getElementById('chart-center-percent').innerText = `${total > 0 ? Math.round((totalHadirVal / total) * 100) : 0}%`;
 
       myPieChart = new Chart(ctx, {
         type: 'doughnut',
@@ -937,12 +1016,52 @@
 
     function toggleCameraState() { isCameraActive ? stopCamera() : initScanner(); }
 
+    // FITUR 1: SCAN SISWA BERIKUTNYA DENGAN KAMERA LANGSUNG ACTIVE STANDBY
+    async function nextScanAndAutoStartCamera() {
+      toggleView('scanner');
+      if (!isCameraActive) {
+        await initScanner();
+      }
+    }
+
+    // FITUR 2: LOGIKA LOGIKA PENGATURAN WAKTU SCAN (HADIR VS TERLAMBAT VS TERTOLLAK)
     async function onScanSuccess(text) {
       await stopCamera();
       
       const now = new Date();
       const dateStr = (isManualTimeMode && customScanDateOverride) ? customScanDateOverride : now.toISOString().split('T')[0];
       const timeStr = (isManualTimeMode && customScanTimeOverride) ? customScanTimeOverride : now.toTimeString().split(' ')[0].substring(0, 5);
+
+      // Cek Pengaturan Jam Hari Ini
+      const dayKeys = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+      const scanDateObj = new Date(dateStr);
+      const dayKey = dayKeys[scanDateObj.getDay()];
+
+      const pStart = localStorage.getItem(`TIME_${dayKey}_PAGI_START`) || DEFAULT_TIME_SETTINGS.pagiStart;
+      const pLimit = localStorage.getItem(`TIME_${dayKey}_PAGI_LIMIT`) || DEFAULT_TIME_SETTINGS.pagiLimit;
+      const sStart = localStorage.getItem(`TIME_${dayKey}_SIANG_START`) || DEFAULT_TIME_SETTINGS.siangStart;
+      const sLimit = localStorage.getItem(`TIME_${dayKey}_SIANG_LIMIT`) || DEFAULT_TIME_SETTINGS.siangLimit;
+
+      autoDetectOrSyncSessionMode(timeStr);
+
+      let computedStatus = "HADIR";
+
+      if (currentScanSession === "PAGI") {
+        if (timeStr < pStart) {
+          alert(`Presensi Tersebut Ditolak! Belum memasuki jam presensi pagi (${pStart}).`);
+          return initScanner();
+        } else if (timeStr > pLimit) {
+          computedStatus = "TERLAMBAT";
+        }
+      } else if (currentScanSession === "SIANG") {
+        if (timeStr < sStart) {
+          alert(`Presensi Pulang Ditolak! Belum memasuki jam pulang (${sStart}).`);
+          return initScanner();
+        } else if (timeStr > sLimit) {
+          alert(`Presensi Pulang Ditolak! Sudah melewati batas jam presensi siang (${sLimit}).`);
+          return initScanner();
+        }
+      }
 
       const tx = db.transaction("students", "readonly");
       tx.objectStore("students").get(text.trim()).onsuccess = async (e) => {
@@ -952,7 +1071,7 @@
             queue_id: `${dateStr}_${student.id_siswa}_${currentScanSession}`,
             tanggal: dateStr, jam: timeStr, id_siswa: student.id_siswa,
             nama: student.nama, kelas: student.kelas, sesi: currentScanSession,
-            status_presensi: "HADIR", timestamp: Date.now()
+            status_presensi: computedStatus, timestamp: Date.now()
           };
           await saveToAttendanceQueue(record);
           if (navigator.onLine) syncQueueToGAS();
@@ -961,9 +1080,25 @@
           document.getElementById('res-nisn').innerText = student.nisn || "-";
           document.getElementById('res-kelas').innerText = student.kelas;
           document.getElementById('res-jam-scan').innerText = timeStr;
+          
+          const statusCardBox = document.getElementById('status-card-box');
+          const badgeBox = document.getElementById('res-badge-box');
+          const statusText = document.getElementById('res-presensi-status');
+
+          statusText.innerText = computedStatus;
+
+          if (computedStatus === "TERLAMBAT") {
+            statusCardBox.className = "bg-amber-50 border border-amber-200 rounded-2xl p-4 text-center shadow-sm space-y-2";
+            badgeBox.className = "text-amber-600 font-extrabold text-xl";
+          } else {
+            statusCardBox.className = "bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-center shadow-sm space-y-2";
+            badgeBox.className = "text-emerald-600 font-extrabold text-xl";
+          }
+
           toggleView('success');
         } else {
           alert("Siswa tidak ditemukan!");
+          initScanner();
         }
       };
     }
@@ -1029,6 +1164,9 @@
       await initDatabase();
       renderDaysConfigForm();
       await autoDownloadMasterStudents();
+
+      const nowTimeStr = new Date().toTimeString().split(' ')[0].substring(0, 5);
+      autoDetectOrSyncSessionMode(nowTimeStr);
     };
   </script>
 </body>
