@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Sistem Absensi Murid - v2.2</title>
+  <title>Sistem Absensi Murid - v2.3</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
@@ -33,7 +33,7 @@
             <span id="status-dot" class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span>
             <span id="status-text" class="text-xs font-semibold">Memeriksa...</span>
           </div>
-          <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30 block mt-0.5">v2.2</span>
+          <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30 block mt-0.5">v2.3</span>
         </div>
       </div>
     </header>
@@ -125,7 +125,7 @@
       <div id="students-list-container" class="space-y-2 pb-4"></div>
     </main>
 
-    <!-- VIEW 4: MONITORING PRESENSI & PRESENSI MANUAL SISWA -->
+    <!-- VIEW 4: MONITORING PRESENSI (WITH PRECISE CLASS/DATE FILTERING) -->
     <main id="view-monitoring" class="flex-1 flex-col overflow-y-auto no-scrollbar bg-slate-50 p-4 hidden">
       <div class="flex items-center justify-between mb-3">
         <div>
@@ -149,7 +149,7 @@
       </div>
 
       <div class="bg-white p-3.5 rounded-2xl border border-gray-100 shadow-sm mb-3 text-center">
-        <h4 class="text-xs font-bold text-gray-700 mb-2">Persentase Kehadiran</h4>
+        <h4 class="text-xs font-bold text-gray-700 mb-2">Persentase Kehadiran Kelas</h4>
         <div class="w-44 h-44 mx-auto relative flex items-center justify-center">
           <canvas id="attendancePieChart"></canvas>
           <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
@@ -159,15 +159,18 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-3 gap-2 mb-3">
-        <div class="bg-emerald-50 border border-emerald-100 p-2 rounded-xl text-center"><span class="block text-[9px] text-emerald-600 font-bold">Hadir</span><span id="stat-hadir" class="text-sm font-extrabold text-emerald-800">0</span></div>
-        <div class="bg-amber-50 border border-amber-100 p-2 rounded-xl text-center"><span class="block text-[9px] text-amber-600 font-bold">Alpa</span><span id="stat-alpa" class="text-sm font-extrabold text-amber-800">0</span></div>
-        <div class="bg-rose-50 border border-rose-100 p-2 rounded-xl text-center"><span class="block text-[9px] text-rose-600 font-bold">Bolos</span><span id="stat-bolos" class="text-sm font-extrabold text-rose-800">0</span></div>
-        <div class="bg-blue-50 border border-blue-100 p-2 rounded-xl text-center"><span class="block text-[9px] text-blue-600 font-bold">Sakit</span><span id="stat-sakit" class="text-sm font-extrabold text-blue-800">0</span></div>
-        <div class="bg-indigo-50 border border-indigo-100 p-2 rounded-xl text-center"><span class="block text-[9px] text-indigo-600 font-bold">Izin</span><span id="stat-izin" class="text-sm font-extrabold text-indigo-800">0</span></div>
-        <div class="bg-purple-50 border border-purple-100 p-2 rounded-xl text-center"><span class="block text-[9px] text-purple-600 font-bold">Kegiatan</span><span id="stat-kegiatan" class="text-sm font-extrabold text-purple-800">0</span></div>
+      <!-- KARTU METRIK RINGKASAN TERMASUK TERLAMBAT -->
+      <div class="grid grid-cols-4 gap-1.5 mb-3">
+        <div class="bg-emerald-50 border border-emerald-100 p-2 rounded-xl text-center"><span class="block text-[9px] text-emerald-600 font-bold">Hadir</span><span id="stat-hadir" class="text-xs font-extrabold text-emerald-800">0</span></div>
+        <div class="bg-amber-50 border border-amber-100 p-2 rounded-xl text-center"><span class="block text-[9px] text-amber-600 font-bold">Terlambat</span><span id="stat-terlambat" class="text-xs font-extrabold text-amber-800">0</span></div>
+        <div class="bg-red-50 border border-red-100 p-2 rounded-xl text-center"><span class="block text-[9px] text-red-600 font-bold">Alpa</span><span id="stat-alpa" class="text-xs font-extrabold text-red-800">0</span></div>
+        <div class="bg-rose-50 border border-rose-100 p-2 rounded-xl text-center"><span class="block text-[9px] text-rose-600 font-bold">Bolos</span><span id="stat-bolos" class="text-xs font-extrabold text-rose-800">0</span></div>
+        <div class="bg-blue-50 border border-blue-100 p-2 rounded-xl text-center"><span class="block text-[9px] text-blue-600 font-bold">Sakit</span><span id="stat-sakit" class="text-xs font-extrabold text-blue-800">0</span></div>
+        <div class="bg-indigo-50 border border-indigo-100 p-2 rounded-xl text-center"><span class="block text-[9px] text-indigo-600 font-bold">Izin</span><span id="stat-izin" class="text-xs font-extrabold text-indigo-800">0</span></div>
+        <div class="bg-purple-50 border border-purple-100 p-2 rounded-xl text-center col-span-2"><span class="block text-[9px] text-purple-600 font-bold">Kegiatan</span><span id="stat-kegiatan" class="text-xs font-extrabold text-purple-800">0</span></div>
       </div>
 
+      <!-- DAFTAR SISWA & TOMBOL AKSI PRESENSI MANUAL -->
       <div class="bg-white p-3 rounded-2xl border border-gray-200 shadow-sm mb-4">
         <h3 class="font-bold text-xs text-gray-800 mb-2 border-b border-gray-100 pb-1.5 flex items-center justify-between">
           <span>Daftar Siswa & Aksi Presensi</span>
@@ -246,14 +249,13 @@
       <div id="hari-libur-list-container" class="space-y-2"></div>
     </main>
 
-    <!-- VIEW 8: PENGATURAN SYSTEM WITH PREVIEW MODAL/CARD -->
+    <!-- VIEW 8: PENGATURAN SYSTEM -->
     <main id="view-settings" class="flex-1 flex-col overflow-y-auto no-scrollbar bg-slate-50 p-4 hidden">
       <div class="mb-3">
         <h2 class="font-bold text-lg text-gray-900">Pengaturan System</h2>
         <p class="text-xs text-gray-500">Konfigurasi Jam Presensi & Identitas Sekolah</p>
       </div>
 
-      <!-- MODUL LENGKAP FITUR BARU: PRATINJAU PENGATURAN WAKTU TERSIMPAN -->
       <div class="bg-white p-3.5 rounded-2xl border border-emerald-200 shadow-sm mb-3 space-y-2">
         <div class="flex items-center justify-between border-b border-gray-100 pb-1.5">
           <div class="flex items-center space-x-1.5">
@@ -465,7 +467,6 @@
       }
     }
 
-    // RENder RINGKASAN PENGATURAN WAKTU TERSIMPAN
     function renderTimeSettingsSummary() {
       const container = document.getElementById("saved-time-summary-box");
       let html = "";
@@ -690,39 +691,64 @@
     function toggleMenuModal() { document.getElementById('menu-modal').classList.toggle('hidden'); }
     function toggleAddStudentModal() { document.getElementById('add-student-modal').classList.toggle('hidden'); }
 
+    // METODOLOGI PERHITUNGAN DAN FILTERING KELAS REALTIME DI MONITORING
     async function updateMonitoringDashboard() {
       const targetDate = document.getElementById('monitoring-date-filter').value || new Date().toISOString().split('T')[0];
       const selectedClass = document.getElementById('monitoring-class-filter').value;
       
       const queueRecords = await getAllQueueFromDB();
-      const allRecords = [...fetchedTodayAttendance, ...fetchedAttendanceHistory, ...queueRecords].filter(r => r.tanggal === targetDate);
+      const rawRecords = [...fetchedTodayAttendance, ...fetchedAttendanceHistory, ...queueRecords].filter(r => r.tanggal === targetDate);
 
-      let hadir = 0, alpa = 0, bolos = 0, sakit = 0, izin = 0, kegiatan = 0;
-      allRecords.forEach(r => {
-        const st = String(r.status_presensi || "HADIR").toUpperCase();
-        if (st === "HADIR") hadir++;
-        else if (st === "ALPA") alpa++;
-        else if (st === "BOLOS") bolos++;
-        else if (st === "SAKIT") sakit++;
-        else if (st === "IZIN") izin++;
-        else if (st === "KEGIATAN") kegiatan++;
+      // Filter siswa berdasarkan kelas terdaftar di master
+      const classStudents = cachedStudents.filter(s => selectedClass === "ALL" || s.kelas === selectedClass);
+
+      let hadir = 0, terlambat = 0, alpa = 0, bolos = 0, sakit = 0, izin = 0, kegiatan = 0;
+
+      classStudents.forEach(std => {
+        const stdRec = rawRecords.find(r => r.id_siswa === std.id_siswa);
+        if (!stdRec) {
+          // Belum absen sama sekali -> Otomatis ALPA
+          alpa++;
+        } else {
+          const st = String(stdRec.status_presensi || "HADIR").toUpperCase();
+          const jamPagi = stdRec.jam_pagi || stdRec.jam || "";
+          const jamSiang = stdRec.jam_siang || "";
+
+          // Otomatis Bolos jika hanya scan pagi (siang kosong) & status presensi masih HADIR
+          if (jamPagi && !jamSiang && st === "HADIR" && currentScanSession === "SIANG") {
+            bolos++;
+          } else if (st === "HADIR") {
+            hadir++;
+          } else if (st === "TERLAMBAT") {
+            terlambat++;
+          } else if (st === "ALPA") {
+            alpa++;
+          } else if (st === "BOLOS") {
+            bolos++;
+          } else if (st === "SAKIT") {
+            sakit++;
+          } else if (st === "IZIN") {
+            izin++;
+          } else if (st === "KEGIATAN") {
+            kegiatan++;
+          }
+        }
       });
 
       document.getElementById('stat-hadir').innerText = hadir;
+      document.getElementById('stat-terlambat').innerText = terlambat;
       document.getElementById('stat-alpa').innerText = alpa;
       document.getElementById('stat-bolos').innerText = bolos;
       document.getElementById('stat-sakit').innerText = sakit;
       document.getElementById('stat-izin').innerText = izin;
       document.getElementById('stat-kegiatan').innerText = kegiatan;
 
-      renderPieChart(hadir, alpa, bolos, sakit, izin, kegiatan);
-      renderMonitoringActionList(targetDate, selectedClass, allRecords);
+      renderPieChart(hadir, terlambat, alpa, bolos, sakit, izin, kegiatan);
+      renderMonitoringActionList(targetDate, selectedClass, rawRecords, classStudents);
     }
 
-    function renderMonitoringActionList(targetDate, selectedClass, attendanceRecords) {
+    function renderMonitoringActionList(targetDate, selectedClass, attendanceRecords, filteredStudents) {
       const container = document.getElementById('monitoring-student-action-list');
-      const filteredStudents = cachedStudents.filter(s => selectedClass === "ALL" || s.kelas === selectedClass);
-      
       document.getElementById('monitoring-count-badge').innerText = `${filteredStudents.length} Siswa`;
 
       if (filteredStudents.length === 0) {
@@ -732,7 +758,14 @@
 
       container.innerHTML = filteredStudents.map(std => {
         const stdRec = attendanceRecords.find(r => r.id_siswa === std.id_siswa);
-        const currentStatus = stdRec ? String(stdRec.status_presensi).toUpperCase() : "BELUM";
+        let currentStatus = "ALPA"; // Default otomatis bagi yang belum scan
+
+        if (stdRec) {
+          currentStatus = String(stdRec.status_presensi).toUpperCase();
+          if (stdRec.jam_pagi && !stdRec.jam_siang && currentStatus === "HADIR" && currentScanSession === "SIANG") {
+            currentStatus = "BOLOS";
+          }
+        }
 
         return `
           <div class="p-2.5 bg-slate-50 border border-gray-200 rounded-xl space-y-1.5">
@@ -743,12 +776,11 @@
               </div>
               <span class="text-[9px] font-extrabold px-2 py-0.5 rounded-full ${getStatusBadgeClass(currentStatus)}">${currentStatus}</span>
             </div>
-            <div class="grid grid-cols-6 gap-1 pt-1">
+            <!-- BARIS AKSI MANUAL TERENDAH: HADIR, IZIN, SAKIT, KEG. (ALPA & BOLOS DITERAPKAN OTOMATIS) -->
+            <div class="grid grid-cols-4 gap-1.5 pt-1">
               <button onclick="setManualPresensiAction('${std.id_siswa}', 'HADIR', '${targetDate}')" class="py-1 bg-emerald-600 text-white font-bold text-[9px] rounded-lg">Hadir</button>
               <button onclick="setManualPresensiAction('${std.id_siswa}', 'IZIN', '${targetDate}')" class="py-1 bg-indigo-600 text-white font-bold text-[9px] rounded-lg">Izin</button>
               <button onclick="setManualPresensiAction('${std.id_siswa}', 'SAKIT', '${targetDate}')" class="py-1 bg-blue-600 text-white font-bold text-[9px] rounded-lg">Sakit</button>
-              <button onclick="setManualPresensiAction('${std.id_siswa}', 'ALPA', '${targetDate}')" class="py-1 bg-amber-600 text-white font-bold text-[9px] rounded-lg">Alpa</button>
-              <button onclick="setManualPresensiAction('${std.id_siswa}', 'BOLOS', '${targetDate}')" class="py-1 bg-rose-600 text-white font-bold text-[9px] rounded-lg">Bolos</button>
               <button onclick="setManualPresensiAction('${std.id_siswa}', 'KEGIATAN', '${targetDate}')" class="py-1 bg-purple-600 text-white font-bold text-[9px] rounded-lg">Keg.</button>
             </div>
           </div>
@@ -758,9 +790,10 @@
 
     function getStatusBadgeClass(status) {
       if (status === "HADIR") return "bg-emerald-100 text-emerald-800";
+      if (status === "TERLAMBAT") return "bg-amber-100 text-amber-800";
       if (status === "IZIN") return "bg-indigo-100 text-indigo-800";
       if (status === "SAKIT") return "bg-blue-100 text-blue-800";
-      if (status === "ALPA") return "bg-amber-100 text-amber-800";
+      if (status === "ALPA") return "bg-red-100 text-red-800";
       if (status === "BOLOS") return "bg-rose-100 text-rose-800";
       if (status === "KEGIATAN") return "bg-purple-100 text-purple-800";
       return "bg-gray-200 text-gray-600";
@@ -773,9 +806,9 @@
       const timeStr = (isManualTimeMode && customScanTimeOverride) ? customScanTimeOverride : new Date().toTimeString().split(' ')[0].substring(0, 5);
 
       const record = {
-        queue_id: `${targetDate}_${idSiswa}_PAGI`,
+        queue_id: `${targetDate}_${idSiswa}_${currentScanSession}`,
         tanggal: targetDate, jam: timeStr, id_siswa: idSiswa,
-        nama: student.nama, kelas: student.kelas, sesi: "PAGI",
+        nama: student.nama, kelas: student.kelas, sesi: currentScanSession,
         status_presensi: status, timestamp: Date.now()
       };
 
@@ -784,18 +817,19 @@
       if (navigator.onLine) syncQueueToGAS();
     }
 
-    function renderPieChart(hadir, alpa, bolos, sakit, izin, kegiatan) {
+    function renderPieChart(hadir, terlambat, alpa, bolos, sakit, izin, kegiatan) {
       const ctx = document.getElementById('attendancePieChart').getContext('2d');
       if (myPieChart) myPieChart.destroy();
 
-      const total = hadir + alpa + bolos + sakit + izin + kegiatan;
-      document.getElementById('chart-center-percent').innerText = `${total > 0 ? Math.round((hadir / total) * 100) : 0}%`;
+      const total = hadir + terlambat + alpa + bolos + sakit + izin + kegiatan;
+      const totalHadirValid = hadir + terlambat;
+      document.getElementById('chart-center-percent').innerText = `${total > 0 ? Math.round((totalHadirValid / total) * 100) : 0}%`;
 
       myPieChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
-          labels: ['Hadir', 'Alpa', 'Bolos', 'Sakit', 'Izin', 'Kegiatan'],
-          datasets: [{ data: [hadir, alpa, bolos, sakit, izin, kegiatan], backgroundColor: ['#10b981', '#f59e0b', '#f43f5e', '#3b82f6', '#6366f1', '#a855f7'] }]
+          labels: ['Hadir', 'Terlambat', 'Alpa', 'Bolos', 'Sakit', 'Izin', 'Kegiatan'],
+          datasets: [{ data: [hadir, terlambat, alpa, bolos, sakit, izin, kegiatan], backgroundColor: ['#10b981', '#f59e0b', '#ef4444', '#f43f5e', '#3b82f6', '#6366f1', '#a855f7'] }]
         },
         options: { responsive: true, maintainAspectRatio: false, cutout: '72%', plugins: { legend: { display: false } } }
       });
