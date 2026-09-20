@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#0b3c5d">
-  <title>Sistem Absensi Murid - v2.6</title>
+  <title>Sistem Absensi Murid - v2.7</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
@@ -20,8 +20,8 @@
 
   <div class="w-full max-w-md h-[100vh] sm:h-[840px] bg-white flex flex-col justify-between shadow-2xl overflow-hidden sm:rounded-3xl relative border border-gray-200">
 
-    <!-- HEADER UTAMA -->
-    <header class="bg-[#0b3c5d] text-white py-3.5 px-4 z-30 shadow-md flex-shrink-0">
+    <!-- FITUR 6: FIXED STICKY HEADER UTAMA (TIDAK IKUT TERGULIR) -->
+    <header class="bg-[#0b3c5d] text-white py-3.5 px-4 z-40 shadow-md flex-shrink-0 sticky top-0">
       <div class="flex items-center justify-between">
         <div class="flex items-center space-x-3">
           <div class="min-w-0 flex-1">
@@ -34,300 +34,319 @@
             <span id="status-dot" class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span>
             <span id="status-text" class="text-xs font-semibold">Memeriksa...</span>
           </div>
-          <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30 block mt-0.5">v2.6</span>
+          <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30 block mt-0.5">v2.7</span>
         </div>
       </div>
     </header>
 
-    <!-- VIEW 1: SCANNER KAMERA -->
-    <main id="view-scanner" class="flex-1 flex flex-col justify-between relative bg-gray-900 overflow-hidden">
-      <div class="flex-1 relative flex flex-col items-center justify-center p-4 bg-black">
-        <div class="w-full h-full max-h-[420px] overflow-hidden rounded-2xl relative flex items-center justify-center bg-gray-800 border border-gray-700">
-          <div id="reader" class="w-full h-full"></div>
-          <div id="camera-off-placeholder" class="absolute inset-0 flex flex-col items-center justify-center text-center p-6 space-y-3 bg-gray-900 z-10">
-            <i class="fa-solid fa-camera text-gray-500 text-4xl"></i>
-            <p class="text-xs text-gray-400 font-semibold">Kamera Non-Aktif.<br>Klik "Nyalakan Kamera" untuk memindai QR.</p>
+    <!-- AREA BADAN APLIKASI (SCROLLABLE CONTAINER) -->
+    <div class="flex-1 overflow-y-auto no-scrollbar relative flex flex-col">
+
+      <!-- VIEW 1: SCANNER KAMERA -->
+      <main id="view-scanner" class="flex-1 flex flex-col justify-between relative bg-gray-900 min-h-full">
+        <div class="flex-1 relative flex flex-col items-center justify-center p-4 bg-black">
+          <div class="w-full h-full max-h-[420px] overflow-hidden rounded-2xl relative flex items-center justify-center bg-gray-800 border border-gray-700">
+            <div id="reader" class="w-full h-full"></div>
+            <div id="camera-off-placeholder" class="absolute inset-0 flex flex-col items-center justify-center text-center p-6 space-y-3 bg-gray-900 z-10">
+              <i class="fa-solid fa-camera text-gray-500 text-4xl"></i>
+              <p class="text-xs text-gray-400 font-semibold">Kamera Non-Aktif.<br>Klik "Nyalakan Kamera" untuk memindai QR.</p>
+            </div>
+          </div>
+
+          <div id="scan-frame-box" class="absolute w-64 h-64 pointer-events-none flex items-center justify-center z-20 hidden">
+            <div class="absolute -top-1 -left-1 w-8 h-8 border-t-4 border-l-4 border-green-400 rounded-tl-xl"></div>
+            <div class="absolute -top-1 -right-1 w-8 h-8 border-t-4 border-r-4 border-green-400 rounded-tr-xl"></div>
+            <div class="absolute -bottom-1 -left-1 w-8 h-8 border-b-4 border-l-4 border-green-400 rounded-bl-xl"></div>
+            <div class="absolute -bottom-1 -right-1 w-8 h-8 border-b-4 border-r-4 border-green-400 rounded-br-xl"></div>
+          </div>
+
+          <div id="scan-mode-indicator" class="absolute top-4 left-4 right-4 bg-blue-900/80 text-blue-100 text-[10px] font-bold py-1 px-3 rounded-full text-center border border-blue-400/30 backdrop-blur-sm z-20 shadow">
+            Mode Waktu: AUTO (Realtime Perangkat)
+          </div>
+
+          <div class="absolute bottom-4 left-4 right-4 flex items-center justify-between gap-2 z-20">
+            <button onclick="toggleScanSessionMode()" class="bg-black/60 text-white flex-1 py-2 rounded-xl text-[11px] font-medium flex flex-col items-center justify-center gap-0.5 backdrop-blur-md border border-white/10">
+              <i id="session-icon" class="fa-solid fa-sun text-amber-400 text-xs"></i>
+              <span id="session-mode-text">Mode Pagi</span>
+            </button>
+
+            <button id="btn-toggle-camera" onclick="toggleCameraState()" class="bg-blue-600 text-white flex-[2] py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 shadow-lg">
+              <i class="fa-solid fa-video"></i>
+              <span id="btn-camera-text">Nyalakan Kamera</span>
+            </button>
+
+            <button onclick="toggleTimeModeSetting()" class="bg-black/60 text-white flex-1 py-2 rounded-xl text-[11px] font-medium flex flex-col items-center justify-center gap-0.5 backdrop-blur-md border border-white/10">
+              <i class="fa-solid fa-clock text-amber-400 text-xs"></i>
+              <span>Mode Waktu</span>
+            </button>
           </div>
         </div>
 
-        <div id="scan-frame-box" class="absolute w-64 h-64 pointer-events-none flex items-center justify-center z-20 hidden">
-          <div class="absolute -top-1 -left-1 w-8 h-8 border-t-4 border-l-4 border-green-400 rounded-tl-xl"></div>
-          <div class="absolute -top-1 -right-1 w-8 h-8 border-t-4 border-r-4 border-green-400 rounded-tr-xl"></div>
-          <div class="absolute -bottom-1 -left-1 w-8 h-8 border-b-4 border-l-4 border-green-400 rounded-bl-xl"></div>
-          <div class="absolute -bottom-1 -right-1 w-8 h-8 border-b-4 border-r-4 border-green-400 rounded-br-xl"></div>
+        <div class="bg-white p-3 border-t border-gray-100 flex items-center justify-between shadow-sm z-20">
+          <div class="flex items-center space-x-3">
+            <div class="w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center font-bold"><i class="fa-solid fa-bolt text-sm"></i></div>
+            <div>
+              <h4 class="text-xs font-bold text-gray-800">Queue Offline Sync</h4>
+              <p id="sync-info-text" class="text-[10px] text-gray-500">Otomatis sinkron ke Sheet...</p>
+            </div>
+          </div>
+          <div class="text-right pl-2 border-l border-gray-200 cursor-pointer" onclick="triggerManualSync()">
+            <span class="text-[10px] text-gray-400 block font-medium">Queue</span>
+            <span id="queue-count" class="text-sm font-extrabold text-gray-800">0</span>
+          </div>
         </div>
+      </main>
 
-        <div id="scan-mode-indicator" class="absolute top-4 left-4 right-4 bg-blue-900/80 text-blue-100 text-[10px] font-bold py-1 px-3 rounded-full text-center border border-blue-400/30 backdrop-blur-sm z-20 shadow">
-          Mode Waktu: AUTO (Realtime Perangkat)
+      <!-- VIEW 2: HASIL SCAN -->
+      <main id="view-success" class="flex-1 flex-col bg-slate-50 p-4 hidden">
+        <div id="status-card-box" class="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-center shadow-sm space-y-2">
+          <h3 id="res-nama" class="font-bold text-gray-900 text-lg truncate">-</h3>
+          <p class="text-xs text-gray-600">NISN: <span id="res-nisn" class="font-bold">-</span> | Kelas: <span id="res-kelas" class="font-bold">-</span></p>
+          <div id="res-badge-box" class="text-emerald-600 font-extrabold text-xl"><i id="res-icon" class="fa-solid fa-circle-check"></i> <span id="res-presensi-status">HADIR</span></div>
+          <p class="text-xs text-emerald-700"><i class="fa-regular fa-clock"></i> <span id="res-jam-scan">00:00:00</span></p>
         </div>
+        <button onclick="nextScanAndAutoStartCamera()" class="w-full mt-4 bg-blue-600 text-white font-semibold py-3 rounded-xl text-xs flex items-center justify-center gap-2 shadow-md">
+          <i class="fa-solid fa-qrcode"></i> Scan Siswa Berikutnya
+        </button>
+      </main>
 
-        <div class="absolute bottom-4 left-4 right-4 flex items-center justify-between gap-2 z-20">
-          <button onclick="toggleScanSessionMode()" class="bg-black/60 text-white flex-1 py-2 rounded-xl text-[11px] font-medium flex flex-col items-center justify-center gap-0.5 backdrop-blur-md border border-white/10">
-            <i id="session-icon" class="fa-solid fa-sun text-amber-400 text-xs"></i>
-            <span id="session-mode-text">Mode Pagi</span>
-          </button>
-
-          <button id="btn-toggle-camera" onclick="toggleCameraState()" class="bg-blue-600 text-white flex-[2] py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 shadow-lg">
-            <i class="fa-solid fa-video"></i>
-            <span id="btn-camera-text">Nyalakan Kamera</span>
-          </button>
-
-          <button onclick="toggleTimeModeSetting()" class="bg-black/60 text-white flex-1 py-2 rounded-xl text-[11px] font-medium flex flex-col items-center justify-center gap-0.5 backdrop-blur-md border border-white/10">
-            <i class="fa-solid fa-clock text-amber-400 text-xs"></i>
-            <span>Mode Waktu</span>
-          </button>
-        </div>
-      </div>
-
-      <div class="bg-white p-3 border-t border-gray-100 flex items-center justify-between shadow-sm z-20">
-        <div class="flex items-center space-x-3">
-          <div class="w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center font-bold"><i class="fa-solid fa-bolt text-sm"></i></div>
+      <!-- VIEW 3: DATA MASTER SISWA -->
+      <main id="view-students" class="flex-1 flex-col bg-slate-50 p-4 hidden">
+        <div class="flex items-center justify-between mb-2">
           <div>
-            <h4 class="text-xs font-bold text-gray-800">Queue Offline Sync</h4>
-            <p id="sync-info-text" class="text-[10px] text-gray-500">Otomatis sinkron ke Sheet...</p>
+            <h2 class="font-bold text-lg text-gray-900">Data Master Siswa</h2>
+            <p class="text-xs text-gray-500">Kelola & Tambah Siswa Baru</p>
           </div>
-        </div>
-        <div class="text-right pl-2 border-l border-gray-200 cursor-pointer" onclick="triggerManualSync()">
-          <span class="text-[10px] text-gray-400 block font-medium">Queue</span>
-          <span id="queue-count" class="text-sm font-extrabold text-gray-800">0</span>
-        </div>
-      </div>
-    </main>
-
-    <!-- VIEW 2: HASIL SCAN -->
-    <main id="view-success" class="flex-1 flex-col overflow-y-auto no-scrollbar bg-slate-50 p-4 hidden">
-      <div id="status-card-box" class="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-center shadow-sm space-y-2">
-        <h3 id="res-nama" class="font-bold text-gray-900 text-lg truncate">-</h3>
-        <p class="text-xs text-gray-600">NISN: <span id="res-nisn" class="font-bold">-</span> | Kelas: <span id="res-kelas" class="font-bold">-</span></p>
-        <div id="res-badge-box" class="text-emerald-600 font-extrabold text-xl"><i id="res-icon" class="fa-solid fa-circle-check"></i> <span id="res-presensi-status">HADIR</span></div>
-        <p class="text-xs text-emerald-700"><i class="fa-regular fa-clock"></i> <span id="res-jam-scan">00:00:00</span></p>
-      </div>
-      <button onclick="nextScanAndAutoStartCamera()" class="w-full mt-4 bg-blue-600 text-white font-semibold py-3 rounded-xl text-xs flex items-center justify-center gap-2 shadow-md">
-        <i class="fa-solid fa-qrcode"></i> Scan Siswa Berikutnya
-      </button>
-    </main>
-
-    <!-- VIEW 3: DATA MASTER SISWA -->
-    <main id="view-students" class="flex-1 flex-col overflow-y-auto no-scrollbar bg-slate-50 p-4 hidden">
-      <div class="flex items-center justify-between mb-2">
-        <div>
-          <h2 class="font-bold text-lg text-gray-900">Data Master Siswa</h2>
-          <p class="text-xs text-gray-500">Kelola & Tambah Siswa Baru</p>
-        </div>
-        <div class="flex items-center space-x-1.5">
-          <button onclick="toggleAddStudentModal()" class="bg-emerald-600 text-white p-2.5 rounded-xl text-xs font-bold flex items-center gap-1 shadow-sm"><i class="fa-solid fa-plus"></i> Tambah</button>
-          <button onclick="autoDownloadMasterStudents()" class="bg-blue-50 text-blue-600 p-2.5 rounded-xl text-xs font-bold border border-blue-200"><i class="fa-solid fa-rotate"></i></button>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-2 gap-2 mb-3">
-        <div class="bg-blue-50 border border-blue-100 p-2.5 rounded-xl text-center">
-          <span class="block text-[9px] text-blue-600 font-bold">Total Siswa Keseluruhan</span>
-          <span id="std-count-total" class="text-base font-black text-blue-900">0</span>
-        </div>
-        <div class="bg-indigo-50 border border-indigo-100 p-2.5 rounded-xl text-center">
-          <span class="block text-[9px] text-indigo-600 font-bold">Siswa Kelas Terpilih</span>
-          <span id="std-count-filtered" class="text-base font-black text-indigo-900">0</span>
-        </div>
-      </div>
-
-      <div class="space-y-2 mb-3">
-        <input type="text" id="search-student-input" onkeyup="filterStudentsList()" placeholder="Cari nama, NISN..." class="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs text-gray-800">
-        <select id="filter-class-select" onchange="filterStudentsList()" class="w-full py-2 px-3 bg-white border border-gray-200 rounded-xl text-xs font-semibold text-gray-700"><option value="ALL">Semua Kelas</option></select>
-      </div>
-      <div id="students-list-container" class="space-y-2 pb-4"></div>
-    </main>
-
-    <!-- VIEW 4: MONITORING PRESENSI & GRAFIK -->
-    <main id="view-monitoring" class="flex-1 flex-col overflow-y-auto no-scrollbar bg-slate-50 p-4 hidden">
-      <div class="flex items-center justify-between mb-3">
-        <div>
-          <h2 class="font-bold text-lg text-gray-900">Monitoring Absensi</h2>
-          <p class="text-xs text-gray-500">Statistik & Input Manual Status Presensi</p>
-        </div>
-        <button onclick="autoDownloadMasterStudents()" class="bg-blue-50 text-blue-600 p-2 rounded-xl text-xs font-bold border border-blue-200"><i class="fa-solid fa-arrows-rotate"></i> Refresh</button>
-      </div>
-
-      <div class="bg-white p-3 rounded-2xl border border-gray-200 shadow-sm space-y-2 mb-3">
-        <div class="grid grid-cols-2 gap-2">
-          <div>
-            <label class="block text-[10px] font-bold text-gray-600 mb-1">Pilih Tanggal</label>
-            <input type="date" id="monitoring-date-filter" onchange="updateMonitoringDashboard()" class="w-full py-1.5 px-2 bg-slate-50 border border-gray-200 rounded-xl text-xs font-bold text-blue-900">
-          </div>
-          <div>
-            <label class="block text-[10px] font-bold text-gray-600 mb-1">Filter Kelas</label>
-            <select id="monitoring-class-filter" onchange="updateMonitoringDashboard()" class="w-full py-1.5 px-2 bg-slate-50 border border-gray-200 rounded-xl text-xs font-bold text-blue-900"><option value="ALL">Semua Kelas</option></select>
-          </div>
-        </div>
-      </div>
-
-      <div class="bg-white p-3.5 rounded-2xl border border-gray-100 shadow-sm mb-3 text-center">
-        <h4 class="text-xs font-bold text-gray-700 mb-2">Persentase Kehadiran Total</h4>
-        <div class="w-44 h-44 mx-auto relative flex items-center justify-center">
-          <canvas id="attendancePieChart"></canvas>
-          <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-            <span id="chart-center-percent" class="text-2xl font-black text-emerald-600 leading-none">0%</span>
-            <span class="text-[9px] font-bold text-gray-400 mt-0.5">Tingkat Hadir</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="bg-white p-3.5 rounded-2xl border border-gray-200 shadow-sm mb-3">
-        <h4 class="text-xs font-bold text-gray-800 mb-1 flex items-center justify-between">
-          <span>Persentase Kehadiran Per Kelas</span>
-          <span class="text-[9px] text-gray-400 font-normal">Klik batang kelas untuk memfilter</span>
-        </h4>
-        <div id="classBarChartContainer" class="w-full min-h-[160px]">
-          <canvas id="classBarChart"></canvas>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-4 gap-1.5 mb-3">
-        <div class="bg-emerald-50 border border-emerald-100 p-2 rounded-xl text-center"><span class="block text-[9px] text-emerald-600 font-bold">Hadir</span><span id="stat-hadir" class="text-xs font-extrabold text-emerald-800">0</span></div>
-        <div class="bg-amber-50 border border-amber-100 p-2 rounded-xl text-center"><span class="block text-[9px] text-amber-600 font-bold">Terlambat</span><span id="stat-terlambat" class="text-xs font-extrabold text-amber-800">0</span></div>
-        <div class="bg-red-50 border border-red-100 p-2 rounded-xl text-center"><span class="block text-[9px] text-red-600 font-bold">Alpa</span><span id="stat-alpa" class="text-xs font-extrabold text-red-800">0</span></div>
-        <div class="bg-rose-50 border border-rose-100 p-2 rounded-xl text-center"><span class="block text-[9px] text-rose-600 font-bold">Bolos</span><span id="stat-bolos" class="text-xs font-extrabold text-rose-800">0</span></div>
-        <div class="bg-blue-50 border border-blue-100 p-2 rounded-xl text-center"><span class="block text-[9px] text-blue-600 font-bold">Sakit</span><span id="stat-sakit" class="text-xs font-extrabold text-blue-800">0</span></div>
-        <div class="bg-indigo-50 border border-indigo-100 p-2 rounded-xl text-center"><span class="block text-[9px] text-indigo-600 font-bold">Izin</span><span id="stat-izin" class="text-xs font-extrabold text-indigo-800">0</span></div>
-        <div class="bg-purple-50 border border-purple-100 p-2 rounded-xl text-center col-span-2"><span class="block text-[9px] text-purple-600 font-bold">Kegiatan</span><span id="stat-kegiatan" class="text-xs font-extrabold text-purple-800">0</span></div>
-      </div>
-
-      <div class="bg-white p-3 rounded-2xl border border-gray-200 shadow-sm mb-4">
-        <h3 class="font-bold text-xs text-gray-800 mb-2 border-b border-gray-100 pb-1.5 flex items-center justify-between">
-          <span>Siswa Belum Absen & Aksi Presensi</span>
-          <span id="monitoring-count-badge" class="text-[10px] text-rose-600 font-bold bg-rose-50 px-2 py-0.5 rounded-md">0 Siswa Belum</span>
-        </h3>
-        <div id="monitoring-student-action-list" class="space-y-2.5 max-h-[380px] overflow-y-auto no-scrollbar pr-1"></div>
-      </div>
-    </main>
-
-    <!-- VIEW 5: DONASI / DUKUNGAN -->
-    <main id="view-donation" class="flex-1 flex-col overflow-y-auto no-scrollbar bg-slate-50 p-4 hidden">
-      <div class="text-center mb-3">
-        <div class="w-12 h-12 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-2 text-xl shadow-sm"><i class="fa-solid fa-hand-holding-heart"></i></div>
-        <h2 class="font-bold text-lg text-gray-900">❤️ Dukung Pengembangan</h2>
-        <p class="text-xs text-gray-500 leading-relaxed mt-1">
-          Aplikasi ini dibagikan secara gratis untuk mendukung digitalisasi sekolah. Jika aplikasi ini bermanfaat, dukungan sukarela Anda sangat berharga untuk kelanjutan pengembangannya.
-        </p>
-      </div>
-
-      <div class="space-y-2.5 mb-4">
-        <div class="bg-white p-3.5 rounded-2xl border border-gray-200 shadow-sm flex items-center justify-between">
-          <div>
-            <b class="text-xs text-blue-900 block font-extrabold">Bank BRI</b>
-            <span class="font-mono text-sm font-extrabold text-gray-800 block mt-0.5">488801018509539</span>
-            <small class="text-[10px] text-gray-500">a.n. Ajiardin</small>
-          </div>
-          <button onclick="navigator.clipboard.writeText('488801018509539'); alert('Nomor Rekening BRI Disalin!');" class="px-2.5 py-1.5 bg-blue-50 text-blue-700 border border-blue-200 font-bold text-[10px] rounded-lg">
-            <i class="fa-solid fa-copy"></i> Salin
-          </button>
-        </div>
-
-        <div class="bg-white p-3.5 rounded-2xl border border-gray-200 shadow-sm flex items-center justify-between">
-          <div>
-            <b class="text-xs text-emerald-800 block font-extrabold">E-Wallet (DANA • OVO • GoPay • ShopeePay • KasPro)</b>
-            <span class="font-mono text-sm font-extrabold text-gray-800 block mt-0.5">085298875399</span>
-            <small class="text-[10px] text-gray-500">a.n. Ajiardin</small>
-          </div>
-          <button onclick="navigator.clipboard.writeText('085298875399'); alert('Nomor E-Wallet Disalin!');" class="px-2.5 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-[10px] rounded-lg">
-            <i class="fa-solid fa-copy"></i> Salin
-          </button>
-        </div>
-      </div>
-      <p class="text-[10px] text-center text-gray-400 italic">Tidak ada kewajiban untuk memberikan dukungan. Terima kasih sudah menggunakan dan ikut menyebarkan manfaat.</p>
-    </main>
-
-    <!-- VIEW 6: TINDAK LANJUT SISWA -->
-    <main id="view-tindak-lanjut" class="flex-1 flex-col overflow-y-auto no-scrollbar bg-slate-50 p-4 hidden">
-      <div class="flex items-center justify-between mb-3">
-        <div>
-          <h2 class="font-bold text-lg text-gray-900">🚩 Tindak Lanjut Siswa</h2>
-          <p class="text-xs text-gray-500">Pelanggaran & Catatan Penanganan</p>
-        </div>
-      </div>
-      <div id="tindak-lanjut-list-container" class="space-y-3 pb-6"></div>
-    </main>
-
-    <!-- VIEW 7: ATUR HARI LIBUR -->
-    <main id="view-hari-libur" class="flex-1 flex-col overflow-y-auto no-scrollbar bg-slate-50 p-4 hidden">
-      <div class="mb-3">
-        <h2 class="font-bold text-lg text-gray-900">📅 Atur Hari Libur</h2>
-        <p class="text-xs text-gray-500">Tandai Hari Libur Nasional & Sekolah</p>
-      </div>
-
-      <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3 mb-3">
-        <div>
-          <label class="block text-[10px] font-bold text-gray-600 mb-1">Tanggal Libur</label>
-          <input type="date" id="input-libur-tanggal" class="w-full px-3 py-2 bg-slate-50 border border-gray-200 rounded-xl text-xs font-bold text-gray-800">
-        </div>
-        <div>
-          <label class="block text-[10px] font-bold text-gray-600 mb-1">Keterangan Hari Libur</label>
-          <input type="text" id="input-libur-ket" placeholder="Contoh: Libur Semester" class="w-full px-3 py-2 bg-slate-50 border border-gray-200 rounded-xl text-xs text-gray-800">
-        </div>
-        <button onclick="saveHariLiburNew()" class="w-full bg-blue-600 text-white font-bold py-2.5 rounded-xl text-xs shadow-md"><i class="fa-solid fa-floppy-disk"></i> Simpan Hari Libur</button>
-      </div>
-
-      <div id="hari-libur-list-container" class="space-y-2"></div>
-    </main>
-
-    <!-- VIEW 8: PENGATURAN SYSTEM -->
-    <main id="view-settings" class="flex-1 flex-col overflow-y-auto no-scrollbar bg-slate-50 p-4 hidden">
-      <div class="mb-3">
-        <h2 class="font-bold text-lg text-gray-900">Pengaturan System</h2>
-        <p class="text-xs text-gray-500">Konfigurasi Jam Presensi & Identitas Sekolah</p>
-      </div>
-
-      <div class="bg-white p-3.5 rounded-2xl border border-emerald-200 shadow-sm mb-3 space-y-2">
-        <div class="flex items-center justify-between border-b border-gray-100 pb-1.5">
           <div class="flex items-center space-x-1.5">
-            <i class="fa-solid fa-clock-rotate-left text-emerald-600 text-xs"></i>
-            <h3 class="font-bold text-xs text-gray-800">Ringkasan Waktu Tersimpan</h3>
+            <button onclick="toggleAddStudentModal()" class="bg-emerald-600 text-white p-2.5 rounded-xl text-xs font-bold flex items-center gap-1 shadow-sm"><i class="fa-solid fa-plus"></i> Tambah</button>
+            <button onclick="autoDownloadMasterStudents()" class="bg-blue-50 text-blue-600 p-2.5 rounded-xl text-xs font-bold border border-blue-200"><i class="fa-solid fa-rotate"></i></button>
           </div>
-          <button onclick="renderTimeSettingsSummary()" class="text-[10px] text-blue-600 font-bold bg-blue-50 px-2 py-0.5 rounded-md"><i class="fa-solid fa-arrows-rotate"></i> Segarkan</button>
         </div>
-        <div id="saved-time-summary-box" class="space-y-1.5 max-h-[160px] overflow-y-auto no-scrollbar pr-0.5"></div>
-      </div>
 
-      <div class="bg-blue-600 text-white p-3.5 rounded-2xl shadow-md space-y-2 mb-3">
-        <div class="flex items-center space-x-2">
-          <i class="fa-solid fa-cloud-arrow-down text-lg text-amber-300"></i>
+        <div class="grid grid-cols-2 gap-2 mb-2">
+          <div class="bg-blue-50 border border-blue-100 p-2.5 rounded-xl text-center">
+            <span class="block text-[9px] text-blue-600 font-bold">Total Siswa Keseluruhan</span>
+            <span id="std-count-total" class="text-base font-black text-blue-900">0</span>
+          </div>
+          <div class="bg-indigo-50 border border-indigo-100 p-2.5 rounded-xl text-center">
+            <span class="block text-[9px] text-indigo-600 font-bold">Siswa Filter Terpilih</span>
+            <span id="std-count-filtered" class="text-base font-black text-indigo-900">0</span>
+          </div>
+        </div>
+
+        <!-- FITUR 4: DAFTAR RINCIAN JUMLAH SISWA MASING-MASING KELAS -->
+        <div class="mb-3">
+          <label class="block text-[10px] font-bold text-gray-600 mb-1">Rincian Siswa Per Kelas:</label>
+          <div id="class-summary-badges" class="flex gap-1.5 overflow-x-auto no-scrollbar pb-1"></div>
+        </div>
+
+        <div class="space-y-2 mb-3">
+          <input type="text" id="search-student-input" onkeyup="filterStudentsList()" placeholder="Cari nama, NISN..." class="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs text-gray-800">
+          <select id="filter-class-select" onchange="filterStudentsList()" class="w-full py-2 px-3 bg-white border border-gray-200 rounded-xl text-xs font-semibold text-gray-700"><option value="ALL">Semua Kelas</option></select>
+        </div>
+        <div id="students-list-container" class="space-y-2 pb-4"></div>
+      </main>
+
+      <!-- VIEW 4: MONITORING PRESENSI -->
+      <main id="view-monitoring" class="flex-1 flex-col bg-slate-50 p-4 hidden">
+        <div class="flex items-center justify-between mb-3">
           <div>
-            <h3 class="font-bold text-xs">Sinkronkan Pengaturan Waktu</h3>
-            <p class="text-[10px] text-blue-100">Tarik data jam dari Sheet ke aplikasi.</p>
+            <h2 class="font-bold text-lg text-gray-900">Monitoring Absensi</h2>
+            <p class="text-xs text-gray-500">Statistik & Input Manual Status Presensi</p>
           </div>
         </div>
-        <button onclick="pullTimeSettingsFromSheet()" class="w-full bg-white text-blue-900 font-extrabold py-2 rounded-xl text-xs shadow-sm flex items-center justify-center space-x-1.5">
-          <i class="fa-solid fa-arrows-rotate text-blue-600"></i>
-          <span>Tarik Jam Presensi dari Sheet</span>
-        </button>
-      </div>
 
-      <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3 mb-3">
-        <h3 class="font-bold text-xs text-blue-900 border-b border-gray-100 pb-2">Ubah Jam Presensi Per Hari</h3>
-        <div id="days-config-container" class="space-y-3"></div>
-        <button onclick="saveDaysTimeSettings()" class="w-full bg-blue-600 text-white font-semibold py-2.5 rounded-xl text-xs flex items-center justify-center space-x-1.5 shadow-sm">
-          <i class="fa-solid fa-floppy-disk"></i>
-          <span>Simpan & Upload Jam ke Sheet</span>
-        </button>
-      </div>
+        <!-- FITUR 3: FILTER MONITORING DENGAN MODE PAGI & SIANG -->
+        <div class="bg-white p-3 rounded-2xl border border-gray-200 shadow-sm space-y-2 mb-3">
+          <div class="grid grid-cols-3 gap-1.5">
+            <div>
+              <label class="block text-[9px] font-bold text-gray-600 mb-1">Tanggal</label>
+              <input type="date" id="monitoring-date-filter" onchange="updateMonitoringDashboard()" class="w-full py-1.5 px-1.5 bg-slate-50 border border-gray-200 rounded-xl text-[11px] font-bold text-blue-900">
+            </div>
+            <div>
+              <label class="block text-[9px] font-bold text-gray-600 mb-1">Kelas</label>
+              <select id="monitoring-class-filter" onchange="updateMonitoringDashboard()" class="w-full py-1.5 px-1.5 bg-slate-50 border border-gray-200 rounded-xl text-[11px] font-bold text-blue-900"><option value="ALL">Semua</option></select>
+            </div>
+            <div>
+              <label class="block text-[9px] font-bold text-gray-600 mb-1">Mode Sesi</label>
+              <select id="monitoring-session-filter" onchange="updateMonitoringDashboard()" class="w-full py-1.5 px-1.5 bg-slate-50 border border-gray-200 rounded-xl text-[11px] font-bold text-blue-900">
+                <option value="ALL">Semua Sesi</option>
+                <option value="PAGI">Mode Pagi</option>
+                <option value="SIANG">Mode Siang</option>
+              </select>
+            </div>
+          </div>
+        </div>
 
-      <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3 mb-3">
-        <h3 class="font-bold text-xs text-blue-900 border-b border-gray-100 pb-2">Identitas Sekolah</h3>
-        <div>
-          <label class="block text-[11px] font-semibold text-gray-700 mb-1">Nama Sekolah</label>
-          <input type="text" id="input-school-name" placeholder="Nama Sekolah" class="w-full px-3 py-2 bg-slate-50 border border-gray-200 rounded-xl text-xs text-gray-800">
+        <div class="bg-white p-3.5 rounded-2xl border border-gray-100 shadow-sm mb-3 text-center">
+          <h4 class="text-xs font-bold text-gray-700 mb-2">Persentase Kehadiran Total</h4>
+          <div class="w-44 h-44 mx-auto relative flex items-center justify-center">
+            <canvas id="attendancePieChart"></canvas>
+            <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+              <span id="chart-center-percent" class="text-2xl font-black text-emerald-600 leading-none">0%</span>
+              <span class="text-[9px] font-bold text-gray-400 mt-0.5">Tingkat Hadir</span>
+            </div>
+          </div>
         </div>
-        <div>
-          <label class="block text-[11px] font-semibold text-gray-700 mb-1">Nama Kepala Sekolah</label>
-          <input type="text" id="input-principal-name" placeholder="Nama Kepala Sekolah" class="w-full px-3 py-2 bg-slate-50 border border-gray-200 rounded-xl text-xs text-gray-800">
+
+        <div class="bg-white p-3.5 rounded-2xl border border-gray-200 shadow-sm mb-3">
+          <h4 class="text-xs font-bold text-gray-800 mb-1 flex items-center justify-between">
+            <span>Persentase Kehadiran Per Kelas</span>
+            <span class="text-[9px] text-gray-400 font-normal">Klik batang kelas untuk memfilter</span>
+          </h4>
+          <div id="classBarChartContainer" class="w-full min-h-[160px]">
+            <canvas id="classBarChart"></canvas>
+          </div>
         </div>
-        <div>
-          <label class="block text-[11px] font-semibold text-gray-700 mb-1">NIP Kepala Sekolah</label>
-          <input type="text" id="input-principal-nip" placeholder="NIP Kepala Sekolah" class="w-full px-3 py-2 bg-slate-50 border border-gray-200 rounded-xl text-xs text-gray-800">
+
+        <div class="grid grid-cols-4 gap-1.5 mb-3">
+          <div class="bg-emerald-50 border border-emerald-100 p-2 rounded-xl text-center"><span class="block text-[9px] text-emerald-600 font-bold">Hadir</span><span id="stat-hadir" class="text-xs font-extrabold text-emerald-800">0</span></div>
+          <div class="bg-amber-50 border border-amber-100 p-2 rounded-xl text-center"><span class="block text-[9px] text-amber-600 font-bold">Terlambat</span><span id="stat-terlambat" class="text-xs font-extrabold text-amber-800">0</span></div>
+          <div class="bg-red-50 border border-red-100 p-2 rounded-xl text-center"><span class="block text-[9px] text-red-600 font-bold">Alpa</span><span id="stat-alpa" class="text-xs font-extrabold text-red-800">0</span></div>
+          <div class="bg-rose-50 border border-rose-100 p-2 rounded-xl text-center"><span class="block text-[9px] text-rose-600 font-bold">Bolos</span><span id="stat-bolos" class="text-xs font-extrabold text-rose-800">0</span></div>
+          <div class="bg-blue-50 border border-blue-100 p-2 rounded-xl text-center"><span class="block text-[9px] text-blue-600 font-bold">Sakit</span><span id="stat-sakit" class="text-xs font-extrabold text-blue-800">0</span></div>
+          <div class="bg-indigo-50 border border-indigo-100 p-2 rounded-xl text-center"><span class="block text-[9px] text-indigo-600 font-bold">Izin</span><span id="stat-izin" class="text-xs font-extrabold text-indigo-800">0</span></div>
+          <div class="bg-purple-50 border border-purple-100 p-2 rounded-xl text-center col-span-2"><span class="block text-[9px] text-purple-600 font-bold">Kegiatan</span><span id="stat-kegiatan" class="text-xs font-extrabold text-purple-800">0</span></div>
         </div>
-        <button onclick="saveSchoolSettings()" class="w-full bg-slate-800 text-white font-semibold py-2 rounded-xl text-xs shadow-sm"><i class="fa-solid fa-floppy-disk"></i> Simpan Identitas</button>
-      </div>
-    </main>
+
+        <div class="bg-white p-3 rounded-2xl border border-gray-200 shadow-sm mb-4">
+          <h3 class="font-bold text-xs text-gray-800 mb-2 border-b border-gray-100 pb-1.5 flex items-center justify-between">
+            <span>Siswa Belum Absen & Aksi Presensi</span>
+            <span id="monitoring-count-badge" class="text-[10px] text-rose-600 font-bold bg-rose-50 px-2 py-0.5 rounded-md">0 Siswa Belum</span>
+          </h3>
+          <div id="monitoring-student-action-list" class="space-y-2.5 max-h-[380px] overflow-y-auto no-scrollbar pr-1"></div>
+        </div>
+      </main>
+
+      <!-- VIEW 5: DONASI / DUKUNGAN -->
+      <main id="view-donation" class="flex-1 flex-col bg-slate-50 p-4 hidden">
+        <div class="text-center mb-3">
+          <div class="w-12 h-12 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-2 text-xl shadow-sm"><i class="fa-solid fa-hand-holding-heart"></i></div>
+          <h2 class="font-bold text-lg text-gray-900">❤️ Dukung Pengembangan</h2>
+          <p class="text-xs text-gray-500 leading-relaxed mt-1">
+            Aplikasi ini dibagikan secara gratis untuk mendukung digitalisasi sekolah. Jika aplikasi ini bermanfaat, dukungan sukarela Anda sangat berharga untuk kelanjutan pengembangannya.
+          </p>
+        </div>
+
+        <div class="space-y-2.5 mb-4">
+          <div class="bg-white p-3.5 rounded-2xl border border-gray-200 shadow-sm flex items-center justify-between">
+            <div>
+              <b class="text-xs text-blue-900 block font-extrabold">Bank BRI</b>
+              <span class="font-mono text-sm font-extrabold text-gray-800 block mt-0.5">488801018509539</span>
+              <small class="text-[10px] text-gray-500">a.n. Ajiardin</small>
+            </div>
+            <button onclick="navigator.clipboard.writeText('488801018509539'); alert('Nomor Rekening BRI Disalin!');" class="px-2.5 py-1.5 bg-blue-50 text-blue-700 border border-blue-200 font-bold text-[10px] rounded-lg">
+              <i class="fa-solid fa-copy"></i> Salin
+            </button>
+          </div>
+
+          <div class="bg-white p-3.5 rounded-2xl border border-gray-200 shadow-sm flex items-center justify-between">
+            <div>
+              <b class="text-xs text-emerald-800 block font-extrabold">E-Wallet (DANA • OVO • GoPay • ShopeePay • KasPro)</b>
+              <span class="font-mono text-sm font-extrabold text-gray-800 block mt-0.5">085298875399</span>
+              <small class="text-[10px] text-gray-500">a.n. Ajiardin</small>
+            </div>
+            <button onclick="navigator.clipboard.writeText('085298875399'); alert('Nomor E-Wallet Disalin!');" class="px-2.5 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-[10px] rounded-lg">
+              <i class="fa-solid fa-copy"></i> Salin
+            </button>
+          </div>
+        </div>
+        <p class="text-[10px] text-center text-gray-400 italic">Tidak ada kewajiban untuk memberikan dukungan. Terima kasih sudah menggunakan dan ikut menyebarkan manfaat.</p>
+      </main>
+
+      <!-- VIEW 6: TINDAK LANJUT SISWA -->
+      <main id="view-tindak-lanjut" class="flex-1 flex-col bg-slate-50 p-4 hidden">
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <h2 class="font-bold text-lg text-gray-900">🚩 Tindak Lanjut Siswa</h2>
+            <p class="text-xs text-gray-500">Pelanggaran & Catatan Penanganan</p>
+          </div>
+        </div>
+        <div id="tindak-lanjut-list-container" class="space-y-3 pb-6"></div>
+      </main>
+
+      <!-- VIEW 7: ATUR HARI LIBUR -->
+      <main id="view-hari-libur" class="flex-1 flex-col bg-slate-50 p-4 hidden">
+        <div class="mb-3">
+          <h2 class="font-bold text-lg text-gray-900">📅 Atur Hari Libur</h2>
+          <p class="text-xs text-gray-500">Tandai Hari Libur Nasional & Sekolah</p>
+        </div>
+
+        <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3 mb-3">
+          <div>
+            <label class="block text-[10px] font-bold text-gray-600 mb-1">Tanggal Libur</label>
+            <input type="date" id="input-libur-tanggal" class="w-full px-3 py-2 bg-slate-50 border border-gray-200 rounded-xl text-xs font-bold text-gray-800">
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-gray-600 mb-1">Keterangan Hari Libur</label>
+            <input type="text" id="input-libur-ket" placeholder="Contoh: Libur Semester" class="w-full px-3 py-2 bg-slate-50 border border-gray-200 rounded-xl text-xs text-gray-800">
+          </div>
+          <button onclick="saveHariLiburNew()" class="w-full bg-blue-600 text-white font-bold py-2.5 rounded-xl text-xs shadow-md"><i class="fa-solid fa-floppy-disk"></i> Simpan Hari Libur</button>
+        </div>
+
+        <div id="hari-libur-list-container" class="space-y-2"></div>
+      </main>
+
+      <!-- VIEW 8: PENGATURAN SYSTEM -->
+      <main id="view-settings" class="flex-1 flex-col bg-slate-50 p-4 hidden">
+        <div class="mb-3">
+          <h2 class="font-bold text-lg text-gray-900">Pengaturan System</h2>
+          <p class="text-xs text-gray-500">Konfigurasi Jam Presensi & Identitas Sekolah</p>
+        </div>
+
+        <div class="bg-white p-3.5 rounded-2xl border border-emerald-200 shadow-sm mb-3 space-y-2">
+          <div class="flex items-center justify-between border-b border-gray-100 pb-1.5">
+            <div class="flex items-center space-x-1.5">
+              <i class="fa-solid fa-clock-rotate-left text-emerald-600 text-xs"></i>
+              <h3 class="font-bold text-xs text-gray-800">Ringkasan Waktu Tersimpan</h3>
+            </div>
+            <button onclick="renderTimeSettingsSummary()" class="text-[10px] text-blue-600 font-bold bg-blue-50 px-2 py-0.5 rounded-md"><i class="fa-solid fa-arrows-rotate"></i> Segarkan</button>
+          </div>
+          <div id="saved-time-summary-box" class="space-y-1.5 max-h-[160px] overflow-y-auto no-scrollbar pr-0.5"></div>
+        </div>
+
+        <div class="bg-blue-600 text-white p-3.5 rounded-2xl shadow-md space-y-2 mb-3">
+          <div class="flex items-center space-x-2">
+            <i class="fa-solid fa-cloud-arrow-down text-lg text-amber-300"></i>
+            <div>
+              <h3 class="font-bold text-xs">Sinkronkan Pengaturan Waktu</h3>
+              <p class="text-[10px] text-blue-100">Tarik data jam dari Sheet ke aplikasi.</p>
+            </div>
+          </div>
+          <button onclick="pullTimeSettingsFromSheet()" class="w-full bg-white text-blue-900 font-extrabold py-2 rounded-xl text-xs shadow-sm flex items-center justify-center space-x-1.5">
+            <i class="fa-solid fa-arrows-rotate text-blue-600"></i>
+            <span>Tarik Jam Presensi dari Sheet</span>
+          </button>
+        </div>
+
+        <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3 mb-3">
+          <h3 class="font-bold text-xs text-blue-900 border-b border-gray-100 pb-2">Ubah Jam Presensi Per Hari</h3>
+          <div id="days-config-container" class="space-y-3"></div>
+          <button onclick="saveDaysTimeSettings()" class="w-full bg-blue-600 text-white font-semibold py-2.5 rounded-xl text-xs flex items-center justify-center space-x-1.5 shadow-sm">
+            <i class="fa-solid fa-floppy-disk"></i>
+            <span>Simpan & Upload Jam ke Sheet</span>
+          </button>
+        </div>
+
+        <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3 mb-3">
+          <h3 class="font-bold text-xs text-blue-900 border-b border-gray-100 pb-2">Identitas Sekolah</h3>
+          <div>
+            <label class="block text-[11px] font-semibold text-gray-700 mb-1">Nama Sekolah</label>
+            <input type="text" id="input-school-name" placeholder="Nama Sekolah" class="w-full px-3 py-2 bg-slate-50 border border-gray-200 rounded-xl text-xs text-gray-800">
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-gray-700 mb-1">Nama Kepala Sekolah</label>
+            <input type="text" id="input-principal-name" placeholder="Nama Kepala Sekolah" class="w-full px-3 py-2 bg-slate-50 border border-gray-200 rounded-xl text-xs text-gray-800">
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-gray-700 mb-1">NIP Kepala Sekolah</label>
+            <input type="text" id="input-principal-nip" placeholder="NIP Kepala Sekolah" class="w-full px-3 py-2 bg-slate-50 border border-gray-200 rounded-xl text-xs text-gray-800">
+          </div>
+          <button onclick="saveSchoolSettings()" class="w-full bg-slate-800 text-white font-semibold py-2 rounded-xl text-xs shadow-sm"><i class="fa-solid fa-floppy-disk"></i> Simpan Identitas</button>
+        </div>
+      </main>
+
+    </div>
 
     <!-- MODAL POPUP TAMBAH SISWA BARU -->
     <div id="add-student-modal" class="absolute inset-0 bg-black/60 backdrop-blur-sm z-50 flex flex-col justify-end hidden">
@@ -386,8 +405,8 @@
       </div>
     </div>
 
-    <!-- FITUR 3: BOTTOM NAVIGATION DENGAN IKON BERWARNA-WARNI -->
-    <nav class="bg-white border-t border-gray-200 px-2 py-1.5 flex justify-between items-center text-center z-30 flex-shrink-0">
+    <!-- FITUR 5: FIXED STICKY FOOTER BOTTOM NAVIGATION (TIDAK IKUT TERGULIR) -->
+    <nav class="bg-white border-t border-gray-200 px-2 py-1.5 flex justify-between items-center text-center z-40 flex-shrink-0 sticky bottom-0">
       <button id="nav-students" onclick="toggleView('students')" class="flex-1 flex flex-col items-center">
         <i class="fa-solid fa-user-group text-sm text-teal-600"></i>
         <span class="text-[10px] font-bold text-teal-700 mt-0.5">Data Siswa</span>
@@ -717,13 +736,31 @@
       }
     }
 
+    // FITUR 4: MENAMPILKAN RINGKASAN SISWA MASING-MASING KELAS DI DATA SISWA
     async function loadStudentsView() {
       const tx = db.transaction("students", "readonly");
       tx.objectStore("students").getAll().onsuccess = (e) => {
         cachedStudents = e.target.result || [];
         filterStudentsList();
+        renderClassSummaryBadges();
         populateClassDropdowns();
       };
+    }
+
+    function renderClassSummaryBadges() {
+      const badgeContainer = document.getElementById("class-summary-badges");
+      if (!badgeContainer) return;
+
+      const classes = [...new Set(cachedStudents.map(s => s.kelas))].filter(Boolean).sort();
+      
+      badgeContainer.innerHTML = classes.map(cls => {
+        const count = cachedStudents.filter(s => s.kelas === cls).length;
+        return `
+          <button onclick="document.getElementById('filter-class-select').value='${cls}'; filterStudentsList();" class="flex-shrink-0 px-2.5 py-1 bg-white border border-gray-200 rounded-lg text-[10px] font-bold text-gray-700 shadow-sm hover:border-blue-400">
+            ${cls}: <span class="text-blue-600 font-extrabold">${count}</span>
+          </button>
+        `;
+      }).join('');
     }
 
     function filterStudentsList() {
@@ -756,7 +793,7 @@
       document.getElementById('view-' + viewName).classList.remove('hidden');
 
       if (viewName === 'students') loadStudentsView();
-      if (viewName === 'monitoring') updateMonitoringDashboard();
+      if (viewName === 'monitoring') updateMonitoringDashboard(); // FITUR 3: REFRESH OTOMATIS SAAT DIKLIK
       if (viewName === 'tindak-lanjut') renderTindakLanjutView();
       if (viewName === 'hari-libur') renderHariLiburView();
       if (viewName === 'settings') renderDaysConfigForm();
@@ -765,12 +802,18 @@
     function toggleMenuModal() { document.getElementById('menu-modal').classList.toggle('hidden'); }
     function toggleAddStudentModal() { document.getElementById('add-student-modal').classList.toggle('hidden'); }
 
+    // FITUR 3: DUKUNGAN FILTER MODE PAGI / SIANG DI DASHBOARD MONITORING
     async function updateMonitoringDashboard() {
       const targetDate = document.getElementById('monitoring-date-filter').value || new Date().toISOString().split('T')[0];
       const selectedClass = document.getElementById('monitoring-class-filter').value;
+      const selectedSessionFilter = document.getElementById('monitoring-session-filter').value;
       
       const queueRecords = await getAllQueueFromDB();
-      const rawRecords = [...fetchedTodayAttendance, ...fetchedAttendanceHistory, ...queueRecords].filter(r => r.tanggal === targetDate);
+      let rawRecords = [...fetchedTodayAttendance, ...fetchedAttendanceHistory, ...queueRecords].filter(r => r.tanggal === targetDate);
+
+      if (selectedSessionFilter !== "ALL") {
+        rawRecords = rawRecords.filter(r => String(r.sesi || "PAGI").toUpperCase() === selectedSessionFilter);
+      }
 
       const classStudents = cachedStudents.filter(s => selectedClass === "ALL" || s.kelas === selectedClass);
 
@@ -911,18 +954,6 @@
       }).join('');
     }
 
-    function getStatusBadgeClass(status) {
-      if (status === "HADIR") return "bg-emerald-100 text-emerald-800";
-      if (status === "TERLAMBAT") return "bg-amber-100 text-amber-800";
-      if (status === "IZIN") return "bg-indigo-100 text-indigo-800";
-      if (status === "SAKIT") return "bg-blue-100 text-blue-800";
-      if (status === "ALPA") return "bg-red-100 text-red-800";
-      if (status === "BOLOS") return "bg-rose-100 text-rose-800";
-      if (status === "KEGIATAN") return "bg-purple-100 text-purple-800";
-      return "bg-gray-200 text-gray-600";
-    }
-
-    // FITUR 2: AKSI PRESENSI MANUAL OTOMATIS MENGHAPUS/MENYEMBUNYIKAN SISWA SECARA LANGSUNG
     async function setManualPresensiAction(idSiswa, status, targetDate) {
       const student = cachedStudents.find(s => s.id_siswa === idSiswa);
       if (!student) return;
@@ -936,14 +967,11 @@
         status_presensi: status, timestamp: Date.now()
       };
 
-      // Simpan Ke Queue Offline
       await saveToAttendanceQueue(record);
 
-      // Simpan lokal instan agar UI monitoring segera mendeteksi siswa sudah absen
       fetchedTodayAttendance = fetchedTodayAttendance.filter(r => r.id_siswa !== idSiswa);
       fetchedTodayAttendance.push(record);
 
-      // Sembunyikan elemen secara instan
       const itemEl = document.getElementById(`action-item-${idSiswa}`);
       if (itemEl) {
         itemEl.classList.add('opacity-0', 'scale-95');
