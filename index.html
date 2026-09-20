@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#0b3c5d">
-  <title>Sistem Absensi Murid - v2.5</title>
+  <title>Sistem Absensi Murid - v2.6</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
@@ -34,7 +34,7 @@
             <span id="status-dot" class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span>
             <span id="status-text" class="text-xs font-semibold">Memeriksa...</span>
           </div>
-          <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30 block mt-0.5">v2.5</span>
+          <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30 block mt-0.5">v2.6</span>
         </div>
       </div>
     </header>
@@ -107,7 +107,7 @@
       </button>
     </main>
 
-    <!-- VIEW 3: DATA MASTER SISWA & RINGKASAN JUMLAH SISWA -->
+    <!-- VIEW 3: DATA MASTER SISWA -->
     <main id="view-students" class="flex-1 flex-col overflow-y-auto no-scrollbar bg-slate-50 p-4 hidden">
       <div class="flex items-center justify-between mb-2">
         <div>
@@ -120,7 +120,6 @@
         </div>
       </div>
 
-      <!-- FITUR 4: INDIKATOR TOTAL SISWA KESELURUHAN & PER KELAS -->
       <div class="grid grid-cols-2 gap-2 mb-3">
         <div class="bg-blue-50 border border-blue-100 p-2.5 rounded-xl text-center">
           <span class="block text-[9px] text-blue-600 font-bold">Total Siswa Keseluruhan</span>
@@ -139,7 +138,7 @@
       <div id="students-list-container" class="space-y-2 pb-4"></div>
     </main>
 
-    <!-- VIEW 4: MONITORING PRESENSI & GRAFIK BATANG HORIZONTAL PER KELAS -->
+    <!-- VIEW 4: MONITORING PRESENSI & GRAFIK -->
     <main id="view-monitoring" class="flex-1 flex-col overflow-y-auto no-scrollbar bg-slate-50 p-4 hidden">
       <div class="flex items-center justify-between mb-3">
         <div>
@@ -173,7 +172,6 @@
         </div>
       </div>
 
-      <!-- FITUR 2: GRAFIK BATANG HORIZONTAL PER KELAS (DYNAMIC HEIGHT & FLEXIBLE) -->
       <div class="bg-white p-3.5 rounded-2xl border border-gray-200 shadow-sm mb-3">
         <h4 class="text-xs font-bold text-gray-800 mb-1 flex items-center justify-between">
           <span>Persentase Kehadiran Per Kelas</span>
@@ -184,7 +182,6 @@
         </div>
       </div>
 
-      <!-- KARTU METRIK RINGKASAN -->
       <div class="grid grid-cols-4 gap-1.5 mb-3">
         <div class="bg-emerald-50 border border-emerald-100 p-2 rounded-xl text-center"><span class="block text-[9px] text-emerald-600 font-bold">Hadir</span><span id="stat-hadir" class="text-xs font-extrabold text-emerald-800">0</span></div>
         <div class="bg-amber-50 border border-amber-100 p-2 rounded-xl text-center"><span class="block text-[9px] text-amber-600 font-bold">Terlambat</span><span id="stat-terlambat" class="text-xs font-extrabold text-amber-800">0</span></div>
@@ -195,7 +192,6 @@
         <div class="bg-purple-50 border border-purple-100 p-2 rounded-xl text-center col-span-2"><span class="block text-[9px] text-purple-600 font-bold">Kegiatan</span><span id="stat-kegiatan" class="text-xs font-extrabold text-purple-800">0</span></div>
       </div>
 
-      <!-- DAFTAR SISWA BELUM ABSEN SAJA -->
       <div class="bg-white p-3 rounded-2xl border border-gray-200 shadow-sm mb-4">
         <h3 class="font-bold text-xs text-gray-800 mb-2 border-b border-gray-100 pb-1.5 flex items-center justify-between">
           <span>Siswa Belum Absen & Aksi Presensi</span>
@@ -390,16 +386,16 @@
       </div>
     </div>
 
-    <!-- BOTTOM NAVIGATION -->
+    <!-- FITUR 3: BOTTOM NAVIGATION DENGAN IKON BERWARNA-WARNI -->
     <nav class="bg-white border-t border-gray-200 px-2 py-1.5 flex justify-between items-center text-center z-30 flex-shrink-0">
-      <button id="nav-students" onclick="toggleView('students')" class="flex-1 text-gray-400 hover:text-gray-600 flex flex-col items-center">
-        <i class="fa-solid fa-user-group text-sm"></i>
-        <span class="text-[10px] font-medium">Data Siswa</span>
+      <button id="nav-students" onclick="toggleView('students')" class="flex-1 flex flex-col items-center">
+        <i class="fa-solid fa-user-group text-sm text-teal-600"></i>
+        <span class="text-[10px] font-bold text-teal-700 mt-0.5">Data Siswa</span>
       </button>
 
-      <button id="nav-monitoring" onclick="toggleView('monitoring')" class="flex-1 text-gray-400 hover:text-gray-600 flex flex-col items-center">
-        <i class="fa-solid fa-chart-pie text-sm"></i>
-        <span class="text-[10px] font-medium">Monitoring</span>
+      <button id="nav-monitoring" onclick="toggleView('monitoring')" class="flex-1 flex flex-col items-center">
+        <i class="fa-solid fa-chart-pie text-sm text-indigo-600"></i>
+        <span class="text-[10px] font-bold text-indigo-700 mt-0.5">Monitoring</span>
       </button>
 
       <button id="nav-scanner" onclick="toggleView('scanner')" class="flex-1 text-blue-600 flex flex-col items-center -mt-4">
@@ -409,27 +405,27 @@
         <span class="text-[10px] font-bold mt-0.5">Scanner</span>
       </button>
 
-      <button id="nav-donation" onclick="toggleView('donation')" class="flex-1 text-gray-400 hover:text-gray-600 flex flex-col items-center">
+      <button id="nav-donation" onclick="toggleView('donation')" class="flex-1 flex flex-col items-center">
         <i class="fa-solid fa-hand-holding-heart text-sm text-rose-500"></i>
-        <span class="text-[10px] font-medium">Donasi</span>
+        <span class="text-[10px] font-bold text-rose-600 mt-0.5">Donasi</span>
       </button>
 
-      <button onclick="toggleMenuModal()" class="flex-1 text-gray-400 hover:text-gray-600 flex flex-col items-center">
-        <i class="fa-solid fa-bars text-sm"></i>
-        <span class="text-[10px] font-medium">Menu</span>
+      <button onclick="toggleMenuModal()" class="flex-1 flex flex-col items-center">
+        <i class="fa-solid fa-bars text-sm text-amber-600"></i>
+        <span class="text-[10px] font-bold text-amber-700 mt-0.5">Menu</span>
       </button>
     </nav>
 
   </div>
 
-  <!-- FITUR 1: REGISTRASI SERVICE WORKER UNTUK OFFLINE-FIRST 100% -->
+  <!-- REGISTRASI SERVICE WORKER OFFLINE FIRST -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js').then(reg => {
-          console.log('ServiceWorker registered successfully.', reg.scope);
+          console.log('SW Registered: ', reg.scope);
         }).catch(err => {
-          console.log('ServiceWorker registration failed: ', err);
+          console.log('SW Registration failed: ', err);
         });
       });
     }
@@ -700,7 +696,6 @@
       } catch (e) {}
     }
 
-    // FITUR 3: DROPDOWN AKURAT TANPA MERUBAH PILIHAN USER
     function populateClassDropdowns() {
       const classes = [...new Set(cachedStudents.map(s => s.kelas))].filter(Boolean).sort();
       const optionsHtml = '<option value="ALL">Semua Kelas</option>' + classes.map(c => `<option value="${c}">${c}</option>`).join('');
@@ -731,7 +726,6 @@
       };
     }
 
-    // FITUR 4: FILTER DAN HITUNG TOTAL SISWA DI VIEW DATA SISWA
     function filterStudentsList() {
       const q = document.getElementById('search-student-input').value.toLowerCase();
       const cls = document.getElementById('filter-class-select').value;
@@ -827,7 +821,6 @@
       renderMonitoringActionListOnlyUnabsented(targetDate, unabsentedStudents);
     }
 
-    // FITUR 2: GRAFIK BATANG PER KELAS HORIZONTAL SANGAT FLEKSIBEL
     function renderClassBarChartHorizontal(attendanceRecords) {
       const container = document.getElementById('classBarChartContainer');
       const ctx = document.getElementById('classBarChart').getContext('2d');
@@ -852,7 +845,6 @@
         percentages.push(pct);
       });
 
-      // Mengatur tinggi container secara dinamis agar responsive
       const dynamicHeight = Math.max(160, classes.length * 28);
       container.style.height = `${dynamicHeight}px`;
 
@@ -869,7 +861,7 @@
           }]
         },
         options: {
-          indexAxis: 'y', // Orientasi HORIZONTAL
+          indexAxis: 'y',
           responsive: true,
           maintainAspectRatio: false,
           plugins: { legend: { display: false } },
@@ -900,7 +892,7 @@
 
       container.innerHTML = unabsentedStudents.map(std => {
         return `
-          <div class="p-2.5 bg-slate-50 border border-gray-200 rounded-xl space-y-1.5">
+          <div id="action-item-${std.id_siswa}" class="p-2.5 bg-slate-50 border border-gray-200 rounded-xl space-y-1.5 transition-all duration-300">
             <div class="flex items-center justify-between">
               <div class="min-w-0 flex-1">
                 <h5 class="font-bold text-xs text-gray-900 truncate">${std.nama}</h5>
@@ -909,10 +901,10 @@
               <span class="text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-red-100 text-red-800">BELUM SCAN</span>
             </div>
             <div class="grid grid-cols-4 gap-1.5 pt-1">
-              <button onclick="setManualPresensiAction('${std.id_siswa}', 'HADIR', '${targetDate}')" class="py-1 bg-emerald-600 text-white font-bold text-[9px] rounded-lg">Hadir</button>
-              <button onclick="setManualPresensiAction('${std.id_siswa}', 'IZIN', '${targetDate}')" class="py-1 bg-indigo-600 text-white font-bold text-[9px] rounded-lg">Izin</button>
-              <button onclick="setManualPresensiAction('${std.id_siswa}', 'SAKIT', '${targetDate}')" class="py-1 bg-blue-600 text-white font-bold text-[9px] rounded-lg">Sakit</button>
-              <button onclick="setManualPresensiAction('${std.id_siswa}', 'KEGIATAN', '${targetDate}')" class="py-1 bg-purple-600 text-white font-bold text-[9px] rounded-lg">Keg.</button>
+              <button onclick="setManualPresensiAction('${std.id_siswa}', 'HADIR', '${targetDate}')" class="py-1 bg-emerald-600 text-white font-bold text-[9px] rounded-lg shadow-sm">Hadir</button>
+              <button onclick="setManualPresensiAction('${std.id_siswa}', 'IZIN', '${targetDate}')" class="py-1 bg-indigo-600 text-white font-bold text-[9px] rounded-lg shadow-sm">Izin</button>
+              <button onclick="setManualPresensiAction('${std.id_siswa}', 'SAKIT', '${targetDate}')" class="py-1 bg-blue-600 text-white font-bold text-[9px] rounded-lg shadow-sm">Sakit</button>
+              <button onclick="setManualPresensiAction('${std.id_siswa}', 'KEGIATAN', '${targetDate}')" class="py-1 bg-purple-600 text-white font-bold text-[9px] rounded-lg shadow-sm">Keg.</button>
             </div>
           </div>
         `;
@@ -930,6 +922,7 @@
       return "bg-gray-200 text-gray-600";
     }
 
+    // FITUR 2: AKSI PRESENSI MANUAL OTOMATIS MENGHAPUS/MENYEMBUNYIKAN SISWA SECARA LANGSUNG
     async function setManualPresensiAction(idSiswa, status, targetDate) {
       const student = cachedStudents.find(s => s.id_siswa === idSiswa);
       if (!student) return;
@@ -943,8 +936,24 @@
         status_presensi: status, timestamp: Date.now()
       };
 
+      // Simpan Ke Queue Offline
       await saveToAttendanceQueue(record);
-      updateMonitoringDashboard();
+
+      // Simpan lokal instan agar UI monitoring segera mendeteksi siswa sudah absen
+      fetchedTodayAttendance = fetchedTodayAttendance.filter(r => r.id_siswa !== idSiswa);
+      fetchedTodayAttendance.push(record);
+
+      // Sembunyikan elemen secara instan
+      const itemEl = document.getElementById(`action-item-${idSiswa}`);
+      if (itemEl) {
+        itemEl.classList.add('opacity-0', 'scale-95');
+        setTimeout(() => {
+          updateMonitoringDashboard();
+        }, 200);
+      } else {
+        updateMonitoringDashboard();
+      }
+
       if (navigator.onLine) syncQueueToGAS();
     }
 
