@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#0b3c5d">
-  <title>Sistem Absensi Murid - v2.8</title>
+  <title>Sistem Absensi Murid - v2.9</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
@@ -21,7 +21,7 @@
   <!-- CONTAINER APLIKASI UTAMA (LOCKED HEIGHT) -->
   <div id="app-viewport-container" class="w-full max-w-md h-full sm:h-[840px] bg-white flex flex-col shadow-2xl overflow-hidden sm:rounded-3xl relative border border-gray-200">
 
-    <!-- 1. FIXED HEADER UTAMA (TERKUNCI DI ATAS) -->
+    <!-- 1. FIXED HEADER UTAMA -->
     <header class="bg-[#0b3c5d] text-white py-3.5 px-4 z-40 shadow-md flex-shrink-0">
       <div class="flex items-center justify-between">
         <div class="flex items-center space-x-3">
@@ -35,7 +35,7 @@
             <span id="status-dot" class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span>
             <span id="status-text" class="text-xs font-semibold">Memeriksa...</span>
           </div>
-          <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30 block mt-0.5">v2.8</span>
+          <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30 block mt-0.5">v2.9</span>
         </div>
       </div>
     </header>
@@ -404,7 +404,7 @@
       </div>
     </div>
 
-    <!-- 3. FIXED BOTTOM NAVIGATION (TERKUNCI DI BAWAH) -->
+    <!-- 3. FIXED BOTTOM NAVIGATION -->
     <nav class="bg-white border-t border-gray-200 px-2 py-1.5 flex justify-between items-center text-center z-40 flex-shrink-0">
       <button id="nav-students" onclick="toggleView('students')" class="flex-1 flex flex-col items-center">
         <i class="fa-solid fa-user-group text-sm text-teal-600"></i>
@@ -475,15 +475,22 @@
     function bukaHalamanLaporan() { window.open(GAS_WEB_APP_URL + "?page=laporan", "_blank"); }
     function bukaHalamanCetakQR() { window.open(GAS_WEB_APP_URL + "?page=cetak-qr", "_blank"); }
 
+    // PENYEMPURNAAN OFFLINE DB Persist (v2.9)
     function initDatabase() {
       return new Promise((resolve) => {
-        const req = indexedDB.open("AbsensiQR_DB", 1);
+        const req = indexedDB.open("AbsensiQR_DB", 2); // Schema Version 2
         req.onupgradeneeded = (e) => {
           const database = e.target.result;
           if (!database.objectStoreNames.contains("students")) database.createObjectStore("students", { keyPath: "id_siswa" });
           if (!database.objectStoreNames.contains("attendance_queue")) database.createObjectStore("attendance_queue", { keyPath: "queue_id" });
+          if (!database.objectStoreNames.contains("attendance_history")) database.createObjectStore("attendance_history", { keyPath: "queue_id" });
         };
-        req.onsuccess = (e) => { db = e.target.result; updateQueueCountUI(); resolve(db); };
+        req.onsuccess = (e) => { 
+          db = e.target.result; 
+          updateQueueCountUI(); 
+          loadLocalHistoryToMemory();
+          resolve(db); 
+        };
       });
     }
 
@@ -673,8 +680,12 @@
       renderDaysConfigForm();
     }
 
+    // DOWNLOAD & SIMPAN KELOLAAN SHEET KE INDEXEDDB (OFFLINE SYNC)
     async function autoDownloadMasterStudents() {
-      if (!navigator.onLine) return;
+      if (!navigator.onLine) {
+        loadLocalHistoryToMemory();
+        return;
+      }
       try {
         const response = await fetch(`${GAS_WEB_APP_URL}?action=GET_APP_DATA`);
         const result = await response.json();
@@ -682,8 +693,14 @@
           if (result.time_settings) applyTimeSettingsFromCloud(result.time_settings);
           if (result.today_attendance) fetchedTodayAttendance = result.today_attendance;
           if (result.attendance_history) fetchedAttendanceHistory = result.attendance_history;
-          if (result.tindak_lanjut) fetchedTindakLanjutHistory = result.tindak_lanjut;
-          if (result.hari_libur) fetchedHariLiburList = result.hari_libur;
+          if (result.tindak_lanjut) {
+            fetchedTindakLanjutHistory = result.tindak_lanjut;
+            localStorage.setItem("CACHE_TINDAK_LANJUT", JSON.stringify(fetchedTindakLanjutHistory));
+          }
+          if (result.hari_libur) {
+            fetchedHariLiburList = result.hari_libur;
+            localStorage.setItem("CACHE_HARI_LIBUR", JSON.stringify(fetchedHariLiburList));
+          }
 
           if (result.settings) {
             const schoolName = result.settings.SCHOOL_NAME || "SMK Negeri 1 Contoh";
@@ -700,6 +717,23 @@
             document.getElementById("input-principal-nip").value = principalNip;
           }
 
+          // Simpan Riwayat Absensi ke DB Lokal
+          const combinedHist = [...fetchedTodayAttendance, ...fetchedAttendanceHistory];
+          if (db) {
+            const txHist = db.transaction("attendance_history", "readwrite");
+            const storeHist = txHist.objectStore("attendance_history");
+            combinedHist.forEach(rec => {
+              if (rec.id_siswa && rec.tanggal) {
+                storeHist.put({
+                  queue_id: `${rec.tanggal}_${rec.id_siswa}_${rec.sesi || 'PAGI'}`,
+                  tanggal: rec.tanggal, jam: rec.jam || rec.jam_pagi || "",
+                  id_siswa: rec.id_siswa, nama: rec.nama, kelas: rec.kelas,
+                  sesi: rec.sesi || "PAGI", status_presensi: rec.status_presensi || "HADIR"
+                });
+              }
+            });
+          }
+
           if (result.students) {
             const tx = db.transaction("students", "readwrite");
             const store = tx.objectStore("students");
@@ -711,7 +745,24 @@
             };
           }
         }
-      } catch (e) {}
+      } catch (e) {
+        loadLocalHistoryToMemory();
+      }
+    }
+
+    function loadLocalHistoryToMemory() {
+      if (localStorage.getItem("CACHE_TINDAK_LANJUT")) {
+        fetchedTindakLanjutHistory = JSON.parse(localStorage.getItem("CACHE_TINDAK_LANJUT"));
+      }
+      if (localStorage.getItem("CACHE_HARI_LIBUR")) {
+        fetchedHariLiburList = JSON.parse(localStorage.getItem("CACHE_HARI_LIBUR"));
+      }
+      if (db) {
+        const tx = db.transaction("attendance_history", "readonly");
+        tx.objectStore("attendance_history").getAll().onsuccess = (e) => {
+          fetchedAttendanceHistory = e.target.result || [];
+        };
+      }
     }
 
     function populateClassDropdowns() {
@@ -736,6 +787,7 @@
     }
 
     async function loadStudentsView() {
+      if (!db) await initDatabase();
       const tx = db.transaction("students", "readonly");
       tx.objectStore("students").getAll().onsuccess = (e) => {
         cachedStudents = e.target.result || [];
@@ -806,7 +858,9 @@
       const selectedSessionFilter = document.getElementById('monitoring-session-filter').value;
       
       const queueRecords = await getAllQueueFromDB();
-      let rawRecords = [...fetchedTodayAttendance, ...fetchedAttendanceHistory, ...queueRecords].filter(r => r.tanggal === targetDate);
+      const localHist = await getAllLocalHistoryFromDB();
+      
+      let rawRecords = [...localHist, ...fetchedTodayAttendance, ...fetchedAttendanceHistory, ...queueRecords].filter(r => r.tanggal === targetDate);
 
       if (selectedSessionFilter !== "ALL") {
         rawRecords = rawRecords.filter(r => String(r.sesi || "PAGI").toUpperCase() === selectedSessionFilter);
@@ -965,6 +1019,7 @@
       };
 
       await saveToAttendanceQueue(record);
+      await saveToLocalHistoryDB(record);
 
       fetchedTodayAttendance = fetchedTodayAttendance.filter(r => r.id_siswa !== idSiswa);
       fetchedTodayAttendance.push(record);
@@ -1031,6 +1086,7 @@
       
       const newItem = { tanggal: tgl, keterangan: ket };
       fetchedHariLiburList.push(newItem);
+      localStorage.setItem("CACHE_HARI_LIBUR", JSON.stringify(fetchedHariLiburList));
       renderHariLiburView();
 
       if (navigator.onLine) {
@@ -1157,6 +1213,8 @@
             status_presensi: computedStatus, timestamp: Date.now()
           };
           await saveToAttendanceQueue(record);
+          await saveToLocalHistoryDB(record);
+
           if (navigator.onLine) syncQueueToGAS();
 
           document.getElementById('res-nama').innerText = student.nama;
@@ -1194,10 +1252,28 @@
       });
     }
 
+    function saveToLocalHistoryDB(record) {
+      return new Promise((resolve) => {
+        if (!db) return resolve();
+        const tx = db.transaction("attendance_history", "readwrite");
+        tx.objectStore("attendance_history").put(record);
+        tx.oncomplete = () => resolve();
+      });
+    }
+
     function getAllQueueFromDB() {
       return new Promise((resolve) => {
+        if (!db) return resolve([]);
         const tx = db.transaction("attendance_queue", "readonly");
         tx.objectStore("attendance_queue").getAll().onsuccess = (e) => resolve(e.target.result || []);
+      });
+    }
+
+    function getAllLocalHistoryFromDB() {
+      return new Promise((resolve) => {
+        if (!db) return resolve([]);
+        const tx = db.transaction("attendance_history", "readonly");
+        tx.objectStore("attendance_history").getAll().onsuccess = (e) => resolve(e.target.result || []);
       });
     }
 
@@ -1230,11 +1306,17 @@
 
     function triggerManualSync() { if (navigator.onLine) syncQueueToGAS(); }
 
+    // REALTIME OFFLINE-ONLINE DETECTION & AUTO SYNC
     setInterval(() => {
       const isOnline = navigator.onLine;
       document.getElementById('status-dot').className = `w-2.5 h-2.5 rounded-full ${isOnline ? 'bg-green-400' : 'bg-amber-400'} inline-block`;
       document.getElementById('status-text').innerText = isOnline ? 'Online' : 'Offline';
     }, 1000);
+
+    window.addEventListener('online', () => {
+      syncQueueToGAS();
+      autoDownloadMasterStudents();
+    });
 
     window.onload = async () => {
       const localSchoolName = localStorage.getItem("SCHOOL_NAME");
@@ -1245,8 +1327,14 @@
 
       document.getElementById("monitoring-date-filter").value = new Date().toISOString().split('T')[0];
       await initDatabase();
+      await loadStudentsView();
       renderDaysConfigForm();
-      await autoDownloadMasterStudents();
+      
+      if (navigator.onLine) {
+        await autoDownloadMasterStudents();
+      } else {
+        loadLocalHistoryToMemory();
+      }
 
       const nowTimeStr = new Date().toTimeString().split(' ')[0].substring(0, 5);
       autoDetectOrSyncSessionMode(nowTimeStr);
