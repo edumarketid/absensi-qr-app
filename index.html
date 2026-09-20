@@ -147,7 +147,7 @@
     <main id="view-scanner" class="flex-1 flex flex-col justify-between relative bg-gray-900 overflow-hidden">
       <div class="flex-1 relative flex flex-col items-center justify-center p-4 bg-black">
         
-        <!-- PLACEHOLDER / CONTAINER KAMERA STABIL -->
+        <!-- CONTAINER KAMERA -->
         <div class="w-full h-full max-h-[420px] overflow-hidden rounded-2xl relative flex items-center justify-center bg-gray-800 border border-gray-700">
           <div id="reader" class="w-full h-full"></div>
           
@@ -253,7 +253,8 @@
         </div>
 
         <div class="space-y-2 pt-1">
-          <button onclick="toggleView('scanner')" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl text-xs flex items-center justify-center space-x-2 shadow-md transition">
+          <!-- TOMBOL SCAN SISWA BERIKUTNYA OTOMATIS MENYALAKAN KAMERA -->
+          <button onclick="scanNextStudentAutoCamera()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl text-xs flex items-center justify-center space-x-2 shadow-md transition">
             <i class="fa-solid fa-qrcode text-sm"></i>
             <span>Scan Siswa Berikutnya</span>
           </button>
@@ -1643,7 +1644,7 @@
 
           let jamPagi = cleanJamOnly(recPagi ? (recPagi.jam || recPagi.jam_pagi) : "");
           let jamSiang = cleanJamOnly(recSiang ? (recSiang.jam || recSiang.jam_siang) : "");
-          let statusStr = anyRec ? (anyRec.status_presensi || "HADIR") : "ALPA";
+          let statusStr = anyRec ? String(anyRec.status_presensi || "HADIR").toUpperCase() : "ALPA";
 
           if (statusStr === "HADIR") totalHadir++;
           else if (statusStr === "ALPA") totalAlpa++;
@@ -1683,11 +1684,11 @@
 
         tBody.innerHTML = filtered.map((std, idx) => {
           const stdRecords = allAttendance.filter(r => r.id_siswa === std.id_siswa);
-          let h = stdRecords.filter(r => (r.status_presensi || "HADIR") === "HADIR").length;
-          let s = stdRecords.filter(r => r.status_presensi === "SAKIT").length;
-          let i = stdRecords.filter(r => r.status_presensi === "IZIN").length;
-          let a = stdRecords.filter(r => r.status_presensi === "ALPA").length;
-          let b = stdRecords.filter(r => r.status_presensi === "BOLOS").length;
+          let h = stdRecords.filter(r => String(r.status_presensi || "HADIR").toUpperCase() === "HADIR").length;
+          let s = stdRecords.filter(r => String(r.status_presensi).toUpperCase() === "SAKIT").length;
+          let i = stdRecords.filter(r => String(r.status_presensi).toUpperCase() === "IZIN").length;
+          let a = stdRecords.filter(r => String(r.status_presensi).toUpperCase() === "ALPA").length;
+          let b = stdRecords.filter(r => String(r.status_presensi).toUpperCase() === "BOLOS").length;
 
           totalHadir += h; totalAlpa += a; totalBolos += b; totalSakit += s; totalIzin += i;
 
@@ -1735,13 +1736,13 @@
           .filter(r => r.id_siswa === std.id_siswa)
           .sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
 
-        let totalAlpa = stdLogs.filter(r => r.status_presensi === "ALPA").length;
+        let totalAlpa = stdLogs.filter(r => String(r.status_presensi).toUpperCase() === "ALPA").length;
 
         let maxConsecutiveBolos = 0, currentBolos = 0;
         let maxConsecutiveTerlambat = 0, currentTerlambat = 0;
 
         stdLogs.forEach(log => {
-          const st = log.status_presensi || "HADIR";
+          const st = String(log.status_presensi || "HADIR").toUpperCase();
           if (st === "BOLOS") {
             currentBolos++;
             if (currentBolos > maxConsecutiveBolos) maxConsecutiveBolos = currentBolos;
@@ -1849,7 +1850,7 @@
       }
     }
 
-    // 9. SCANNER CONTROLLER STABIL (TANPA CRASH / RE-ENTRY LOCK)
+    // 9. SCANNER CONTROLLER STABIL & OTOMATIS AKTIF SAAT DIBUTUHKAN
     async function initScanner() {
       if (isCameraStarting || isCameraActive) return;
       isCameraStarting = true;
@@ -1898,6 +1899,12 @@
       document.getElementById('btn-camera-text').innerText = "Nyalakan Kamera";
       document.getElementById('camera-off-placeholder').classList.remove('hidden');
       document.getElementById('scan-frame-box').classList.add('hidden');
+    }
+
+    // FUNGSI SCAN SISWA BERIKUTNYA DENGAN KAMERA LANGSUNG ON
+    async function scanNextStudentAutoCamera() {
+      await toggleView('scanner');
+      await initScanner();
     }
 
     // 10. ATUR MODE WAKTU SCAN (AUTO / MANUAL TANGGAL & JAM)
@@ -1960,7 +1967,7 @@
           nama: student.nama,
           kelas: student.kelas,
           sesi: sesi,
-          status_presensi: manualStatus,
+          status_presensi: manualStatus.toUpperCase(),
           timestamp: Date.now()
         };
 
@@ -1968,7 +1975,7 @@
 
         const existingIdx = fetchedAttendanceHistory.findIndex(r => r.tanggal === dateStr && r.id_siswa === student.id_siswa);
         if (existingIdx !== -1) {
-          fetchedAttendanceHistory[existingIdx].status_presensi = manualStatus;
+          fetchedAttendanceHistory[existingIdx].status_presensi = manualStatus.toUpperCase();
           if (sesi === "SIANG") fetchedAttendanceHistory[existingIdx].jam_siang = timeStr;
           else fetchedAttendanceHistory[existingIdx].jam_pagi = timeStr;
         } else {
@@ -1980,12 +1987,12 @@
             kelas: student.kelas,
             jam_pagi: sesi === "PAGI" ? timeStr : "",
             jam_siang: sesi === "SIANG" ? timeStr : "",
-            status_presensi: manualStatus
+            status_presensi: manualStatus.toUpperCase()
           });
         }
 
         if (!customDate) {
-          showScanResultUI(student, timeStr, sesi, true, manualStatus);
+          showScanResultUI(student, timeStr, sesi, true, manualStatus.toUpperCase());
         }
 
         if (navigator.onLine) syncQueueToGAS();
@@ -1996,7 +2003,7 @@
             nama: "Siswa Tidak Ditemukan / Non-Aktif",
             nisn: "-",
             kelas: "-"
-          }, timeStr, sesi, false, manualStatus);
+          }, timeStr, sesi, false, manualStatus.toUpperCase());
         }
       }
     }
@@ -2081,7 +2088,7 @@
       `).join('');
     }
 
-    // 14. DASHBOARD MONITORING DENGAN PENANGANAN DATA CLOUD SHEET `Absensi_Harian` LENGKAP
+    // 14. DASHBOARD MONITORING - PERSENTASE TEPAT & BACA KELAS SERTA STATUS DENGAN AKURAT
     async function updateMonitoringDashboard() {
       const targetDateStr = document.getElementById('monitoring-date-filter').value || new Date().toISOString().split('T')[0];
       const selectedClass = document.getElementById('monitoring-class-filter').value;
@@ -2105,7 +2112,7 @@
 
       const queueRecords = await getAllQueueFromDB();
       const allTargetRecords = [...fetchedTodayAttendance, ...fetchedAttendanceHistory, ...queueRecords]
-        .filter(r => r.tanggal === targetDateStr);
+        .filter(r => String(r.tanggal).trim() === targetDateStr);
 
       const classStudents = selectedClass === "ALL" ? cachedStudents : cachedStudents.filter(s => s.kelas === selectedClass);
 
@@ -2121,11 +2128,12 @@
 
         if (selectedSession === "PAGI") {
           if (studentPagi) {
-            const st = studentPagi.status_presensi || "HADIR";
+            const st = String(studentPagi.status_presensi || "HADIR").toUpperCase();
             if (st === "HADIR") countHadir++;
             else if (st === "SAKIT") countSakit++;
             else if (st === "IZIN") countIzin++;
             else if (st === "KEGIATAN") countKegiatan++;
+            else if (st === "ALPA") countAlpa++;
           } else {
             if (!isToday || nowHM > dayCfg.pagiLimit) {
               countAlpa++;
@@ -2137,11 +2145,12 @@
         } 
         else if (selectedSession === "SIANG") {
           if (studentSiang) {
-            const st = studentSiang.status_presensi || "HADIR";
+            const st = String(studentSiang.status_presensi || "HADIR").toUpperCase();
             if (st === "HADIR") countHadir++;
             else if (st === "SAKIT") countSakit++;
             else if (st === "IZIN") countIzin++;
             else if (st === "KEGIATAN") countKegiatan++;
+            else if (st === "ALPA") countAlpa++;
           } else {
             if (!isToday || nowHM > dayCfg.siangLimit) {
               if (studentPagi) {
@@ -2158,7 +2167,7 @@
         } 
         else {
           if (anyRecord) {
-            const st = anyRecord.status_presensi || "HADIR";
+            const st = String(anyRecord.status_presensi || "HADIR").toUpperCase();
             if (st === "HADIR") {
               if (studentPagi && !studentSiang && (!isToday || nowHM > dayCfg.siangLimit)) {
                 countBolos++;
@@ -2172,6 +2181,9 @@
             else if (st === "BOLOS") {
               countBolos++;
               unresolvedStudents.push({ ...student, reason: "Dicatat Bolos" });
+            } else if (st === "ALPA") {
+              countAlpa++;
+              unresolvedStudents.push({ ...student, reason: "Dicatat Alpa" });
             }
           } else {
             if (!isToday || nowHM > dayCfg.pagiLimit) {
