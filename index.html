@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Sistem Absensi Murid - v1.31</title>
+  <title>Sistem Absensi Murid - v1.32</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- FontAwesome Icons CDN -->
@@ -82,7 +82,7 @@
             <span id="status-text" class="text-xs font-semibold">Memeriksa...</span>
           </div>
           <!-- VERSI APLIKASI DI BAWAH ONLINE -->
-          <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30 block mt-0.5">v1.31</span>
+          <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30 block mt-0.5">v1.32</span>
         </div>
       </div>
     </header>
@@ -228,13 +228,16 @@
     </main>
 
 
-    <!-- VIEW 4: MONITORING PRESENSI -->
+    <!-- VIEW 4: MONITORING PRESENSI (FIXED V1.32) -->
     <main id="view-monitoring" class="flex-1 flex-col overflow-y-auto no-scrollbar bg-slate-50 p-4 hidden">
       <div class="flex items-center justify-between mb-3">
         <div>
           <h2 class="font-bold text-lg text-gray-900">Monitoring Absensi</h2>
           <p class="text-xs text-gray-500">Statistik Realtime Absensi Per Tanggal</p>
         </div>
+        <button onclick="autoDownloadMasterStudents()" class="bg-blue-50 text-blue-600 p-2 rounded-xl text-xs font-bold border border-blue-200">
+          <i class="fa-solid fa-arrows-rotate"></i> Refresh Data
+        </button>
       </div>
 
       <div class="bg-white p-3 rounded-2xl border border-gray-200 shadow-sm space-y-2 mb-3">
@@ -542,7 +545,7 @@
     </div>
 
 
-    <!-- BOTTOM NAVIGATION (FIXED / STICKY) -->
+    <!-- BOTTOM NAVIGATION -->
     <nav class="bg-white border-t border-gray-200 px-3 py-1.5 flex justify-between items-center text-center z-30 flex-shrink-0">
       <button id="nav-students" onclick="toggleView('students')" class="flex-1 text-gray-400 hover:text-gray-600 flex flex-col items-center">
         <div class="w-7 h-7 flex items-center justify-center mb-0.5"><i class="fa-solid fa-user-group text-sm"></i></div>
@@ -610,6 +613,7 @@
       siangLimit: "16:00"
     };
 
+    // PEMBERSIH FORMAT TANGGAL LEBIH KETAT (V1.32)
     function formatCleanDateJS(val) {
       if (!val) return "";
       var str = String(val).trim();
@@ -813,13 +817,131 @@
             tx.oncomplete = () => {
               loadStudentsView();
               populateClassDropdowns();
+              if (!document.getElementById('view-monitoring').classList.contains('hidden')) {
+                updateMonitoringDashboard();
+              }
             };
           }
         }
       } catch (err) {}
     }
 
-    // --- FUNGSI RENDER MENU TERPISAH (V1.31) ---
+    // --- PERBAIKAN UTAMA PERHITUNGAN MONITORING (V1.32) ---
+    async function updateMonitoringDashboard() {
+      const targetDateStr = formatCleanDateJS(document.getElementById('monitoring-date-filter').value || new Date().toISOString().split('T')[0]);
+      const selectedClass = document.getElementById('monitoring-class-filter').value;
+      const selectedSession = document.getElementById('monitoring-session-filter').value;
+
+      const queueRecords = await getAllQueueFromDB();
+      
+      // Gabungkan semua histori dengan perapihan tanggal presisi
+      const allRecords = [...fetchedTodayAttendance, ...fetchedAttendanceHistory, ...queueRecords].filter(r => {
+        const recDate = formatCleanDateJS(r.tanggal);
+        return recDate === targetDateStr;
+      });
+
+      // Filter siswa terdaftar berdasarkan kelas
+      const classStudents = selectedClass === "ALL" 
+        ? cachedStudents 
+        : cachedStudents.filter(s => String(s.kelas).trim() === String(selectedClass).trim());
+
+      let countHadir = 0, countAlpa = 0, countBolos = 0, countSakit = 0, countIzin = 0, countKegiatan = 0;
+      let unresolvedStudents = [];
+
+      classStudents.forEach(student => {
+        const studentIdClean = String(student.id_siswa).trim();
+
+        // Cari riwayat presensi siswa
+        const studentRecs = allRecords.filter(r => String(r.id_siswa).trim() === studentIdClean);
+
+        if (studentRecs.length > 0) {
+          let recToUse = studentRecs[0];
+
+          if (selectedSession === "PAGI") {
+            const pagiRec = studentRecs.find(r => r.sesi === "PAGI" || (r.jam_pagi && r.jam_pagi !== ""));
+            if (pagiRec) recToUse = pagiRec;
+          } else if (selectedSession === "SIANG") {
+            const siangRec = studentRecs.find(r => r.sesi === "SIANG" || (r.jam_siang && r.jam_siang !== ""));
+            if (siangRec) recToUse = siangRec;
+          }
+
+          const st = String(recToUse.status_presensi || "HADIR").toUpperCase();
+          if (st === "HADIR") countHadir++;
+          else if (st === "ALPA") countAlpa++;
+          else if (st === "BOLOS") countBolos++;
+          else if (st === "SAKIT") countSakit++;
+          else if (st === "IZIN") countIzin++;
+          else if (st === "KEGIATAN") countKegiatan++;
+        } else {
+          // Belum ada data di sheet pada tanggal tersebut -> Dihitung Alpa / Belum Scan
+          countAlpa++;
+          unresolvedStudents.push({ ...student, reason: "Belum Ada Catatan Presensi" });
+        }
+      });
+
+      document.getElementById('stat-hadir').innerText = countHadir;
+      document.getElementById('stat-alpa').innerText = countAlpa;
+      document.getElementById('stat-bolos').innerText = countBolos;
+      document.getElementById('stat-sakit').innerText = countSakit;
+      document.getElementById('stat-izin').innerText = countIzin;
+      document.getElementById('stat-kegiatan').innerText = countKegiatan;
+
+      renderPieChart(countHadir, countAlpa, countBolos, countSakit, countIzin, countKegiatan);
+      renderUnscannedStudentsList(unresolvedStudents, targetDateStr);
+    }
+
+    function renderUnscannedStudentsList(unresolved, targetDateStr) {
+      const container = document.getElementById('unscanned-students-container');
+      if (unresolved.length === 0) {
+        container.innerHTML = `
+          <div class="bg-emerald-50 border border-emerald-200 p-3 rounded-2xl text-center text-emerald-800 text-xs font-bold">
+            Semua siswa telah tercatat dalam presensi!
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = unresolved.map(std => `
+        <div class="bg-white p-3 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
+          <div class="truncate min-w-0 pr-2">
+            <h4 class="font-bold text-xs text-gray-900 truncate">${std.nama}</h4>
+            <p class="text-[10px] text-amber-600 font-semibold truncate">${std.reason}</p>
+          </div>
+          <div class="flex items-center space-x-1 flex-shrink-0">
+            <button onclick="setManualStudentStatus('${std.id_siswa}', 'HADIR', '${targetDateStr}')" class="px-2 py-1 bg-emerald-50 text-emerald-700 font-bold text-[10px] rounded-lg border border-emerald-200">Hadir</button>
+            <button onclick="setManualStudentStatus('${std.id_siswa}', 'SAKIT', '${targetDateStr}')" class="px-2 py-1 bg-blue-50 text-blue-600 font-bold text-[10px] rounded-lg border border-blue-200">Sakit</button>
+            <button onclick="setManualStudentStatus('${std.id_siswa}', 'IZIN', '${targetDateStr}')" class="px-2 py-1 bg-indigo-50 text-indigo-600 font-bold text-[10px] rounded-lg border border-indigo-200">Izin</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function setManualStudentStatus(idSiswa, status, targetDateStr) {
+      await processStudentAttendance(idSiswa, status, targetDateStr);
+      updateMonitoringDashboard();
+    }
+
+    function renderPieChart(hadir, alpa, bolos, sakit, izin, kegiatan) {
+      const ctx = document.getElementById('attendancePieChart').getContext('2d');
+      if (myPieChart) myPieChart.destroy();
+
+      const total = hadir + alpa + bolos + sakit + izin + kegiatan;
+      const pctHadir = total > 0 ? Math.round((hadir / total) * 100) : 0;
+      document.getElementById('chart-center-percent').innerText = `${pctHadir}%`;
+
+      myPieChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Hadir', 'Alpa', 'Bolos', 'Sakit', 'Izin', 'Kegiatan'],
+          datasets: [{
+            data: [hadir, alpa, bolos, sakit, izin, kegiatan],
+            backgroundColor: ['#10b981', '#f59e0b', '#f43f5e', '#3b82f6', '#6366f1', '#a855f7'],
+            borderWidth: 2
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, cutout: '72%', plugins: { legend: { display: false } } }
+      });
+    }
 
     function renderPrintQRView() {
       const container = document.getElementById('printArea');
@@ -848,7 +970,6 @@
       html += `</div>`;
       container.innerHTML = html;
 
-      // Generate QR Codes
       cachedStudents.forEach((std, idx) => {
         const qrBox = document.getElementById(`qr-card-${idx}`);
         if (qrBox) {
@@ -896,8 +1017,6 @@
       `).join('');
     }
 
-    // --- NAVIGASI MULTI-VIEW FIXED (V1.31) ---
-
     async function toggleView(viewName) {
       const views = [
         'view-scanner', 'view-success', 'view-students', 'view-monitoring', 
@@ -932,6 +1051,7 @@
         document.getElementById('view-monitoring').classList.remove('hidden');
         document.getElementById('view-monitoring').classList.add('flex');
         navMonitoring.className = "flex-1 text-blue-600 flex flex-col items-center";
+        await autoDownloadMasterStudents();
         updateMonitoringDashboard();
         await stopCameraIfActive();
       } 
@@ -1217,54 +1337,6 @@
           <span class="px-2 py-1 bg-emerald-50 text-emerald-700 font-bold text-[10px] rounded-lg border border-emerald-200 flex-shrink-0">${std.kelas}</span>
         </div>
       `).join('');
-    }
-
-    async function updateMonitoringDashboard() {
-      const targetDateStr = formatCleanDateJS(document.getElementById('monitoring-date-filter').value || new Date().toISOString().split('T')[0]);
-      const queueRecords = await getAllQueueFromDB();
-      const allRecords = [...fetchedTodayAttendance, ...fetchedAttendanceHistory, ...queueRecords].filter(r => formatCleanDateJS(r.tanggal) === targetDateStr);
-
-      let hadir = 0, alpa = 0, bolos = 0, sakit = 0, izin = 0, kegiatan = 0;
-      allRecords.forEach(r => {
-        const st = String(r.status_presensi || "HADIR").toUpperCase();
-        if (st === "HADIR") hadir++;
-        else if (st === "ALPA") alpa++;
-        else if (st === "BOLOS") bolos++;
-        else if (st === "SAKIT") sakit++;
-        else if (st === "IZIN") izin++;
-        else if (st === "KEGIATAN") kegiatan++;
-      });
-
-      document.getElementById('stat-hadir').innerText = hadir;
-      document.getElementById('stat-alpa').innerText = alpa;
-      document.getElementById('stat-bolos').innerText = bolos;
-      document.getElementById('stat-sakit').innerText = sakit;
-      document.getElementById('stat-izin').innerText = izin;
-      document.getElementById('stat-kegiatan').innerText = kegiatan;
-
-      renderPieChart(hadir, alpa, bolos, sakit, izin, kegiatan);
-    }
-
-    function renderPieChart(hadir, alpa, bolos, sakit, izin, kegiatan) {
-      const ctx = document.getElementById('attendancePieChart').getContext('2d');
-      if (myPieChart) myPieChart.destroy();
-
-      const total = hadir + alpa + bolos + sakit + izin + kegiatan;
-      const pctHadir = total > 0 ? Math.round((hadir / total) * 100) : 0;
-      document.getElementById('chart-center-percent').innerText = `${pctHadir}%`;
-
-      myPieChart = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-          labels: ['Hadir', 'Alpa', 'Bolos', 'Sakit', 'Izin', 'Kegiatan'],
-          datasets: [{
-            data: [hadir, alpa, bolos, sakit, izin, kegiatan],
-            backgroundColor: ['#10b981', '#f59e0b', '#f43f5e', '#3b82f6', '#6366f1', '#a855f7'],
-            borderWidth: 2
-          }]
-        },
-        options: { responsive: true, maintainAspectRatio: false, cutout: '72%', plugins: { legend: { display: false } } }
-      });
     }
 
     function getStudentFromDB(qrKey) {
