@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Sistem Absensi Murid - v1.35.1</title>
+  <title>Sistem Absensi Murid - v1.36.0</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
@@ -33,7 +33,7 @@
             <span id="status-dot" class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span>
             <span id="status-text" class="text-xs font-semibold">Memeriksa...</span>
           </div>
-          <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30 block mt-0.5">v1.35.1</span>
+          <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30 block mt-0.5">v1.36.0</span>
         </div>
       </div>
     </header>
@@ -119,26 +119,32 @@
     </main>
 
 
-    <!-- VIEW 4: MONITORING PRESENSI (FITUR MONITORING DIKEMBALIKAN) -->
+    <!-- VIEW 4: MONITORING PRESENSI & PRESENSI MANUAL SISWA -->
     <main id="view-monitoring" class="flex-1 flex-col overflow-y-auto no-scrollbar bg-slate-50 p-4 hidden">
       <div class="flex items-center justify-between mb-3">
         <div>
           <h2 class="font-bold text-lg text-gray-900">Monitoring Absensi</h2>
-          <p class="text-xs text-gray-500">Statistik Realtime Absensi Per Tanggal</p>
+          <p class="text-xs text-gray-500">Statistik & Input Manual Status Presensi</p>
         </div>
         <button onclick="autoDownloadMasterStudents()" class="bg-blue-50 text-blue-600 p-2 rounded-xl text-xs font-bold border border-blue-200"><i class="fa-solid fa-arrows-rotate"></i> Refresh</button>
       </div>
 
       <div class="bg-white p-3 rounded-2xl border border-gray-200 shadow-sm space-y-2 mb-3">
-        <div>
-          <label class="block text-[10px] font-bold text-gray-600 mb-1">Pilih Tanggal Monitoring</label>
-          <input type="date" id="monitoring-date-filter" onchange="updateMonitoringDashboard()" class="w-full py-1.5 px-2 bg-slate-50 border border-gray-200 rounded-xl text-xs font-bold text-blue-900">
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[10px] font-bold text-gray-600 mb-1">Pilih Tanggal</label>
+            <input type="date" id="monitoring-date-filter" onchange="updateMonitoringDashboard()" class="w-full py-1.5 px-2 bg-slate-50 border border-gray-200 rounded-xl text-xs font-bold text-blue-900">
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-gray-600 mb-1">Filter Kelas</label>
+            <select id="monitoring-class-filter" onchange="updateMonitoringDashboard()" class="w-full py-1.5 px-2 bg-slate-50 border border-gray-200 rounded-xl text-xs font-bold text-blue-900"><option value="ALL">Semua Kelas</option></select>
+          </div>
         </div>
       </div>
 
       <div class="bg-white p-3.5 rounded-2xl border border-gray-100 shadow-sm mb-3 text-center">
         <h4 class="text-xs font-bold text-gray-700 mb-2">Persentase Kehadiran</h4>
-        <div class="w-48 h-48 mx-auto relative flex items-center justify-center">
+        <div class="w-44 h-44 mx-auto relative flex items-center justify-center">
           <canvas id="attendancePieChart"></canvas>
           <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
             <span id="chart-center-percent" class="text-2xl font-black text-emerald-600 leading-none">0%</span>
@@ -147,40 +153,67 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-3 gap-2 mb-4">
-        <div class="bg-emerald-50 border border-emerald-100 p-2.5 rounded-xl text-center"><span class="block text-[10px] text-emerald-600 font-bold">Hadir</span><span id="stat-hadir" class="text-base font-extrabold text-emerald-800">0</span></div>
-        <div class="bg-amber-50 border border-amber-100 p-2.5 rounded-xl text-center"><span class="block text-[10px] text-amber-600 font-bold">Alpa</span><span id="stat-alpa" class="text-base font-extrabold text-amber-800">0</span></div>
-        <div class="bg-rose-50 border border-rose-100 p-2.5 rounded-xl text-center"><span class="block text-[10px] text-rose-600 font-bold">Bolos</span><span id="stat-bolos" class="text-base font-extrabold text-rose-800">0</span></div>
-        <div class="bg-blue-50 border border-blue-100 p-2.5 rounded-xl text-center"><span class="block text-[10px] text-blue-600 font-bold">Sakit</span><span id="stat-sakit" class="text-base font-extrabold text-blue-800">0</span></div>
-        <div class="bg-indigo-50 border border-indigo-100 p-2.5 rounded-xl text-center"><span class="block text-[10px] text-indigo-600 font-bold">Izin</span><span id="stat-izin" class="text-base font-extrabold text-indigo-800">0</span></div>
-        <div class="bg-purple-50 border border-purple-100 p-2.5 rounded-xl text-center"><span class="block text-[10px] text-purple-600 font-bold">Kegiatan</span><span id="stat-kegiatan" class="text-base font-extrabold text-purple-800">0</span></div>
+      <div class="grid grid-cols-3 gap-2 mb-3">
+        <div class="bg-emerald-50 border border-emerald-100 p-2 rounded-xl text-center"><span class="block text-[9px] text-emerald-600 font-bold">Hadir</span><span id="stat-hadir" class="text-sm font-extrabold text-emerald-800">0</span></div>
+        <div class="bg-amber-50 border border-amber-100 p-2 rounded-xl text-center"><span class="block text-[9px] text-amber-600 font-bold">Alpa</span><span id="stat-alpa" class="text-sm font-extrabold text-amber-800">0</span></div>
+        <div class="bg-rose-50 border border-rose-100 p-2 rounded-xl text-center"><span class="block text-[9px] text-rose-600 font-bold">Bolos</span><span id="stat-bolos" class="text-sm font-extrabold text-rose-800">0</span></div>
+        <div class="bg-blue-50 border border-blue-100 p-2 rounded-xl text-center"><span class="block text-[9px] text-blue-600 font-bold">Sakit</span><span id="stat-sakit" class="text-sm font-extrabold text-blue-800">0</span></div>
+        <div class="bg-indigo-50 border border-indigo-100 p-2 rounded-xl text-center"><span class="block text-[9px] text-indigo-600 font-bold">Izin</span><span id="stat-izin" class="text-sm font-extrabold text-indigo-800">0</span></div>
+        <div class="bg-purple-50 border border-purple-100 p-2 rounded-xl text-center"><span class="block text-[9px] text-purple-600 font-bold">Kegiatan</span><span id="stat-kegiatan" class="text-sm font-extrabold text-purple-800">0</span></div>
+      </div>
+
+      <!-- DAFTAR SISWA & TOMBOL AKSI PRESENSI MANUAL -->
+      <div class="bg-white p-3 rounded-2xl border border-gray-200 shadow-sm mb-4">
+        <h3 class="font-bold text-xs text-gray-800 mb-2 border-b border-gray-100 pb-1.5 flex items-center justify-between">
+          <span>Daftar Siswa & Aksi Presensi</span>
+          <span id="monitoring-count-badge" class="text-[10px] text-blue-600 font-bold bg-blue-50 px-2 py-0.5 rounded-md">0 Siswa</span>
+        </h3>
+        <div id="monitoring-student-action-list" class="space-y-2.5 max-h-[380px] overflow-y-auto no-scrollbar pr-1"></div>
       </div>
     </main>
 
 
-    <!-- VIEW 5: DONASI / DUKUNGAN (FITUR DONASI DIKEMBALIKAN) -->
+    <!-- VIEW 5: DONASI / DUKUNGAN LENGKAP WITH KATA-KATA & E-WALLETS -->
     <main id="view-donation" class="flex-1 flex-col overflow-y-auto no-scrollbar bg-slate-50 p-4 hidden">
-      <div class="text-center mb-4">
+      <div class="text-center mb-3">
         <div class="w-12 h-12 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-2 text-xl shadow-sm"><i class="fa-solid fa-hand-holding-heart"></i></div>
-        <h2 class="font-bold text-lg text-gray-900">Donasi & Dukungan</h2>
-        <p class="text-xs text-gray-500">Pengembangan Aplikasi Presensi Sekolah</p>
+        <h2 class="font-bold text-lg text-gray-900">❤️ Dukung Pengembangan</h2>
+        <p class="text-xs text-gray-500 leading-relaxed mt-1">
+          Aplikasi ini dibagikan secara gratis untuk mendukung digitalisasi sekolah. Jika aplikasi ini bermanfaat, dukungan sukarela Anda sangat berharga untuk kelanjutan pengembangannya.
+        </p>
       </div>
 
-      <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm space-y-3 mb-3">
-        <h3 class="font-bold text-xs text-gray-800 border-b border-gray-100 pb-2">Saluran Donasi Transfer:</h3>
-        <div class="bg-blue-50/70 p-3 rounded-xl border border-blue-100 flex items-center justify-between">
+      <div class="space-y-2.5 mb-4">
+        <!-- BANK BRI -->
+        <div class="bg-white p-3.5 rounded-2xl border border-gray-200 shadow-sm flex items-center justify-between">
           <div>
-            <span class="font-extrabold text-blue-900 text-xs">BANK BRI</span>
-            <p class="font-mono text-sm font-bold text-gray-900 mt-0.5">488801018509539</p>
-            <p class="text-[10px] text-gray-500">a.n. <span class="font-bold text-gray-700">Ajiardin</span></p>
+            <b class="text-xs text-blue-900 block font-extrabold">Bank BRI</b>
+            <span class="font-mono text-sm font-extrabold text-gray-800 block mt-0.5">488801018509539</span>
+            <small class="text-[10px] text-gray-500">a.n. Ajiardin</small>
           </div>
-          <button onclick="navigator.clipboard.writeText('488801018509539'); alert('Nomor Rekening BRI Disalin!');" class="px-2.5 py-1.5 bg-white border border-blue-200 text-blue-700 font-bold text-[10px] rounded-lg"><i class="fa-solid fa-copy"></i> Salin</button>
+          <button onclick="navigator.clipboard.writeText('488801018509539'); alert('Nomor Rekening BRI Disalin!');" class="px-2.5 py-1.5 bg-blue-50 text-blue-700 border border-blue-200 font-bold text-[10px] rounded-lg">
+            <i class="fa-solid fa-copy"></i> Salin
+          </button>
+        </div>
+
+        <!-- E-WALLETS -->
+        <div class="bg-white p-3.5 rounded-2xl border border-gray-200 shadow-sm flex items-center justify-between">
+          <div>
+            <b class="text-xs text-emerald-800 block font-extrabold">E-Wallet (DANA • OVO • GoPay • ShopeePay • KasPro)</b>
+            <span class="font-mono text-sm font-extrabold text-gray-800 block mt-0.5">085298875399</span>
+            <small class="text-[10px] text-gray-500">a.n. Ajiardin</small>
+          </div>
+          <button onclick="navigator.clipboard.writeText('085298875399'); alert('Nomor E-Wallet Disalin!');" class="px-2.5 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-[10px] rounded-lg">
+            <i class="fa-solid fa-copy"></i> Salin
+          </button>
         </div>
       </div>
+
+      <p class="text-[10px] text-center text-gray-400 italic">Tidak ada kewajiban untuk memberikan dukungan. Terima kasih sudah menggunakan dan ikut menyebarkan manfaat.</p>
     </main>
 
 
-    <!-- VIEW 6: TINDAK LANJUT SISWA (FITUR TINDAK LANJUT DIKEMBALIKAN) -->
+    <!-- VIEW 6: TINDAK LANJUT SISWA -->
     <main id="view-tindak-lanjut" class="flex-1 flex-col overflow-y-auto no-scrollbar bg-slate-50 p-4 hidden">
       <div class="flex items-center justify-between mb-3">
         <div>
@@ -192,7 +225,7 @@
     </main>
 
 
-    <!-- VIEW 7: ATUR HARI LIBUR (FITUR HARI LIBUR DIKEMBALIKAN) -->
+    <!-- VIEW 7: ATUR HARI LIBUR -->
     <main id="view-hari-libur" class="flex-1 flex-col overflow-y-auto no-scrollbar bg-slate-50 p-4 hidden">
       <div class="mb-3">
         <h2 class="font-bold text-lg text-gray-900">📅 Atur Hari Libur</h2>
@@ -215,13 +248,38 @@
     </main>
 
 
-    <!-- VIEW 8: PENGATURAN SYSTEM (FITUR PENGATURAN DIKEMBALIKAN) -->
+    <!-- VIEW 8: PENGATURAN SYSTEM WITH DYNAMIC DAYS CONFIG FORM -->
     <main id="view-settings" class="flex-1 flex-col overflow-y-auto no-scrollbar bg-slate-50 p-4 hidden">
-      <div class="mb-4">
+      <div class="mb-3">
         <h2 class="font-bold text-lg text-gray-900">Pengaturan System</h2>
-        <p class="text-xs text-gray-500">Konfigurasi Jam & Identitas Sekolah</p>
+        <p class="text-xs text-gray-500">Konfigurasi Jam Presensi & Identitas Sekolah</p>
       </div>
 
+      <div class="bg-blue-600 text-white p-3.5 rounded-2xl shadow-md space-y-2 mb-3">
+        <div class="flex items-center space-x-2">
+          <i class="fa-solid fa-cloud-arrow-down text-lg text-amber-300"></i>
+          <div>
+            <h3 class="font-bold text-xs">Sinkronkan Pengaturan Waktu</h3>
+            <p class="text-[10px] text-blue-100">Tarik data jam dari Sheet ke aplikasi.</p>
+          </div>
+        </div>
+        <button onclick="pullTimeSettingsFromSheet()" class="w-full bg-white text-blue-900 font-extrabold py-2 rounded-xl text-xs shadow-sm flex items-center justify-center space-x-1.5">
+          <i class="fa-solid fa-arrows-rotate text-blue-600"></i>
+          <span>Tarik Jam Presensi dari Sheet</span>
+        </button>
+      </div>
+
+      <!-- CONFIG FORM WAKTU PRESENSI PER HARI -->
+      <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3 mb-3">
+        <h3 class="font-bold text-xs text-blue-900 border-b border-gray-100 pb-2">Jam Presensi Per Hari</h3>
+        <div id="days-config-container" class="space-y-3"></div>
+        <button onclick="saveDaysTimeSettings()" class="w-full bg-blue-600 text-white font-semibold py-2.5 rounded-xl text-xs flex items-center justify-center space-x-1.5 shadow-sm">
+          <i class="fa-solid fa-floppy-disk"></i>
+          <span>Simpan & Upload Jam ke Sheet</span>
+        </button>
+      </div>
+
+      <!-- CONFIG IDENTITAS SEKOLAH -->
       <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3 mb-3">
         <h3 class="font-bold text-xs text-blue-900 border-b border-gray-100 pb-2">Identitas Sekolah</h3>
         <div>
@@ -281,7 +339,6 @@
             <span class="text-xs font-bold text-gray-800">Tindak Lanjut</span>
           </button>
 
-          <!-- DIPANGGIL MANDIRI FULLSCREEN UNTUK CELEBRATION RESULT -->
           <button onclick="toggleMenuModal(); bukaHalamanLaporan();" class="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col items-center justify-center gap-1.5 hover:bg-emerald-50 transition">
             <i class="fa-solid fa-file-invoice text-xl text-emerald-600"></i>
             <span class="text-xs font-bold text-gray-800">Laporan Rekap</span>
@@ -340,6 +397,18 @@
     let fetchedTodayAttendance = [], fetchedAttendanceHistory = [], fetchedTindakLanjutHistory = [], fetchedHariLiburList = [];
     let currentScanSession = "PAGI", myPieChart = null;
 
+    const DAYS_LIST = [
+      { key: "sun", label: "Minggu (Ekstrakurikuler)" },
+      { key: "mon", label: "Senin" },
+      { key: "tue", label: "Selasa" },
+      { key: "wed", label: "Rabu" },
+      { key: "thu", label: "Kamis" },
+      { key: "fri", label: "Jumat" },
+      { key: "sat", label: "Sabtu" }
+    ];
+
+    const DEFAULT_TIME_SETTINGS = { pagiStart: "06:00", pagiLimit: "07:15", siangStart: "12:00", siangLimit: "16:00" };
+
     function bukaHalamanLaporan() { window.open(GAS_WEB_APP_URL + "?page=laporan", "_blank"); }
     function bukaHalamanCetakQR() { window.open(GAS_WEB_APP_URL + "?page=cetak-qr", "_blank"); }
 
@@ -351,8 +420,111 @@
           if (!database.objectStoreNames.contains("students")) database.createObjectStore("students", { keyPath: "id_siswa" });
           if (!database.objectStoreNames.contains("attendance_queue")) database.createObjectStore("attendance_queue", { keyPath: "queue_id" });
         };
-        req.onsuccess = (e) => { db = e.target.result; resolve(db); };
+        req.onsuccess = (e) => { db = e.target.result; updateQueueCountUI(); resolve(db); };
       });
+    }
+
+    function renderDaysConfigForm() {
+      const container = document.getElementById("days-config-container");
+      let html = "";
+      DAYS_LIST.forEach(day => {
+        const defaultActive = day.key !== "sun";
+        const active = localStorage.getItem(`DAY_ACTIVE_${day.key}`) !== null ? (localStorage.getItem(`DAY_ACTIVE_${day.key}`) === "true") : defaultActive;
+        
+        const pStart = localStorage.getItem(`TIME_${day.key}_PAGI_START`) || DEFAULT_TIME_SETTINGS.pagiStart;
+        const pLimit = localStorage.getItem(`TIME_${day.key}_PAGI_LIMIT`) || DEFAULT_TIME_SETTINGS.pagiLimit;
+        const sStart = localStorage.getItem(`TIME_${day.key}_SIANG_START`) || DEFAULT_TIME_SETTINGS.siangStart;
+        const sLimit = localStorage.getItem(`TIME_${day.key}_SIANG_LIMIT`) || DEFAULT_TIME_SETTINGS.siangLimit;
+
+        html += `
+          <div class="p-3 bg-slate-50 border border-gray-200 rounded-xl space-y-2">
+            <div class="flex items-center justify-between border-b border-gray-200 pb-1.5">
+              <span class="font-bold text-xs ${day.key === 'sun' ? 'text-amber-700' : 'text-gray-800'}">${day.label}</span>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="toggle-${day.key}" ${active ? 'checked' : ''} class="sr-only peer" onchange="toggleDayActiveUI('${day.key}')">
+                <div class="w-9 h-5 bg-gray-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                <span id="label-status-${day.key}" class="ml-2 text-[10px] font-bold ${active ? 'text-blue-600' : 'text-gray-400'}">${active ? 'Aktif' : 'Libur'}</span>
+              </label>
+            </div>
+            <div id="inputs-box-${day.key}" class="grid grid-cols-2 gap-2 ${active ? '' : 'opacity-40 pointer-events-none'}">
+              <div><label class="block text-[9px] font-semibold text-gray-600 mb-0.5">Mulai Pagi</label><input type="time" id="pagi-start-${day.key}" value="${pStart}" class="w-full px-2 py-1 bg-white border border-gray-200 rounded-lg text-xs font-bold text-gray-800"></div>
+              <div><label class="block text-[9px] font-semibold text-gray-600 mb-0.5">Toleransi Pagi</label><input type="time" id="pagi-limit-${day.key}" value="${pLimit}" class="w-full px-2 py-1 bg-white border border-gray-200 rounded-lg text-xs font-bold text-gray-800"></div>
+              <div><label class="block text-[9px] font-semibold text-gray-600 mb-0.5">Mulai Siang</label><input type="time" id="siang-start-${day.key}" value="${sStart}" class="w-full px-2 py-1 bg-white border border-gray-200 rounded-lg text-xs font-bold text-gray-800"></div>
+              <div><label class="block text-[9px] font-semibold text-gray-600 mb-0.5">Batas Siang</label><input type="time" id="siang-limit-${day.key}" value="${sLimit}" class="w-full px-2 py-1 bg-white border border-gray-200 rounded-lg text-xs font-bold text-gray-800"></div>
+            </div>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    function toggleDayActiveUI(dayKey) {
+      const isChecked = document.getElementById(`toggle-${dayKey}`).checked;
+      const inputsBox = document.getElementById(`inputs-box-${dayKey}`);
+      const labelStatus = document.getElementById(`label-status-${dayKey}`);
+      if (isChecked) {
+        inputsBox.classList.remove('opacity-40', 'pointer-events-none');
+        labelStatus.innerText = "Aktif";
+        labelStatus.className = "ml-2 text-[10px] font-bold text-blue-600";
+      } else {
+        inputsBox.classList.add('opacity-40', 'pointer-events-none');
+        labelStatus.innerText = "Libur";
+        labelStatus.className = "ml-2 text-[10px] font-bold text-gray-400";
+      }
+    }
+
+    async function saveDaysTimeSettings() {
+      const timeSettingsToSave = {};
+      DAYS_LIST.forEach(day => {
+        const active = document.getElementById(`toggle-${day.key}`).checked;
+        const pStart = document.getElementById(`pagi-start-${day.key}`).value || DEFAULT_TIME_SETTINGS.pagiStart;
+        const pLimit = document.getElementById(`pagi-limit-${day.key}`).value || DEFAULT_TIME_SETTINGS.pagiLimit;
+        const sStart = document.getElementById(`siang-start-${day.key}`).value || DEFAULT_TIME_SETTINGS.siangStart;
+        const sLimit = document.getElementById(`siang-limit-${day.key}`).value || DEFAULT_TIME_SETTINGS.siangLimit;
+
+        localStorage.setItem(`DAY_ACTIVE_${day.key}`, active);
+        localStorage.setItem(`TIME_${day.key}_PAGI_START`, pStart);
+        localStorage.setItem(`TIME_${day.key}_PAGI_LIMIT`, pLimit);
+        localStorage.setItem(`TIME_${day.key}_SIANG_START`, sStart);
+        localStorage.setItem(`TIME_${day.key}_SIANG_LIMIT`, sLimit);
+
+        timeSettingsToSave[`DAY_ACTIVE_${day.key}`] = active;
+        timeSettingsToSave[`TIME_${day.key}_PAGI_START`] = pStart;
+        timeSettingsToSave[`TIME_${day.key}_PAGI_LIMIT`] = pLimit;
+        timeSettingsToSave[`TIME_${day.key}_SIANG_START`] = sStart;
+        timeSettingsToSave[`TIME_${day.key}_SIANG_LIMIT`] = sLimit;
+      });
+
+      if (navigator.onLine) {
+        try {
+          await fetch(GAS_WEB_APP_URL, {
+            method: "POST", mode: "cors", headers: { "Content-Type": "text/plain" },
+            body: JSON.stringify({ action: "SAVE_TIME_SETTINGS", time_settings: timeSettingsToSave })
+          });
+          alert("Pengaturan jam tersimpan & diunggah ke Sheet!");
+        } catch (e) { alert("Pengaturan tersimpan lokal."); }
+      } else alert("Perangkat offline. Tersimpan di HP ini.");
+    }
+
+    async function pullTimeSettingsFromSheet() {
+      if (!navigator.onLine) return alert("Koneksikan internet terlebih dahulu.");
+      try {
+        const response = await fetch(`${GAS_WEB_APP_URL}?action=GET_TIME_SETTINGS`);
+        const result = await response.json();
+        if (result.success && result.time_settings) {
+          applyTimeSettingsFromCloud(result.time_settings);
+          alert("Pengaturan waktu ditarik dari Sheet!");
+        }
+      } catch (err) { alert("Gagal menarik data."); }
+    }
+
+    function applyTimeSettingsFromCloud(timeObj) {
+      for (let key in timeObj) {
+        if (timeObj.hasOwnProperty(key) && timeObj[key] !== "") {
+          localStorage.setItem(key, timeObj[key]);
+        }
+      }
+      renderDaysConfigForm();
     }
 
     async function autoDownloadMasterStudents() {
@@ -361,6 +533,7 @@
         const response = await fetch(`${GAS_WEB_APP_URL}?action=GET_APP_DATA`);
         const result = await response.json();
         if (result.success) {
+          if (result.time_settings) applyTimeSettingsFromCloud(result.time_settings);
           if (result.today_attendance) fetchedTodayAttendance = result.today_attendance;
           if (result.attendance_history) fetchedAttendanceHistory = result.attendance_history;
           if (result.tindak_lanjut) fetchedTindakLanjutHistory = result.tindak_lanjut;
@@ -382,8 +555,9 @@
 
     function populateClassDropdowns() {
       const classes = [...new Set(cachedStudents.map(s => s.kelas))].filter(Boolean).sort();
-      const filterSelect = document.getElementById('filter-class-select');
-      if (filterSelect) filterSelect.innerHTML = '<option value="ALL">Semua Kelas</option>' + classes.map(c => `<option value="${c}">${c}</option>`).join('');
+      const options = '<option value="ALL">Semua Kelas</option>' + classes.map(c => `<option value="${c}">${c}</option>`).join('');
+      if (document.getElementById('filter-class-select')) document.getElementById('filter-class-select').innerHTML = options;
+      if (document.getElementById('monitoring-class-filter')) document.getElementById('monitoring-class-filter').innerHTML = options;
     }
 
     async function loadStudentsView() {
@@ -391,6 +565,7 @@
       tx.objectStore("students").getAll().onsuccess = (e) => {
         cachedStudents = e.target.result || [];
         filterStudentsList();
+        populateClassDropdowns();
       };
     }
 
@@ -420,14 +595,19 @@
       if (viewName === 'monitoring') updateMonitoringDashboard();
       if (viewName === 'tindak-lanjut') renderTindakLanjutView();
       if (viewName === 'hari-libur') renderHariLiburView();
+      if (viewName === 'settings') renderDaysConfigForm();
     }
 
     function toggleMenuModal() { document.getElementById('menu-modal').classList.toggle('hidden'); }
     function toggleAddStudentModal() { document.getElementById('add-student-modal').classList.toggle('hidden'); }
 
-    function updateMonitoringDashboard() {
+    // MONITORING & DAFTAR SISWA DENGAN TOMBOL AKSI PRESENSI MANUAL
+    async function updateMonitoringDashboard() {
       const targetDate = document.getElementById('monitoring-date-filter').value || new Date().toISOString().split('T')[0];
-      const allRecords = [...fetchedTodayAttendance, ...fetchedAttendanceHistory].filter(r => r.tanggal === targetDate);
+      const selectedClass = document.getElementById('monitoring-class-filter').value;
+      
+      const queueRecords = await getAllQueueFromDB();
+      const allRecords = [...fetchedTodayAttendance, ...fetchedAttendanceHistory, ...queueRecords].filter(r => r.tanggal === targetDate);
 
       let hadir = 0, alpa = 0, bolos = 0, sakit = 0, izin = 0, kegiatan = 0;
       allRecords.forEach(r => {
@@ -448,6 +628,74 @@
       document.getElementById('stat-kegiatan').innerText = kegiatan;
 
       renderPieChart(hadir, alpa, bolos, sakit, izin, kegiatan);
+      renderMonitoringActionList(targetDate, selectedClass, allRecords);
+    }
+
+    function renderMonitoringActionList(targetDate, selectedClass, attendanceRecords) {
+      const container = document.getElementById('monitoring-student-action-list');
+      const filteredStudents = cachedStudents.filter(s => selectedClass === "ALL" || s.kelas === selectedClass);
+      
+      document.getElementById('monitoring-count-badge').innerText = `${filteredStudents.length} Siswa`;
+
+      if (filteredStudents.length === 0) {
+        container.innerHTML = `<p class="text-center text-xs text-gray-400 py-4">Tidak ada data siswa untuk kelas terpilih.</p>`;
+        return;
+      }
+
+      container.innerHTML = filteredStudents.map(std => {
+        const stdRec = attendanceRecords.find(r => r.id_siswa === std.id_siswa);
+        const currentStatus = stdRec ? String(stdRec.status_presensi).toUpperCase() : "BELUM";
+
+        return `
+          <div class="p-2.5 bg-slate-50 border border-gray-200 rounded-xl space-y-1.5">
+            <div class="flex items-center justify-between">
+              <div class="min-w-0 flex-1">
+                <h5 class="font-bold text-xs text-gray-900 truncate">${std.nama}</h5>
+                <p class="text-[10px] text-gray-500">${std.kelas} | ID: ${std.id_siswa}</p>
+              </div>
+              <span class="text-[9px] font-extrabold px-2 py-0.5 rounded-full ${getStatusBadgeClass(currentStatus)}">${currentStatus}</span>
+            </div>
+            <!-- TOMBOL AKSI CEPAT PRESENSI MANUAL -->
+            <div class="grid grid-cols-6 gap-1 pt-1">
+              <button onclick="setManualPresensiAction('${std.id_siswa}', 'HADIR', '${targetDate}')" class="py-1 bg-emerald-600 text-white font-bold text-[9px] rounded-lg">Hadir</button>
+              <button onclick="setManualPresensiAction('${std.id_siswa}', 'IZIN', '${targetDate}')" class="py-1 bg-indigo-600 text-white font-bold text-[9px] rounded-lg">Izin</button>
+              <button onclick="setManualPresensiAction('${std.id_siswa}', 'SAKIT', '${targetDate}')" class="py-1 bg-blue-600 text-white font-bold text-[9px] rounded-lg">Sakit</button>
+              <button onclick="setManualPresensiAction('${std.id_siswa}', 'ALPA', '${targetDate}')" class="py-1 bg-amber-600 text-white font-bold text-[9px] rounded-lg">Alpa</button>
+              <button onclick="setManualPresensiAction('${std.id_siswa}', 'BOLOS', '${targetDate}')" class="py-1 bg-rose-600 text-white font-bold text-[9px] rounded-lg">Bolos</button>
+              <button onclick="setManualPresensiAction('${std.id_siswa}', 'KEGIATAN', '${targetDate}')" class="py-1 bg-purple-600 text-white font-bold text-[9px] rounded-lg">Keg.</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function getStatusBadgeClass(status) {
+      if (status === "HADIR") return "bg-emerald-100 text-emerald-800";
+      if (status === "IZIN") return "bg-indigo-100 text-indigo-800";
+      if (status === "SAKIT") return "bg-blue-100 text-blue-800";
+      if (status === "ALPA") return "bg-amber-100 text-amber-800";
+      if (status === "BOLOS") return "bg-rose-100 text-rose-800";
+      if (status === "KEGIATAN") return "bg-purple-100 text-purple-800";
+      return "bg-gray-200 text-gray-600";
+    }
+
+    async function setManualPresensiAction(idSiswa, status, targetDate) {
+      const student = cachedStudents.find(s => s.id_siswa === idSiswa);
+      if (!student) return;
+      
+      const now = new Date();
+      const timeStr = now.toTimeString().split(' ')[0].substring(0, 5);
+
+      const record = {
+        queue_id: `${targetDate}_${idSiswa}_PAGI`,
+        tanggal: targetDate, jam: timeStr, id_siswa: idSiswa,
+        nama: student.nama, kelas: student.kelas, sesi: "PAGI",
+        status_presensi: status, timestamp: Date.now()
+      };
+
+      await saveToAttendanceQueue(record);
+      updateMonitoringDashboard();
+      if (navigator.onLine) syncQueueToGAS();
     }
 
     function renderPieChart(hadir, alpa, bolos, sakit, izin, kegiatan) {
@@ -579,10 +827,49 @@
       };
     }
 
+    function saveToAttendanceQueue(record) {
+      return new Promise((resolve) => {
+        const tx = db.transaction("attendance_queue", "readwrite");
+        tx.objectStore("attendance_queue").put(record);
+        tx.oncomplete = () => { updateQueueCountUI(); resolve(); };
+      });
+    }
+
+    function getAllQueueFromDB() {
+      return new Promise((resolve) => {
+        const tx = db.transaction("attendance_queue", "readonly");
+        tx.objectStore("attendance_queue").getAll().onsuccess = (e) => resolve(e.target.result || []);
+      });
+    }
+
+    function updateQueueCountUI() {
+      getAllQueueFromDB().then(recs => { document.getElementById('queue-count').innerText = recs.length; });
+    }
+
+    async function syncQueueToGAS() {
+      const queueData = await getAllQueueFromDB();
+      if (queueData.length === 0) return;
+      try {
+        const response = await fetch(GAS_WEB_APP_URL, {
+          method: "POST", mode: "cors", headers: { "Content-Type": "text/plain" },
+          body: JSON.stringify({ action: "SYNC_ATTENDANCE_BATCH", data: queueData })
+        });
+        const result = await response.json();
+        if (result.success) {
+          const tx = db.transaction("attendance_queue", "readwrite");
+          const store = tx.objectStore("attendance_queue");
+          queueData.forEach(q => store.delete(q.queue_id));
+          tx.oncomplete = () => updateQueueCountUI();
+        }
+      } catch (e) {}
+    }
+
     function promptManualInput() {
       const qrInput = prompt("Masukkan ID_SISWA atau Kode QR:");
       if (qrInput) onScanSuccess(qrInput.trim());
     }
+
+    function triggerManualSync() { if (navigator.onLine) syncQueueToGAS(); }
 
     setInterval(() => {
       const isOnline = navigator.onLine;
@@ -594,6 +881,7 @@
       document.getElementById("monitoring-date-filter").value = new Date().toISOString().split('T')[0];
       await initDatabase();
       await autoDownloadMasterStudents();
+      renderDaysConfigForm();
     };
   </script>
 </body>
