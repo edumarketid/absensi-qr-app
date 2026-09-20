@@ -124,7 +124,7 @@
   <!-- Container Mobile -->
   <div class="w-full max-w-md h-[100vh] sm:h-[840px] bg-white flex flex-col justify-between shadow-2xl overflow-hidden sm:rounded-3xl relative border border-gray-200">
 
-    <!-- HEADER UTAMA (FIXED / STICKY UNTUK MENCEGAH TERGULIR) -->
+    <!-- HEADER UTAMA (FIXED / STICKY) -->
     <header class="bg-[#0b3c5d] text-white py-3.5 px-4 z-30 shadow-md flex-shrink-0">
       <div class="flex items-center justify-between">
         <div class="flex items-center space-x-3">
@@ -147,15 +147,17 @@
     <main id="view-scanner" class="flex-1 flex flex-col justify-between relative bg-gray-900 overflow-hidden">
       <div class="flex-1 relative flex flex-col items-center justify-center p-4 bg-black">
         
-        <!-- TAMPILAN KAMERA ATAU PLACEHOLDER SAAT KAMERA MATI -->
-        <div id="reader" class="w-full h-full max-h-[420px] overflow-hidden rounded-2xl relative flex items-center justify-center bg-gray-800 border border-gray-700">
-          <div id="camera-off-placeholder" class="text-center p-6 space-y-3">
+        <!-- PLACEHOLDER / CONTAINER KAMERA STABIL -->
+        <div class="w-full h-full max-h-[420px] overflow-hidden rounded-2xl relative flex items-center justify-center bg-gray-800 border border-gray-700">
+          <div id="reader" class="w-full h-full"></div>
+          
+          <div id="camera-off-placeholder" class="absolute inset-0 flex flex-col items-center justify-center text-center p-6 space-y-3 bg-gray-900 z-10">
             <i class="fa-solid fa-camera text-gray-500 text-4xl"></i>
-            <p class="text-xs text-gray-400 font-semibold">Kamera non-aktif.<br>Klik tombol di bawah untuk menyalakan.</p>
+            <p class="text-xs text-gray-400 font-semibold">Kamera Non-Aktif.<br>Klik "Nyalakan Kamera" untuk memindai QR.</p>
           </div>
         </div>
 
-        <div id="scan-frame-box" class="absolute w-64 h-64 pointer-events-none flex items-center justify-center z-10 hidden">
+        <div id="scan-frame-box" class="absolute w-64 h-64 pointer-events-none flex items-center justify-center z-20 hidden">
           <div class="absolute -top-1 -left-1 w-8 h-8 border-t-4 border-l-4 border-green-400 rounded-tl-xl"></div>
           <div class="absolute -top-1 -right-1 w-8 h-8 border-t-4 border-r-4 border-green-400 rounded-tr-xl"></div>
           <div class="absolute -bottom-1 -left-1 w-8 h-8 border-b-4 border-l-4 border-green-400 rounded-bl-xl"></div>
@@ -164,6 +166,11 @@
           <div class="absolute bottom-4 bg-black/70 text-white text-xs px-4 py-1.5 rounded-full backdrop-blur-sm shadow-md border border-white/10">
             Arahkan QR ke dalam kotak
           </div>
+        </div>
+
+        <!-- MODE TANGGAL SCAN INDIKATOR -->
+        <div id="scan-mode-indicator" class="absolute top-6 left-6 right-6 bg-blue-900/80 text-blue-100 text-[10px] font-bold py-1 px-3 rounded-full text-center border border-blue-400/30 backdrop-blur-sm z-20">
+          Mode Waktu Scan: AUTO (Realtime Perangkat)
         </div>
 
         <div class="absolute bottom-4 left-4 right-4 flex items-center justify-between gap-2 z-20">
@@ -177,10 +184,10 @@
             <span id="btn-camera-text">Nyalakan Kamera</span>
           </button>
 
-          <!-- TOMBOL ATUR TANGGAL & JAM SCAN MANUAL -->
-          <button onclick="promptCustomScanTime()" class="bg-black/60 hover:bg-black/80 text-white flex-1 py-2.5 rounded-xl text-xs font-medium flex flex-col items-center justify-center gap-1 backdrop-blur-md border border-white/10">
+          <!-- MODE WAKTU SCAN (AUTO / MANUAL) -->
+          <button onclick="toggleTimeModeSetting()" class="bg-black/60 hover:bg-black/80 text-white flex-1 py-2.5 rounded-xl text-xs font-medium flex flex-col items-center justify-center gap-1 backdrop-blur-md border border-white/10">
             <i class="fa-solid fa-clock text-amber-400 text-sm"></i>
-            <span>Atur Tgl Scan</span>
+            <span>Mode Waktu</span>
           </button>
         </div>
       </div>
@@ -886,7 +893,7 @@
     </div>
 
 
-    <!-- BOTTOM NAVIGATION (FIXED / STICKY UNTUK MENCEGAH TERGULIR) -->
+    <!-- BOTTOM NAVIGATION (FIXED / STICKY) -->
     <nav class="bg-white border-t border-gray-200 px-3 py-1.5 flex justify-between items-center text-center z-30 flex-shrink-0">
       <button id="nav-students" onclick="toggleView('students')" class="flex-1 text-gray-400 hover:text-gray-600 flex flex-col items-center">
         <div class="w-7 h-7 flex items-center justify-center mb-0.5">
@@ -931,6 +938,7 @@
 
     let html5QrCode = null;
     let isCameraActive = false;
+    let isCameraStarting = false;
     let db = null;
     let cachedStudents = [];
     let fetchedTodayAttendance = [];
@@ -946,7 +954,8 @@
     let kopSuratSrc = localStorage.getItem("KOP_SURAT") || "";
     let currentReportType = "HARIAN";
 
-    // VARIABEL ATUR TANGGAL & JAM SCAN MANUAL (DEFAULT NULL = PAKAI WAKTU SEKARANG)
+    // VARIABEL SETTING MODE WAKTU SCAN (AUTO ATAU MANUAL)
+    let isManualTimeMode = false;
     let customScanDateOverride = null;
     let customScanTimeOverride = null;
 
@@ -1010,6 +1019,7 @@
 
       renderDaysConfigForm();
       autoUpdateShiftLabel();
+      updateTimeModeIndicator();
     }
 
     function renderDaysConfigForm() {
@@ -1247,6 +1257,9 @@
               document.getElementById('sync-info-text').innerText = `Terhubung! ${result.students.length} Siswa Aktif.`;
               loadStudentsView();
               populateClassDropdowns();
+              if (!document.getElementById('view-monitoring').classList.contains('hidden')) {
+                updateMonitoringDashboard();
+              }
             };
           }
         }
@@ -1836,73 +1849,96 @@
       }
     }
 
-    // 9. SCANNER CONTROLLER (TIDAK OTOMATIS AKTIF KECUALI DIKLIK)
-    function initScanner() {
-      if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
-      const config = { fps: 15, qrbox: { width: 250, height: 250 } };
+    // 9. SCANNER CONTROLLER STABIL (TANPA CRASH / RE-ENTRY LOCK)
+    async function initScanner() {
+      if (isCameraStarting || isCameraActive) return;
+      isCameraStarting = true;
 
-      document.getElementById('camera-off-placeholder').classList.add('hidden');
-      document.getElementById('scan-frame-box').classList.remove('hidden');
+      try {
+        if (!html5QrCode) {
+          html5QrCode = new Html5Qrcode("reader");
+        }
 
-      html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess)
-        .then(() => {
-          isCameraActive = true;
-          document.getElementById('btn-camera-text').innerText = "Matikan Kamera";
-        })
-        .catch(() => {
-          stopCameraIfActive();
-          document.getElementById('btn-camera-text').innerText = "Nyalakan Kamera";
-        });
+        document.getElementById('camera-off-placeholder').classList.add('hidden');
+        document.getElementById('scan-frame-box').classList.remove('hidden');
+
+        const config = { fps: 15, qrbox: { width: 250, height: 250 } };
+
+        await html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess);
+        
+        isCameraActive = true;
+        document.getElementById('btn-camera-text').innerText = "Matikan Kamera";
+      } catch (err) {
+        console.warn("Gagal mengaktifkan kamera:", err);
+        stopCameraIfActive();
+      } finally {
+        isCameraStarting = false;
+      }
     }
 
     function toggleCameraState() {
-      if (isCameraActive) {
+      if (isCameraActive || isCameraStarting) {
         stopCameraIfActive();
       } else {
         initScanner();
       }
     }
 
-    function stopCameraIfActive() {
-      if (isCameraActive && html5QrCode) {
-        html5QrCode.stop().then(() => {
-          isCameraActive = false;
-          document.getElementById('btn-camera-text').innerText = "Nyalakan Kamera";
-          document.getElementById('camera-off-placeholder').classList.remove('hidden');
-          document.getElementById('scan-frame-box').classList.add('hidden');
-        }).catch(() => {
-          isCameraActive = false;
-          document.getElementById('btn-camera-text').innerText = "Nyalakan Kamera";
-          document.getElementById('camera-off-placeholder').classList.remove('hidden');
-          document.getElementById('scan-frame-box').classList.add('hidden');
-        });
-      } else {
-        document.getElementById('btn-camera-text').innerText = "Nyalakan Kamera";
-        document.getElementById('camera-off-placeholder').classList.remove('hidden');
-        document.getElementById('scan-frame-box').classList.add('hidden');
+    async function stopCameraIfActive() {
+      if (html5QrCode && isCameraActive) {
+        try {
+          await html5QrCode.stop();
+        } catch (e) {
+          console.warn("Kamera sudah terhenti:", e);
+        }
       }
+      isCameraActive = false;
+      isCameraStarting = false;
+
+      document.getElementById('btn-camera-text').innerText = "Nyalakan Kamera";
+      document.getElementById('camera-off-placeholder').classList.remove('hidden');
+      document.getElementById('scan-frame-box').classList.add('hidden');
     }
 
-    // 10. ATUR TANGGAL & JAM SCAN MANUAL (RETROAKTIF)
-    function promptCustomScanTime() {
-      const defaultDate = customScanDateOverride || new Date().toISOString().split('T')[0];
-      const defaultTime = customScanTimeOverride || new Date().toTimeString().split(' ')[0].substring(0, 5);
+    // 10. ATUR MODE WAKTU SCAN (AUTO / MANUAL TANGGAL & JAM)
+    function toggleTimeModeSetting() {
+      if (!isManualTimeMode) {
+        const defaultDate = customScanDateOverride || new Date().toISOString().split('T')[0];
+        const defaultTime = customScanTimeOverride || new Date().toTimeString().split(' ')[0].substring(0, 5);
 
-      const inputDate = prompt("Masukkan Tanggal Scan (Format: YYYY-MM-DD):", defaultDate);
-      if (!inputDate) return;
+        const inputDate = prompt("Mode Manual: Masukkan Tanggal Scan (Format: YYYY-MM-DD):", defaultDate);
+        if (!inputDate) return;
 
-      const inputTime = prompt("Masukkan Jam Scan (Format: HH:MM):", defaultTime);
-      if (!inputTime) return;
+        const inputTime = prompt("Mode Manual: Masukkan Jam Scan (Format: HH:MM):", defaultTime);
+        if (!inputTime) return;
 
-      customScanDateOverride = inputDate.trim();
-      customScanTimeOverride = inputTime.trim();
+        isManualTimeMode = true;
+        customScanDateOverride = inputDate.trim();
+        customScanTimeOverride = inputTime.trim();
+      } else {
+        isManualTimeMode = false;
+        customScanDateOverride = null;
+        customScanTimeOverride = null;
+        alert("Mode Waktu Scan dikembalikan ke AUTO (Waktu Realtime Perangkat).");
+      }
 
-      alert(`Mode Tanggal/Jam Manual Aktif!\nSemua scan berikutnya akan dicatat pada:\nTanggal: ${customScanDateOverride}\nJam: ${customScanTimeOverride}`);
+      updateTimeModeIndicator();
+    }
+
+    function updateTimeModeIndicator() {
+      const indicator = document.getElementById("scan-mode-indicator");
+      if (isManualTimeMode && customScanDateOverride && customScanTimeOverride) {
+        indicator.innerText = `Mode Waktu: MANUAL (${customScanDateOverride} ${customScanTimeOverride})`;
+        indicator.className = "absolute top-6 left-6 right-6 bg-amber-600/90 text-white text-[10px] font-bold py-1 px-3 rounded-full text-center border border-amber-300 backdrop-blur-sm z-20 shadow-md";
+      } else {
+        indicator.innerText = "Mode Waktu: AUTO (Realtime Perangkat)";
+        indicator.className = "absolute top-6 left-6 right-6 bg-blue-900/80 text-blue-100 text-[10px] font-bold py-1 px-3 rounded-full text-center border border-blue-400/30 backdrop-blur-sm z-20";
+      }
     }
 
     // 11. PROCESS SCAN & STATUS
     async function onScanSuccess(decodedText) {
-      stopCameraIfActive();
+      await stopCameraIfActive();
       if (navigator.vibrate) navigator.vibrate(200);
       processStudentAttendance(decodedText.trim());
     }
@@ -1911,8 +1947,8 @@
       const student = await getStudentFromDB(qrCodeKey);
       const now = new Date();
       
-      const dateStr = customDate || customScanDateOverride || now.toISOString().split('T')[0];
-      const timeStr = customScanTimeOverride || now.toTimeString().split(' ')[0].substring(0, 5);
+      const dateStr = customDate || (isManualTimeMode ? customScanDateOverride : now.toISOString().split('T')[0]);
+      const timeStr = (isManualTimeMode && customScanTimeOverride) ? customScanTimeOverride : now.toTimeString().split(' ')[0].substring(0, 5);
       const sesi = currentScanSession;
 
       if (student) {
@@ -2045,7 +2081,7 @@
       `).join('');
     }
 
-    // 14. DASHBOARD MONITORING DENGAN FILTER TANGGAL & DUAL FILTER
+    // 14. DASHBOARD MONITORING DENGAN PENANGANAN DATA CLOUD SHEET `Absensi_Harian` LENGKAP
     async function updateMonitoringDashboard() {
       const targetDateStr = document.getElementById('monitoring-date-filter').value || new Date().toISOString().split('T')[0];
       const selectedClass = document.getElementById('monitoring-class-filter').value;
@@ -2079,8 +2115,8 @@
       const isToday = targetDateStr === todayStr;
 
       classStudents.forEach(student => {
-        const studentPagi = allTargetRecords.find(r => r.id_siswa === student.id_siswa && (r.sesi === "PAGI" || r.jam_pagi));
-        const studentSiang = allTargetRecords.find(r => r.id_siswa === student.id_siswa && (r.sesi === "SIANG" || r.jam_siang));
+        const studentPagi = allTargetRecords.find(r => r.id_siswa === student.id_siswa && (r.sesi === "PAGI" || (r.jam_pagi && r.jam_pagi !== "-")));
+        const studentSiang = allTargetRecords.find(r => r.id_siswa === student.id_siswa && (r.sesi === "SIANG" || (r.jam_siang && r.jam_siang !== "-")));
         const anyRecord = allTargetRecords.find(r => r.id_siswa === student.id_siswa);
 
         if (selectedSession === "PAGI") {
@@ -2190,7 +2226,7 @@
       });
     }
 
-    // LIST SISWA DI MONITORING DENGAN TOMBOL HADIR MANUAL (SOLUSI BARCODE RUSAK)
+    // LIST SISWA DI MONITORING DENGAN TOMBOL HADIR MANUAL
     function renderUnscannedStudentsList(unresolved, targetDateStr) {
       const container = document.getElementById('unscanned-students-container');
 
@@ -2314,7 +2350,7 @@
     }
 
     // 17. NAVIGATION TOGGLE
-    function toggleView(viewName) {
+    async function toggleView(viewName) {
       const views = ['view-scanner', 'view-success', 'view-students', 'view-monitoring', 'view-donation', 'view-print-qr', 'view-report', 'view-tindak-lanjut', 'view-hari-libur', 'view-settings'];
       views.forEach(v => {
         const el = document.getElementById(v);
@@ -2337,43 +2373,43 @@
         document.getElementById('view-students').classList.add('flex');
         navStudents.className = "flex-1 text-blue-600 flex flex-col items-center";
         loadStudentsView();
-        stopCameraIfActive();
+        await stopCameraIfActive();
       } else if (viewName === 'monitoring') {
         document.getElementById('view-monitoring').classList.remove('hidden');
         document.getElementById('view-monitoring').classList.add('flex');
         navMonitoring.className = "flex-1 text-blue-600 flex flex-col items-center";
         updateMonitoringDashboard();
-        stopCameraIfActive();
+        await stopCameraIfActive();
       } else if (viewName === 'donation') {
         document.getElementById('view-donation').classList.remove('hidden');
         document.getElementById('view-donation').classList.add('flex');
         navDonation.className = "flex-1 text-rose-600 flex flex-col items-center font-bold";
-        stopCameraIfActive();
+        await stopCameraIfActive();
       } else if (viewName === 'print-qr') {
         document.getElementById('view-print-qr').classList.remove('hidden');
         document.getElementById('view-print-qr').classList.add('flex');
         renderStudentsChecklistToPrint();
         generateQRCardsToPrint();
-        stopCameraIfActive();
+        await stopCameraIfActive();
       } else if (viewName === 'report') {
         document.getElementById('view-report').classList.remove('hidden');
         document.getElementById('view-report').classList.add('flex');
         generateReportData();
-        stopCameraIfActive();
+        await stopCameraIfActive();
       } else if (viewName === 'tindak-lanjut') {
         document.getElementById('view-tindak-lanjut').classList.remove('hidden');
         document.getElementById('view-tindak-lanjut').classList.add('flex');
         renderTindakLanjutView();
-        stopCameraIfActive();
+        await stopCameraIfActive();
       } else if (viewName === 'hari-libur') {
         document.getElementById('view-hari-libur').classList.remove('hidden');
         document.getElementById('view-hari-libur').classList.add('flex');
         renderHariLiburView();
-        stopCameraIfActive();
+        await stopCameraIfActive();
       } else if (viewName === 'settings') {
         document.getElementById('view-settings').classList.remove('hidden');
         document.getElementById('view-settings').classList.add('flex');
-        stopCameraIfActive();
+        await stopCameraIfActive();
       } else if (viewName === 'success') {
         document.getElementById('view-success').classList.remove('hidden');
         document.getElementById('view-success').classList.add('flex');
@@ -2383,8 +2419,7 @@
         navScanner.className = "flex-1 text-blue-600 flex flex-col items-center -mt-4";
         navScanner.children[0].className = "w-12 h-12 rounded-full bg-blue-600 text-white shadow-lg flex items-center justify-center border-4 border-white";
         
-        // Kamera dibuat MATI secara default saat membuka tab Scanner
-        stopCameraIfActive();
+        await stopCameraIfActive();
       }
     }
 
@@ -2438,12 +2473,12 @@
       syncQueueToGAS();
     });
 
-    // RUN INITIAL LOAD (KAMERA TIDAK OTOMATIS TERBUKA)
+    // RUN INITIAL LOAD
     window.onload = async () => {
       loadAppConfigs();
       await initDatabase();
       await autoDownloadMasterStudents();
-      stopCameraIfActive();
+      await stopCameraIfActive();
     };
   </script>
 
