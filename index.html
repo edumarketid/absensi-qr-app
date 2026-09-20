@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Sistem Absensi Murid - v1.30</title>
+  <title>Sistem Absensi Murid - v1.31</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- FontAwesome Icons CDN -->
@@ -37,69 +37,14 @@
       overflow: hidden;
       background: #fff;
       flex: none;
-      color: var(--ink, #0b2c63);
-      border: 1.3mm solid var(--accent, #0b3b82);
+      color: #0b2c63;
+      border: 1.3mm solid #0b3b82;
       border-radius: 4mm;
       box-shadow: 0 1.5mm 4mm rgba(15,23,42,.18);
       page-break-inside: avoid;
       box-sizing: border-box;
     }
-    .card:before {
-      content: ""; position: absolute; left: 0; top: 0; width: 22mm; height: 20mm;
-      background: var(--accent, #0b3b82); clip-path: polygon(0 0, 100% 0, 42% 100%, 0 100%);
-    }
-    .card:after {
-      content: ""; position: absolute; right: 0; bottom: 0; width: 22mm; height: 18mm;
-      background: var(--accent, #0b3b82); clip-path: polygon(100% 0, 100% 100%, 0 100%);
-    }
-    .accent-stripe {
-      position: absolute; left: 4mm; top: 0; width: 3mm; height: 20mm;
-      background: var(--secondary, #f5b700); transform: skewX(-18deg); z-index: 2;
-    }
-    .card-logo { position: absolute; top: 2.5mm; width: 13mm; height: 13mm; object-fit: contain; z-index: 3; }
-    .card-logo.left { left: 5mm; } .card-logo.right { right: 5mm; }
-    .school-title {
-      position: absolute; top: 2.8mm; left: 19mm; right: 19mm; text-align: center;
-      font-size: 3.8mm; line-height: 1.05; font-weight: 900; color: var(--ink, #0b2c63);
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; z-index: 3; text-transform: uppercase;
-    }
-    .card-badge {
-      position: absolute; top: 10mm; left: 19mm; right: 19mm; height: 6.5mm;
-      background: var(--accent, #0b3b82); border-radius: 5mm; text-align: center;
-      color: #fff; font-size: 3mm; font-weight: 900; line-height: 6.5mm; z-index: 3;
-    }
-    .photo-box {
-      position: absolute; left: 3.8mm; top: 18.2mm; width: 17mm; height: 23mm;
-      border: 0.5mm solid var(--accent, #0b3b82); border-radius: 2mm; padding: 1mm; z-index: 3; background: #fff;
-    }
-    .photo-in {
-      width: 100%; height: 100%; border: 0.3mm solid #cbd5e1; border-radius: 1.5mm; background: #f8fafc;
-      display: flex; align-items: center; justify-content: center; color: #789; font-size: 3mm; font-weight: 800;
-    }
-    .details-box { position: absolute; left: 24mm; top: 18.5mm; right: 26mm; z-index: 3; text-align: left; }
-    .lbl { font-size: 2.2mm; font-weight: 900; color: var(--accent, #0b3b82); margin-bottom: 0.5mm; line-height: 1; }
-    .val { font-size: 2.6mm; font-weight: 800; color: #111827; margin-bottom: 2mm; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.05; }
-    .card-qr { position: absolute; right: 3.7mm; top: 18.4mm; width: 23mm; height: 23mm; background: #fff; display: flex; align-items: center; justify-content: center; z-index: 4; }
     .card-qr canvas, .card-qr img { width: 23mm !important; height: 23mm !important; }
-    .footer-left { position: absolute; left: 4mm; bottom: 2mm; font-size: 2mm; color: #64748b; font-weight: bold; z-index: 4; }
-    .footer-right { position: absolute; right: 4mm; bottom: 2mm; font-size: 2mm; color: #64748b; font-weight: bold; z-index: 4; text-transform: uppercase; }
-
-    /* BINGKAI & TEMA WARNA */
-    .frame-ganda { border: 1.3mm solid var(--accent, #0b3b82); }
-    .frame-ganda .inner-frame { position: absolute; inset: 1.2mm; border: 0.35mm solid var(--secondary, #f5b700); border-radius: 3mm; z-index: 1; }
-    .frame-tunggal { border: 1.1mm solid var(--accent, #0b3b82); border-radius: 2mm; }
-    .frame-sudut { border: 1.1mm solid var(--accent, #0b3b82); border-radius: 4mm; }
-    .frame-minimalis { border: 0.45mm solid #cbd5e1; border-radius: 1.5mm; }
-
-    .theme-biru { --accent: #0b3b82; --secondary: #f5b700; --ink: #0b2c63; }
-    .theme-hijau { --accent: #087443; --secondary: #eab308; --ink: #075331; }
-    .theme-merah { --accent: #a61b1b; --secondary: #f59e0b; --ink: #721c1c; }
-    .theme-ungu { --accent: #5425a8; --secondary: #f59e0b; --ink: #3b1b78; }
-    .theme-emas { --accent: #9a6a00; --secondary: #d4a72c; --ink: #624500; }
-    .theme-hitam { --accent: #111827; --secondary: #94a3b8; --ink: #111827; }
-
-    .kop-surat { text-align: center; border-bottom: 3px double #111; padding-bottom: 6px; margin-bottom: 15px; }
-    .kop-surat img { max-width: 95%; max-height: 90px; object-fit: contain; }
 
     @media print {
       @page { size: A4 portrait; margin: 8mm 5mm; }
@@ -137,7 +82,7 @@
             <span id="status-text" class="text-xs font-semibold">Memeriksa...</span>
           </div>
           <!-- VERSI APLIKASI DI BAWAH ONLINE -->
-          <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30 block mt-0.5">v1.30</span>
+          <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30 block mt-0.5">v1.31</span>
         </div>
       </div>
     </header>
@@ -146,10 +91,8 @@
     <!-- VIEW 1: CAMERA SCANNER -->
     <main id="view-scanner" class="flex-1 flex flex-col justify-between relative bg-gray-900 overflow-hidden">
       <div class="flex-1 relative flex flex-col items-center justify-center p-4 bg-black">
-        
         <div class="w-full h-full max-h-[420px] overflow-hidden rounded-2xl relative flex items-center justify-center bg-gray-800 border border-gray-700">
           <div id="reader" class="w-full h-full"></div>
-          
           <div id="camera-off-placeholder" class="absolute inset-0 flex flex-col items-center justify-center text-center p-6 space-y-3 bg-gray-900 z-10">
             <i class="fa-solid fa-camera text-gray-500 text-4xl"></i>
             <p class="text-xs text-gray-400 font-semibold">Kamera Non-Aktif.<br>Klik "Nyalakan Kamera" untuk memindai QR.</p>
@@ -161,8 +104,7 @@
           <div class="absolute -top-1 -right-1 w-8 h-8 border-t-4 border-r-4 border-green-400 rounded-tr-xl"></div>
           <div class="absolute -bottom-1 -left-1 w-8 h-8 border-b-4 border-l-4 border-green-400 rounded-bl-xl"></div>
           <div class="absolute -bottom-1 -right-1 w-8 h-8 border-b-4 border-r-4 border-green-400 rounded-br-xl"></div>
-          
-          <div class="absolute bottom-4 bg-black/70 text-white text-xs px-4 py-1.5 rounded-full backdrop-blur-sm shadow-md border border-white/10">
+          <div class="absolute bottom-4 bg-black/70 text-white text-xs px-4 py-1.5 rounded-full backdrop-blur-sm border border-white/10">
             Arahkan QR ke dalam kotak
           </div>
         </div>
@@ -172,17 +114,15 @@
         </div>
 
         <div class="absolute bottom-4 left-4 right-4 flex items-center justify-between gap-2 z-20">
-          <button onclick="toggleScanSessionMode()" class="bg-black/60 hover:bg-black/80 text-white flex-1 py-2.5 rounded-xl text-xs font-medium flex flex-col items-center justify-center gap-1 backdrop-blur-md border border-white/10">
+          <button onclick="toggleScanSessionMode()" class="bg-black/60 text-white flex-1 py-2.5 rounded-xl text-xs font-medium flex flex-col items-center justify-center gap-1 backdrop-blur-md border border-white/10">
             <i id="session-icon" class="fa-solid fa-sun text-amber-400 text-sm"></i>
             <span id="session-mode-text">Mode Pagi</span>
           </button>
-          
-          <button id="btn-toggle-camera" onclick="toggleCameraState()" class="bg-blue-600 hover:bg-blue-700 text-white flex-[2] py-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 shadow-lg">
+          <button id="btn-toggle-camera" onclick="toggleCameraState()" class="bg-blue-600 text-white flex-[2] py-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 shadow-lg">
             <i class="fa-solid fa-video"></i>
             <span id="btn-camera-text">Nyalakan Kamera</span>
           </button>
-
-          <button onclick="toggleTimeModeSetting()" class="bg-black/60 hover:bg-black/80 text-white flex-1 py-2.5 rounded-xl text-xs font-medium flex flex-col items-center justify-center gap-1 backdrop-blur-md border border-white/10">
+          <button onclick="toggleTimeModeSetting()" class="bg-black/60 text-white flex-1 py-2.5 rounded-xl text-xs font-medium flex flex-col items-center justify-center gap-1 backdrop-blur-md border border-white/10">
             <i class="fa-solid fa-clock text-amber-400 text-sm"></i>
             <span>Mode Waktu</span>
           </button>
@@ -231,9 +171,6 @@
               <p><span class="text-gray-400">Kelas</span> <span id="res-kelas" class="font-semibold text-gray-800">-</span></p>
               <p><span class="text-gray-400">ID_SISWA</span> <span id="res-idsiswa" class="font-semibold text-gray-800">-</span></p>
             </div>
-            <span id="res-status-tag" class="inline-block mt-2 px-2.5 py-0.5 bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded-full">
-              Siswa Aktif
-            </span>
           </div>
         </div>
 
@@ -249,12 +186,10 @@
           </p>
         </div>
 
-        <div class="space-y-2 pt-1">
-          <button onclick="scanNextStudentAutoCamera()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl text-xs flex items-center justify-center space-x-2 shadow-md transition">
-            <i class="fa-solid fa-qrcode text-sm"></i>
-            <span>Scan Siswa Berikutnya</span>
-          </button>
-        </div>
+        <button onclick="scanNextStudentAutoCamera()" class="w-full bg-blue-600 text-white font-semibold py-3 rounded-xl text-xs flex items-center justify-center space-x-2 shadow-md">
+          <i class="fa-solid fa-qrcode text-sm"></i>
+          <span>Scan Siswa Berikutnya</span>
+        </button>
       </div>
     </main>
 
@@ -267,28 +202,21 @@
           <p class="text-xs text-gray-500">Kelola & Tambah Siswa Baru</p>
         </div>
         <div class="flex items-center space-x-1.5">
-          <button onclick="toggleAddStudentModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white p-2.5 rounded-xl text-xs font-bold flex items-center gap-1 shadow-sm">
+          <button onclick="toggleAddStudentModal()" class="bg-emerald-600 text-white p-2.5 rounded-xl text-xs font-bold flex items-center gap-1 shadow-sm">
             <i class="fa-solid fa-plus"></i>
             <span>Tambah</span>
           </button>
-          <button onclick="autoDownloadMasterStudents()" class="bg-blue-50 text-blue-600 hover:bg-blue-100 p-2.5 rounded-xl text-xs font-bold flex items-center gap-1 border border-blue-200">
+          <button onclick="autoDownloadMasterStudents()" class="bg-blue-50 text-blue-600 p-2.5 rounded-xl text-xs font-bold flex items-center gap-1 border border-blue-200">
             <i class="fa-solid fa-rotate"></i>
           </button>
         </div>
       </div>
 
       <div class="space-y-2 mb-3">
-        <div class="relative">
-          <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-gray-400 text-xs"></i>
-          <input type="text" id="search-student-input" onkeyup="filterStudentsList()" placeholder="Cari nama, NISN..." class="w-full pl-9 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-xs text-gray-800 focus:outline-none focus:border-blue-500 shadow-sm">
-        </div>
-
-        <div class="flex items-center space-x-2">
-          <label class="text-xs font-medium text-gray-600 flex-shrink-0"><i class="fa-solid fa-filter text-blue-600"></i> Kelas:</label>
-          <select id="filter-class-select" onchange="filterStudentsList()" class="flex-1 py-2 px-3 bg-white border border-gray-200 rounded-xl text-xs font-semibold text-gray-700 focus:outline-none focus:border-blue-500 shadow-sm">
-            <option value="ALL">Semua Kelas</option>
-          </select>
-        </div>
+        <input type="text" id="search-student-input" onkeyup="filterStudentsList()" placeholder="Cari nama, NISN..." class="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs text-gray-800">
+        <select id="filter-class-select" onchange="filterStudentsList()" class="w-full py-2 px-3 bg-white border border-gray-200 rounded-xl text-xs font-semibold text-gray-700">
+          <option value="ALL">Semua Kelas</option>
+        </select>
       </div>
 
       <div class="flex justify-between items-center text-xs text-gray-500 font-medium mb-2 px-1">
@@ -311,21 +239,20 @@
 
       <div class="bg-white p-3 rounded-2xl border border-gray-200 shadow-sm space-y-2 mb-3">
         <div>
-          <label class="block text-[10px] font-bold text-gray-600 mb-1"><i class="fa-solid fa-calendar-day text-blue-600"></i> Pilih Tanggal Monitoring</label>
-          <input type="date" id="monitoring-date-filter" onchange="updateMonitoringDashboard()" class="w-full py-1.5 px-2 bg-slate-50 border border-gray-200 rounded-xl text-xs font-bold text-blue-900 shadow-xs focus:outline-none">
+          <label class="block text-[10px] font-bold text-gray-600 mb-1">Pilih Tanggal Monitoring</label>
+          <input type="date" id="monitoring-date-filter" onchange="updateMonitoringDashboard()" class="w-full py-1.5 px-2 bg-slate-50 border border-gray-200 rounded-xl text-xs font-bold text-blue-900">
         </div>
 
         <div class="grid grid-cols-2 gap-2">
           <div>
-            <label class="block text-[10px] font-bold text-gray-600 mb-1"><i class="fa-solid fa-filter text-blue-600"></i> Filter Kelas</label>
-            <select id="monitoring-class-filter" onchange="updateMonitoringDashboard()" class="w-full py-1.5 px-2 bg-slate-50 border border-gray-200 rounded-xl text-xs font-bold text-blue-900 shadow-xs focus:outline-none">
+            <label class="block text-[10px] font-bold text-gray-600 mb-1">Filter Kelas</label>
+            <select id="monitoring-class-filter" onchange="updateMonitoringDashboard()" class="w-full py-1.5 px-2 bg-slate-50 border border-gray-200 rounded-xl text-xs font-bold text-blue-900">
               <option value="ALL">Semua Kelas</option>
             </select>
           </div>
-
           <div>
-            <label class="block text-[10px] font-bold text-gray-600 mb-1"><i class="fa-solid fa-clock text-amber-600"></i> Filter Sesi</label>
-            <select id="monitoring-session-filter" onchange="updateMonitoringDashboard()" class="w-full py-1.5 px-2 bg-slate-50 border border-gray-200 rounded-xl text-xs font-bold text-blue-900 shadow-xs focus:outline-none">
+            <label class="block text-[10px] font-bold text-gray-600 mb-1">Filter Sesi</label>
+            <select id="monitoring-session-filter" onchange="updateMonitoringDashboard()" class="w-full py-1.5 px-2 bg-slate-50 border border-gray-200 rounded-xl text-xs font-bold text-blue-900">
               <option value="ALL">Semua Sesi</option>
               <option value="PAGI">Sesi Pagi</option>
               <option value="SIANG">Sesi Siang</option>
@@ -346,45 +273,15 @@
       </div>
 
       <div class="grid grid-cols-3 gap-2 mb-4">
-        <div class="bg-emerald-50 border border-emerald-100 p-2.5 rounded-xl text-center">
-          <span class="block text-[10px] text-emerald-600 font-bold">Hadir</span>
-          <span id="stat-hadir" class="text-base font-extrabold text-emerald-800">0</span>
-        </div>
-
-        <div class="bg-amber-50 border border-amber-100 p-2.5 rounded-xl text-center">
-          <span class="block text-[10px] text-amber-600 font-bold">Alpa</span>
-          <span id="stat-alpa" class="text-base font-extrabold text-amber-800">0</span>
-        </div>
-
-        <div class="bg-rose-50 border border-rose-100 p-2.5 rounded-xl text-center">
-          <span class="block text-[10px] text-rose-600 font-bold">Bolos</span>
-          <span id="stat-bolos" class="text-base font-extrabold text-rose-800">0</span>
-        </div>
-
-        <div class="bg-blue-50 border border-blue-100 p-2.5 rounded-xl text-center">
-          <span class="block text-[10px] text-blue-600 font-bold">Sakit</span>
-          <span id="stat-sakit" class="text-base font-extrabold text-blue-800">0</span>
-        </div>
-
-        <div class="bg-indigo-50 border border-indigo-100 p-2.5 rounded-xl text-center">
-          <span class="block text-[10px] text-indigo-600 font-bold">Izin</span>
-          <span id="stat-izin" class="text-base font-extrabold text-indigo-800">0</span>
-        </div>
-
-        <div class="bg-purple-50 border border-purple-100 p-2.5 rounded-xl text-center">
-          <span class="block text-[10px] text-purple-600 font-bold">Kegiatan</span>
-          <span id="stat-kegiatan" class="text-base font-extrabold text-purple-800">0</span>
-        </div>
+        <div class="bg-emerald-50 border border-emerald-100 p-2.5 rounded-xl text-center"><span class="block text-[10px] text-emerald-600 font-bold">Hadir</span><span id="stat-hadir" class="text-base font-extrabold text-emerald-800">0</span></div>
+        <div class="bg-amber-50 border border-amber-100 p-2.5 rounded-xl text-center"><span class="block text-[10px] text-amber-600 font-bold">Alpa</span><span id="stat-alpa" class="text-base font-extrabold text-amber-800">0</span></div>
+        <div class="bg-rose-50 border border-rose-100 p-2.5 rounded-xl text-center"><span class="block text-[10px] text-rose-600 font-bold">Bolos</span><span id="stat-bolos" class="text-base font-extrabold text-rose-800">0</span></div>
+        <div class="bg-blue-50 border border-blue-100 p-2.5 rounded-xl text-center"><span class="block text-[10px] text-blue-600 font-bold">Sakit</span><span id="stat-sakit" class="text-base font-extrabold text-blue-800">0</span></div>
+        <div class="bg-indigo-50 border border-indigo-100 p-2.5 rounded-xl text-center"><span class="block text-[10px] text-indigo-600 font-bold">Izin</span><span id="stat-izin" class="text-base font-extrabold text-indigo-800">0</span></div>
+        <div class="bg-purple-50 border border-purple-100 p-2.5 rounded-xl text-center"><span class="block text-[10px] text-purple-600 font-bold">Kegiatan</span><span id="stat-kegiatan" class="text-base font-extrabold text-purple-800">0</span></div>
       </div>
 
-      <div class="space-y-2">
-        <h3 class="font-bold text-xs text-gray-800 flex items-center justify-between">
-          <span>Siswa Belum Complete / Bermasalah</span>
-          <span id="unscanned-count-badge" class="text-[10px] bg-rose-100 text-rose-700 px-2 py-0.5 rounded-md font-bold">0 Murid</span>
-        </h3>
-
-        <div id="unscanned-students-container" class="space-y-2 pb-4"></div>
-      </div>
+      <div id="unscanned-students-container" class="space-y-2 pb-4"></div>
     </main>
 
 
@@ -398,39 +295,15 @@
         <p class="text-xs text-gray-500">Pengembangan Aplikasi Presensi Sekolah</p>
       </div>
 
-      <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm space-y-2 mb-3">
-        <h3 class="font-bold text-xs text-blue-900 flex items-center gap-1.5">
-          <i class="fa-solid fa-heart text-rose-500"></i>
-          <span>Catatan Pengembang</span>
-        </h3>
-        <p class="text-xs text-gray-600 leading-relaxed text-justify">
-          Aplikasi <strong>Sistem Absensi Murid</strong> ini dikembangkan dengan niat tulus untuk membantu efisiensi administrasi serta mempermudah pencatatan presensi di lingkungan sekolah secara gratis dan mandiri.
-        </p>
-      </div>
-
       <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm space-y-3 mb-3">
         <h3 class="font-bold text-xs text-gray-800 border-b border-gray-100 pb-2">Saluran Donasi Transfer:</h3>
-
         <div class="bg-blue-50/70 p-3 rounded-xl border border-blue-100 flex items-center justify-between">
           <div>
             <span class="font-extrabold text-blue-900 text-xs">BANK BRI</span>
             <p class="font-mono text-sm font-bold text-gray-900 mt-0.5">488801018509539</p>
             <p class="text-[10px] text-gray-500">a.n. <span class="font-bold text-gray-700">Ajiardin</span></p>
           </div>
-          <button onclick="navigator.clipboard.writeText('488801018509539'); alert('Nomor Rekening BRI Berhasil Disalin!');" class="px-2.5 py-1.5 bg-white border border-blue-200 text-blue-700 font-bold text-[10px] rounded-lg shadow-sm">
-            <i class="fa-solid fa-copy"></i> Salin
-          </button>
-        </div>
-
-        <div class="bg-emerald-50/70 p-3 rounded-xl border border-emerald-100 flex items-center justify-between">
-          <div>
-            <div class="flex items-center space-x-1 text-[10px] font-bold text-emerald-800">
-              <span>DANA</span> • <span>OVO</span> • <span>GoPay</span>
-            </div>
-            <p class="font-mono text-sm font-bold text-gray-900 mt-0.5">085298875399</p>
-            <p class="text-[10px] text-gray-500">a.n. <span class="font-bold text-gray-700">Ajiardin</span></p>
-          </div>
-          <button onclick="navigator.clipboard.writeText('085298875399'); alert('Nomor e-Wallet Berhasil Disalin!');" class="px-2.5 py-1.5 bg-white border border-emerald-200 text-emerald-700 font-bold text-[10px] rounded-lg shadow-sm">
+          <button onclick="navigator.clipboard.writeText('488801018509539'); alert('Nomor Rekening BRI Berhasil Disalin!');" class="px-2.5 py-1.5 bg-white border border-blue-200 text-blue-700 font-bold text-[10px] rounded-lg">
             <i class="fa-solid fa-copy"></i> Salin
           </button>
         </div>
@@ -443,9 +316,9 @@
       <div class="flex items-center justify-between mb-3 no-print">
         <div>
           <h2 class="font-bold text-lg text-gray-900">🪪 Cetak Kartu QR Code</h2>
-          <p class="text-xs text-gray-500">Ukuran KTP • 10 Kartu per Lembar A4/F4</p>
+          <p class="text-xs text-gray-500">Ukuran Standard Kartu Siswa</p>
         </div>
-        <button onclick="window.print()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-md">
+        <button onclick="window.print()" class="bg-emerald-600 text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-md">
           <i class="fa-solid fa-print"></i>
           <span>Cetak Kartu</span>
         </button>
@@ -460,28 +333,30 @@
       <div class="flex items-center justify-between mb-3 no-print">
         <div>
           <h2 class="font-bold text-lg text-gray-900">📄 Laporan Rekapitulasi</h2>
-          <p class="text-xs text-gray-500">Harian, Mingguan, Bulanan, Semester & Tahunan</p>
+          <p class="text-xs text-gray-500">Rekap Presensi Siswa</p>
         </div>
-        <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-md">
+        <button onclick="window.print()" class="bg-blue-600 text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-md">
           <i class="fa-solid fa-print"></i>
           <span>Cetak Laporan</span>
         </button>
       </div>
 
       <div id="reportPrintArea" class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3">
-        <div id="report-kop-box" class="kop-surat hidden">
-          <img id="report-kop-img" src="" alt="Kop Sekolah">
-        </div>
-
         <div class="text-center">
-          <h2 id="report-doc-title" class="font-extrabold text-base text-gray-900 uppercase">DAFTAR HADIR HARIAN</h2>
-          <p id="report-doc-subtitle" class="text-xs font-bold text-gray-600 mt-0.5">Kelas: Semua Kelas</p>
-          <p id="report-doc-period" class="text-xs text-gray-500 mt-0.5">-</p>
+          <h2 id="report-doc-title" class="font-extrabold text-base text-gray-900 uppercase">LAPORAN ABSENSI SISWA</h2>
+          <p id="report-doc-subtitle" class="text-xs font-bold text-gray-600 mt-0.5">Sistem Presensi Sekolah</p>
         </div>
 
         <div class="overflow-x-auto">
           <table class="w-full text-left text-xs border-collapse border border-gray-300">
-            <thead id="report-table-head" class="bg-slate-100 text-gray-800 font-bold"></thead>
+            <thead class="bg-slate-100 text-gray-800 font-bold">
+              <tr>
+                <th class="p-2 border border-gray-300 text-center">No</th>
+                <th class="p-2 border border-gray-300">Nama Siswa</th>
+                <th class="p-2 border border-gray-300">Kelas</th>
+                <th class="p-2 border border-gray-300 text-center">Status Presensi</th>
+              </tr>
+            </thead>
             <tbody id="report-table-body" class="divide-y divide-gray-200"></tbody>
           </table>
         </div>
@@ -519,10 +394,10 @@
 
         <div>
           <label class="block text-[10px] font-bold text-gray-600 mb-1">Keterangan Libur / Nama Hari Besar</label>
-          <input type="text" id="input-libur-ket" placeholder="Contoh: HUT Kemerdekaan RI Ke-81" class="w-full px-3 py-2 bg-slate-50 border border-gray-200 rounded-xl text-xs text-gray-800">
+          <input type="text" id="input-libur-ket" placeholder="Contoh: HUT Kemerdekaan RI" class="w-full px-3 py-2 bg-slate-50 border border-gray-200 rounded-xl text-xs text-gray-800">
         </div>
 
-        <button onclick="saveHariLiburNew()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center space-x-1.5 shadow-md">
+        <button onclick="saveHariLiburNew()" class="w-full bg-blue-600 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center space-x-1.5 shadow-md">
           <i class="fa-solid fa-floppy-disk"></i>
           <span>Simpan Hari Libur</span>
         </button>
@@ -542,7 +417,6 @@
         <p class="text-xs text-gray-500">Konfigurasi waktu presensi per hari & identitas sekolah</p>
       </div>
 
-      <!-- FITUR BARU: TARIK DATA DARI SHEET PENGATURAN WAKTU -->
       <div class="bg-blue-600 text-white p-3.5 rounded-2xl shadow-md space-y-2 mb-3">
         <div class="flex items-center space-x-2">
           <i class="fa-solid fa-cloud-arrow-down text-lg text-amber-300"></i>
@@ -551,51 +425,36 @@
             <p class="text-[10px] text-blue-100">Tarik data jam dari Sheet "Pengaturan_Waktu" ke aplikasi.</p>
           </div>
         </div>
-        <button onclick="pullTimeSettingsFromSheet()" class="w-full bg-white hover:bg-blue-50 text-blue-900 font-extrabold py-2 rounded-xl text-xs shadow-sm flex items-center justify-center space-x-1.5">
+        <button onclick="pullTimeSettingsFromSheet()" class="w-full bg-white text-blue-900 font-extrabold py-2 rounded-xl text-xs shadow-sm flex items-center justify-center space-x-1.5">
           <i class="fa-solid fa-arrows-rotate text-blue-600"></i>
           <span>Tarik Data Pengaturan Waktu dari Sheet</span>
         </button>
       </div>
 
       <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3 mb-3">
-        <h3 class="font-bold text-xs text-blue-900 border-b border-gray-100 pb-2 flex items-center justify-between">
-          <span class="flex items-center gap-2">
-            <i class="fa-solid fa-calendar-days text-blue-600"></i>
-            <span>Jam Presensi Per Hari</span>
-          </span>
-          <span class="text-[10px] font-normal text-blue-600">*Termasuk Minggu</span>
-        </h3>
-
+        <h3 class="font-bold text-xs text-blue-900 border-b border-gray-100 pb-2">Jam Presensi Per Hari</h3>
         <div id="days-config-container" class="space-y-3"></div>
-
-        <button onclick="saveDaysTimeSettings()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-xl text-xs flex items-center justify-center space-x-1.5 shadow-sm transition">
+        <button onclick="saveDaysTimeSettings()" class="w-full bg-blue-600 text-white font-semibold py-2.5 rounded-xl text-xs flex items-center justify-center space-x-1.5 shadow-sm">
           <i class="fa-solid fa-floppy-disk"></i>
           <span>Simpan & Upload Jam ke Sheet</span>
         </button>
       </div>
 
       <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3 mb-3">
-        <h3 class="font-bold text-xs text-blue-900 border-b border-gray-100 pb-2 flex items-center gap-2">
-          <i class="fa-solid fa-school text-blue-600"></i>
-          <span>Identitas Sekolah & Kepala Sekolah</span>
-        </h3>
-
+        <h3 class="font-bold text-xs text-blue-900 border-b border-gray-100 pb-2">Identitas Sekolah</h3>
         <div>
           <label class="block text-[11px] font-semibold text-gray-700 mb-1">Nama Sekolah</label>
-          <input type="text" id="input-school-name" placeholder="SMK Negeri 1 Contoh" class="w-full px-3 py-2 bg-slate-50 border border-gray-200 rounded-xl text-xs text-gray-800 focus:outline-none focus:border-blue-500">
+          <input type="text" id="input-school-name" placeholder="SMK Negeri 1 Contoh" class="w-full px-3 py-2 bg-slate-50 border border-gray-200 rounded-xl text-xs text-gray-800">
         </div>
-
         <div>
           <label class="block text-[11px] font-semibold text-gray-700 mb-1">Nama Kepala Sekolah</label>
-          <input type="text" id="input-principal-name" placeholder="Drs. H. Ahmad Dahlan, M.Pd." class="w-full px-3 py-2 bg-slate-50 border border-gray-200 rounded-xl text-xs text-gray-800 focus:outline-none focus:border-blue-500">
+          <input type="text" id="input-principal-name" placeholder="Drs. H. Ahmad Dahlan, M.Pd." class="w-full px-3 py-2 bg-slate-50 border border-gray-200 rounded-xl text-xs text-gray-800">
         </div>
-
         <div>
           <label class="block text-[11px] font-semibold text-gray-700 mb-1">NIP Kepala Sekolah</label>
-          <input type="text" id="input-principal-nip" placeholder="19750812 200003 1 002" class="w-full px-3 py-2 bg-slate-50 border border-gray-200 rounded-xl text-xs text-gray-800 focus:outline-none focus:border-blue-500">
+          <input type="text" id="input-principal-nip" placeholder="19750812 200003 1 002" class="w-full px-3 py-2 bg-slate-50 border border-gray-200 rounded-xl text-xs text-gray-800">
         </div>
-
-        <button onclick="saveSchoolSettings()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-semibold py-2 rounded-xl text-xs flex items-center justify-center space-x-1.5 shadow-sm transition">
+        <button onclick="saveSchoolSettings()" class="w-full bg-slate-800 text-white font-semibold py-2 rounded-xl text-xs flex items-center justify-center space-x-1.5 shadow-sm">
           <i class="fa-solid fa-floppy-disk"></i>
           <span>Simpan Identitas Sekolah</span>
         </button>
@@ -607,35 +466,29 @@
     <div id="add-student-modal" class="absolute inset-0 bg-black/60 backdrop-blur-sm z-50 flex flex-col justify-end hidden">
       <div class="bg-white rounded-t-3xl p-5 space-y-3 shadow-2xl">
         <div class="flex items-center justify-between border-b border-gray-100 pb-2">
-          <h3 class="font-bold text-gray-900 text-sm"><i class="fa-solid fa-user-plus text-emerald-600 mr-1.5"></i>Tambah Siswa Baru</h3>
+          <h3 class="font-bold text-gray-900 text-sm">Tambah Siswa Baru</h3>
           <button onclick="toggleAddStudentModal()" class="w-7 h-7 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center">
             <i class="fa-solid fa-xmark text-sm"></i>
           </button>
         </div>
-
         <div>
           <label class="block text-[10px] font-bold text-gray-700 mb-1">ID Siswa (Unik)</label>
-          <input type="text" id="new-std-id" placeholder="STD-000125" class="w-full px-3 py-2 bg-slate-50 border border-gray-200 rounded-xl text-xs font-mono text-gray-800">
+          <input type="text" id="new-std-id" placeholder="STD-000125" class="w-full px-3 py-2 bg-slate-50 border border-gray-200 rounded-xl text-xs font-mono">
         </div>
-
         <div>
           <label class="block text-[10px] font-bold text-gray-700 mb-1">NISN Siswa</label>
-          <input type="text" id="new-std-nisn" placeholder="1234567892" class="w-full px-3 py-2 bg-slate-50 border border-gray-200 rounded-xl text-xs text-gray-800">
+          <input type="text" id="new-std-nisn" placeholder="1234567892" class="w-full px-3 py-2 bg-slate-50 border border-gray-200 rounded-xl text-xs">
         </div>
-
         <div>
           <label class="block text-[10px] font-bold text-gray-700 mb-1">Nama Lengkap Siswa</label>
-          <input type="text" id="new-std-nama" placeholder="Ahmad Rian" class="w-full px-3 py-2 bg-slate-50 border border-gray-200 rounded-xl text-xs text-gray-800">
+          <input type="text" id="new-std-nama" placeholder="Ahmad Rian" class="w-full px-3 py-2 bg-slate-50 border border-gray-200 rounded-xl text-xs">
         </div>
-
         <div>
           <label class="block text-[10px] font-bold text-gray-700 mb-1">Kelas</label>
-          <input type="text" id="new-std-kelas" placeholder="X TKJ" class="w-full px-3 py-2 bg-slate-50 border border-gray-200 rounded-xl text-xs text-gray-800">
+          <input type="text" id="new-std-kelas" placeholder="X TKJ" class="w-full px-3 py-2 bg-slate-50 border border-gray-200 rounded-xl text-xs">
         </div>
-
-        <button onclick="saveNewStudentToDB()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center space-x-1.5 shadow-md">
-          <i class="fa-solid fa-floppy-disk"></i>
-          <span>Simpan Siswa Baru</span>
+        <button onclick="saveNewStudentToDB()" class="w-full bg-emerald-600 text-white font-bold py-2.5 rounded-xl text-xs shadow-md">
+          <i class="fa-solid fa-floppy-disk"></i> Simpan Siswa Baru
         </button>
       </div>
     </div>
@@ -655,32 +508,32 @@
         </div>
 
         <div class="grid grid-cols-2 gap-3">
-          <button onclick="toggleMenuModal(); promptManualInput();" class="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col items-center justify-center gap-1.5 hover:bg-blue-50 hover:border-blue-200 transition">
+          <button onclick="toggleMenuModal(); promptManualInput();" class="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col items-center justify-center gap-1.5 hover:bg-blue-50 transition">
             <i class="fa-solid fa-keyboard text-xl text-blue-600"></i>
             <span class="text-xs font-bold text-gray-800">Absensi Manual</span>
           </button>
 
-          <button onclick="toggleMenuModal(); toggleView('hari-libur');" class="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col items-center justify-center gap-1.5 hover:bg-amber-50 hover:border-amber-200 transition">
+          <button onclick="toggleMenuModal(); toggleView('hari-libur');" class="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col items-center justify-center gap-1.5 hover:bg-amber-50 transition">
             <i class="fa-solid fa-calendar-day text-xl text-amber-600"></i>
             <span class="text-xs font-bold text-gray-800">Atur Hari Libur</span>
           </button>
 
-          <button onclick="toggleMenuModal(); toggleView('tindak-lanjut');" class="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col items-center justify-center gap-1.5 hover:bg-rose-50 hover:border-rose-200 transition">
+          <button onclick="toggleMenuModal(); toggleView('tindak-lanjut');" class="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col items-center justify-center gap-1.5 hover:bg-rose-50 transition">
             <i class="fa-solid fa-user-shield text-xl text-rose-600"></i>
             <span class="text-xs font-bold text-gray-800">Tindak Lanjut</span>
           </button>
 
-          <button onclick="toggleMenuModal(); toggleView('report');" class="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col items-center justify-center gap-1.5 hover:bg-emerald-50 hover:border-emerald-200 transition">
+          <button onclick="toggleMenuModal(); toggleView('report');" class="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col items-center justify-center gap-1.5 hover:bg-emerald-50 transition">
             <i class="fa-solid fa-file-invoice text-xl text-emerald-600"></i>
             <span class="text-xs font-bold text-gray-800">Laporan Rekap</span>
           </button>
 
-          <button onclick="toggleMenuModal(); toggleView('print-qr');" class="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col items-center justify-center gap-1.5 hover:bg-indigo-50 hover:border-indigo-200 transition">
+          <button onclick="toggleMenuModal(); toggleView('print-qr');" class="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col items-center justify-center gap-1.5 hover:bg-indigo-50 transition">
             <i class="fa-solid fa-print text-xl text-indigo-600"></i>
             <span class="text-xs font-bold text-gray-800">Cetak QR Code</span>
           </button>
 
-          <button onclick="toggleMenuModal(); toggleView('settings');" class="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col items-center justify-center gap-1.5 hover:bg-purple-50 hover:border-purple-200 transition">
+          <button onclick="toggleMenuModal(); toggleView('settings');" class="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col items-center justify-center gap-1.5 hover:bg-purple-50 transition">
             <i class="fa-solid fa-gear text-xl text-purple-600"></i>
             <span class="text-xs font-bold text-gray-800">Pengaturan</span>
           </button>
@@ -692,16 +545,12 @@
     <!-- BOTTOM NAVIGATION (FIXED / STICKY) -->
     <nav class="bg-white border-t border-gray-200 px-3 py-1.5 flex justify-between items-center text-center z-30 flex-shrink-0">
       <button id="nav-students" onclick="toggleView('students')" class="flex-1 text-gray-400 hover:text-gray-600 flex flex-col items-center">
-        <div class="w-7 h-7 flex items-center justify-center mb-0.5">
-          <i class="fa-solid fa-user-group text-sm"></i>
-        </div>
+        <div class="w-7 h-7 flex items-center justify-center mb-0.5"><i class="fa-solid fa-user-group text-sm"></i></div>
         <span class="text-[10px] font-medium">Data Siswa</span>
       </button>
 
       <button id="nav-monitoring" onclick="toggleView('monitoring')" class="flex-1 text-gray-400 hover:text-gray-600 flex flex-col items-center">
-        <div class="w-7 h-7 flex items-center justify-center mb-0.5">
-          <i class="fa-solid fa-chart-pie text-sm"></i>
-        </div>
+        <div class="w-7 h-7 flex items-center justify-center mb-0.5"><i class="fa-solid fa-chart-pie text-sm"></i></div>
         <span class="text-[10px] font-medium">Monitoring</span>
       </button>
 
@@ -713,16 +562,12 @@
       </button>
 
       <button id="nav-donation" onclick="toggleView('donation')" class="flex-1 text-gray-400 hover:text-gray-600 flex flex-col items-center">
-        <div class="w-7 h-7 flex items-center justify-center mb-0.5">
-          <i class="fa-solid fa-hand-holding-heart text-sm text-rose-500"></i>
-        </div>
+        <div class="w-7 h-7 flex items-center justify-center mb-0.5"><i class="fa-solid fa-hand-holding-heart text-sm text-rose-500"></i></div>
         <span class="text-[10px] font-medium">Donasi</span>
       </button>
 
       <button onclick="toggleMenuModal()" class="flex-1 text-gray-400 hover:text-gray-600 flex flex-col items-center">
-        <div class="w-7 h-7 flex items-center justify-center mb-0.5">
-          <i class="fa-solid fa-bars text-sm"></i>
-        </div>
+        <div class="w-7 h-7 flex items-center justify-center mb-0.5"><i class="fa-solid fa-bars text-sm"></i></div>
         <span class="text-[10px] font-medium">Menu</span>
       </button>
     </nav>
@@ -775,23 +620,16 @@
     function initDatabase() {
       return new Promise((resolve, reject) => {
         const request = indexedDB.open("AbsensiQR_DB", 1);
-        
         request.onupgradeneeded = (e) => {
           const database = e.target.result;
-          if (!database.objectStoreNames.contains("students")) {
-            database.createObjectStore("students", { keyPath: "id_siswa" });
-          }
-          if (!database.objectStoreNames.contains("attendance_queue")) {
-            database.createObjectStore("attendance_queue", { keyPath: "queue_id" });
-          }
+          if (!database.objectStoreNames.contains("students")) database.createObjectStore("students", { keyPath: "id_siswa" });
+          if (!database.objectStoreNames.contains("attendance_queue")) database.createObjectStore("attendance_queue", { keyPath: "queue_id" });
         };
-
         request.onsuccess = (e) => {
           db = e.target.result;
           updateQueueCountUI();
           resolve(db);
         };
-
         request.onerror = (e) => reject("Database lokal gagal dimuat: " + e.target.error);
       });
     }
@@ -819,14 +657,11 @@
       });
 
       renderDaysConfigForm();
-      autoUpdateShiftLabel();
-      updateTimeModeIndicator();
     }
 
     function renderDaysConfigForm() {
       const container = document.getElementById("days-config-container");
       let html = "";
-
       DAYS_LIST.forEach(day => {
         const defaultActive = day.key !== "sun";
         const active = localStorage.getItem(`DAY_ACTIVE_${day.key}`) !== null ? (localStorage.getItem(`DAY_ACTIVE_${day.key}`) === "true") : defaultActive;
@@ -842,33 +677,19 @@
               <span class="font-bold text-xs ${day.key === 'sun' ? 'text-amber-700' : 'text-gray-800'}">${day.label}</span>
               <label class="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" id="toggle-${day.key}" ${active ? 'checked' : ''} class="sr-only peer" onchange="toggleDayActiveUI('${day.key}')">
-                <div class="w-9 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                <div class="w-9 h-5 bg-gray-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
                 <span id="label-status-${day.key}" class="ml-2 text-[10px] font-bold ${active ? 'text-blue-600' : 'text-gray-400'}">${active ? 'Aktif' : 'Libur'}</span>
               </label>
             </div>
-
             <div id="inputs-box-${day.key}" class="grid grid-cols-2 gap-2 ${active ? '' : 'opacity-40 pointer-events-none'}">
-              <div>
-                <label class="block text-[9px] font-semibold text-gray-600 mb-0.5">Mulai Pagi</label>
-                <input type="time" id="pagi-start-${day.key}" value="${pagiStart}" class="w-full px-2 py-1 bg-white border border-gray-200 rounded-lg text-xs font-bold text-gray-800">
-              </div>
-              <div>
-                <label class="block text-[9px] font-semibold text-gray-600 mb-0.5">Toleransi Pagi (Alpa)</label>
-                <input type="time" id="pagi-limit-${day.key}" value="${pagiLimit}" class="w-full px-2 py-1 bg-white border border-gray-200 rounded-lg text-xs font-bold text-gray-800">
-              </div>
-              <div>
-                <label class="block text-[9px] font-semibold text-gray-600 mb-0.5">Mulai Siang</label>
-                <input type="time" id="siang-start-${day.key}" value="${siangStart}" class="w-full px-2 py-1 bg-white border border-gray-200 rounded-lg text-xs font-bold text-gray-800">
-              </div>
-              <div>
-                <label class="block text-[9px] font-semibold text-gray-600 mb-0.5">Batas Siang (Bolos)</label>
-                <input type="time" id="siang-limit-${day.key}" value="${siangLimit}" class="w-full px-2 py-1 bg-white border border-gray-200 rounded-lg text-xs font-bold text-gray-800">
-              </div>
+              <div><label class="block text-[9px] font-semibold text-gray-600 mb-0.5">Mulai Pagi</label><input type="time" id="pagi-start-${day.key}" value="${pagiStart}" class="w-full px-2 py-1 bg-white border border-gray-200 rounded-lg text-xs font-bold text-gray-800"></div>
+              <div><label class="block text-[9px] font-semibold text-gray-600 mb-0.5">Toleransi Pagi</label><input type="time" id="pagi-limit-${day.key}" value="${pagiLimit}" class="w-full px-2 py-1 bg-white border border-gray-200 rounded-lg text-xs font-bold text-gray-800"></div>
+              <div><label class="block text-[9px] font-semibold text-gray-600 mb-0.5">Mulai Siang</label><input type="time" id="siang-start-${day.key}" value="${siangStart}" class="w-full px-2 py-1 bg-white border border-gray-200 rounded-lg text-xs font-bold text-gray-800"></div>
+              <div><label class="block text-[9px] font-semibold text-gray-600 mb-0.5">Batas Siang</label><input type="time" id="siang-limit-${day.key}" value="${siangLimit}" class="w-full px-2 py-1 bg-white border border-gray-200 rounded-lg text-xs font-bold text-gray-800"></div>
             </div>
           </div>
         `;
       });
-
       container.innerHTML = html;
     }
 
@@ -876,7 +697,6 @@
       const isChecked = document.getElementById(`toggle-${dayKey}`).checked;
       const inputsBox = document.getElementById(`inputs-box-${dayKey}`);
       const labelStatus = document.getElementById(`label-status-${dayKey}`);
-
       if (isChecked) {
         inputsBox.classList.remove('opacity-40', 'pointer-events-none');
         labelStatus.innerText = "Aktif";
@@ -890,7 +710,6 @@
 
     async function saveDaysTimeSettings() {
       const timeSettingsToSave = {};
-
       DAYS_LIST.forEach(day => {
         const active = document.getElementById(`toggle-${day.key}`).checked;
         const pStart = document.getElementById(`pagi-start-${day.key}`).value || DEFAULT_TIME_SETTINGS.pagiStart;
@@ -911,84 +730,40 @@
         timeSettingsToSave[`TIME_${day.key}_SIANG_LIMIT`] = sLimit;
       });
 
-      autoUpdateShiftLabel();
-
       if (navigator.onLine) {
         try {
           await fetch(GAS_WEB_APP_URL, {
             method: "POST",
             mode: "cors",
             headers: { "Content-Type": "text/plain" },
-            body: JSON.stringify({
-              action: "SAVE_TIME_SETTINGS",
-              time_settings: timeSettingsToSave
-            })
+            body: JSON.stringify({ action: "SAVE_TIME_SETTINGS", time_settings: timeSettingsToSave })
           });
-          alert("Pengaturan jam berhasil disimpan & diunggah ke Sheet 'Pengaturan_Waktu'!");
+          alert("Pengaturan jam tersimpan & diunggah ke Sheet!");
         } catch (e) {
-          alert("Pengaturan tersimpan lokal di HP. Gagal kirim ke server.");
+          alert("Pengaturan tersimpan lokal.");
         }
-      } else {
-        alert("Perangkat offline. Jam presensi tersimpan di HP ini.");
-      }
+      } else alert("Perangkat offline. Jam presensi tersimpan di HP ini.");
     }
 
     async function pullTimeSettingsFromSheet() {
-      if (!navigator.onLine) {
-        alert("Anda sedang Offline. Koneksikan internet untuk menarik data dari Sheet.");
-        return;
-      }
-
+      if (!navigator.onLine) return alert("Koneksikan internet untuk menarik data dari Sheet.");
       try {
         const response = await fetch(`${GAS_WEB_APP_URL}?action=GET_TIME_SETTINGS`);
         const result = await response.json();
-
-        if (result.success && result.time_settings && Object.keys(result.time_settings).length > 0) {
+        if (result.success && result.time_settings) {
           applyTimeSettingsFromCloud(result.time_settings);
-          alert("Berhasil! Pengaturan waktu telah ditarik dari Sheet dan masuk ke aplikasi.");
-        } else {
-          alert("Data di Sheet 'Pengaturan_Waktu' masih kosong.");
+          alert("Pengaturan waktu ditarik dari Sheet!");
         }
-      } catch (err) {
-        alert("Gagal menarik data dari server.");
-      }
+      } catch (err) { alert("Gagal menarik data."); }
     }
 
     function applyTimeSettingsFromCloud(timeObj) {
       for (let key in timeObj) {
-        if (timeObj.hasOwnProperty(key) && timeObj[key] !== "" && timeObj[key] !== "undefined") {
+        if (timeObj.hasOwnProperty(key) && timeObj[key] !== "") {
           localStorage.setItem(key, timeObj[key]);
         }
       }
       renderDaysConfigForm();
-      autoUpdateShiftLabel();
-    }
-
-    function getCurrentDayConfig(targetDateStr) {
-      const checkDateStr = formatCleanDateJS(targetDateStr || new Date().toISOString().split('T')[0]);
-      const holObj = fetchedHariLiburList.find(h => formatCleanDateJS(h.tanggal) === checkDateStr);
-
-      if (holObj) {
-        return { isHoliday: true, name: `Hari Libur (${holObj.keterangan})` };
-      }
-
-      const targetDate = new Date(checkDateStr);
-      const dayIndex = targetDate.getDay();
-      const dayKeys = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
-      const key = dayKeys[dayIndex];
-
-      const defaultActive = key !== "sun";
-      const active = localStorage.getItem(`DAY_ACTIVE_${key}`) !== null ? (localStorage.getItem(`DAY_ACTIVE_${key}`) === "true") : defaultActive;
-
-      return {
-        isHoliday: !active,
-        key: key,
-        name: key === "sun" ? "Minggu" : "Hari Rutin",
-        pagiStart: localStorage.getItem(`TIME_${key}_PAGI_START`) || DEFAULT_TIME_SETTINGS.pagiStart,
-        pagiLimit: localStorage.getItem(`TIME_${key}_PAGI_LIMIT`) || DEFAULT_TIME_SETTINGS.pagiLimit,
-        siangStart: localStorage.getItem(`TIME_${key}_SIANG_START`) || DEFAULT_TIME_SETTINGS.siangStart,
-        siangLimit: localStorage.getItem(`TIME_${key}_SIANG_LIMIT`) || DEFAULT_TIME_SETTINGS.siangLimit
-      };
     }
 
     async function saveSchoolSettings() {
@@ -997,11 +772,9 @@
       const principalNip = document.getElementById("input-principal-nip").value.trim();
 
       if (!schoolName) return alert("Nama sekolah wajib diisi!");
-
       localStorage.setItem("SCHOOL_NAME", schoolName);
       localStorage.setItem("PRINCIPAL_NAME", principalName);
       localStorage.setItem("PRINCIPAL_NIP", principalNip);
-
       document.getElementById("app-header-school-name").innerText = schoolName;
 
       if (navigator.onLine) {
@@ -1010,62 +783,21 @@
             method: "POST",
             mode: "cors",
             headers: { "Content-Type": "text/plain" },
-            body: JSON.stringify({
-              action: "SAVE_SETTINGS",
-              settings: {
-                "SCHOOL_NAME": schoolName,
-                "PRINCIPAL_NAME": principalName,
-                "PRINCIPAL_NIP": principalNip
-              }
-            })
+            body: JSON.stringify({ action: "SAVE_SETTINGS", settings: { "SCHOOL_NAME": schoolName, "PRINCIPAL_NAME": principalName, "PRINCIPAL_NIP": principalNip } })
           });
         } catch (e) {}
       }
-      alert("Identitas sekolah berhasil disimpan!");
-    }
-
-    function autoUpdateShiftLabel() {
-      const dayCfg = getCurrentDayConfig();
-      const nowHM = new Date().toTimeString().substring(0, 5);
-
-      if (!dayCfg.isHoliday && nowHM >= dayCfg.siangStart) {
-        if (currentScanSession === "PAGI") toggleScanSessionMode();
-      }
-    }
-
-    function toggleScanSessionMode() {
-      if (currentScanSession === "PAGI") {
-        currentScanSession = "SIANG";
-        document.getElementById("session-icon").className = "fa-solid fa-moon text-indigo-400 text-sm";
-        document.getElementById("session-mode-text").innerText = "Mode Siang";
-      } else {
-        currentScanSession = "PAGI";
-        document.getElementById("session-icon").className = "fa-solid fa-sun text-amber-400 text-sm";
-        document.getElementById("session-mode-text").innerText = "Mode Pagi";
-      }
+      alert("Identitas sekolah tersimpan!");
     }
 
     async function autoDownloadMasterStudents() {
-      if (!navigator.onLine) {
-        document.getElementById('sync-info-text').innerText = "Mode Offline - Data dari memori HP.";
-        loadStudentsView();
-        return;
-      }
-
+      if (!navigator.onLine) return;
       try {
-        document.getElementById('sync-info-text').innerText = "Mengunduh data server...";
         const response = await fetch(`${GAS_WEB_APP_URL}?action=GET_APP_DATA`);
         const result = await response.json();
-
         if (result.success) {
-          if (result.version) {
-            document.getElementById("app-version-tag").innerText = result.version;
-          }
-
-          if (result.time_settings && Object.keys(result.time_settings).length > 0) {
-            applyTimeSettingsFromCloud(result.time_settings);
-          }
-
+          if (result.version) document.getElementById("app-version-tag").innerText = result.version;
+          if (result.time_settings) applyTimeSettingsFromCloud(result.time_settings);
           if (result.today_attendance) fetchedTodayAttendance = result.today_attendance;
           if (result.attendance_history) fetchedAttendanceHistory = result.attendance_history;
           if (result.tindak_lanjut) fetchedTindakLanjutHistory = result.tindak_lanjut;
@@ -1075,35 +807,184 @@
             const tx = db.transaction("students", "readwrite");
             const store = tx.objectStore("students");
             store.clear();
-
             result.students.forEach(std => {
-              store.put({
-                id_siswa: String(std.qr_key || std.id_siswa).trim(),
-                nisn: String(std.nisn || '-').trim(),
-                nama: String(std.nama).trim(),
-                kelas: String(std.kelas).trim(),
-                status: String(std.status).trim()
-              });
+              store.put({ id_siswa: String(std.qr_key || std.id_siswa).trim(), nisn: String(std.nisn || '-').trim(), nama: String(std.nama).trim(), kelas: String(std.kelas).trim(), status: "Aktif" });
             });
-
             tx.oncomplete = () => {
-              document.getElementById('sync-info-text').innerText = `Terhubung! ${result.students.length} Siswa Aktif.`;
               loadStudentsView();
               populateClassDropdowns();
-              if (!document.getElementById('view-monitoring').classList.contains('hidden')) {
-                updateMonitoringDashboard();
-              }
             };
           }
         }
-      } catch (err) {
-        document.getElementById('sync-info-text').innerText = "Mode Offline / Server sibuk.";
+      } catch (err) {}
+    }
+
+    // --- FUNGSI RENDER MENU TERPISAH (V1.31) ---
+
+    function renderPrintQRView() {
+      const container = document.getElementById('printArea');
+      if (cachedStudents.length === 0) {
+        container.innerHTML = `<p class="text-center text-xs text-gray-500 py-6">Belum ada data siswa untuk dicetak.</p>`;
+        return;
+      }
+
+      let html = `<div class="page-print">`;
+      cachedStudents.forEach((std, idx) => {
+        html += `
+          <div class="card p-2 text-left bg-white relative">
+            <div class="card-badge bg-blue-900 text-white font-extrabold text-[10px] text-center rounded py-0.5 mb-1">KARTU ABSENSI SISWA</div>
+            <div class="flex items-center space-x-2">
+              <div id="qr-card-${idx}" class="card-qr flex-shrink-0"></div>
+              <div class="text-[10px] space-y-0.5 min-w-0">
+                <p class="font-extrabold text-blue-950 truncate">${std.nama}</p>
+                <p class="text-gray-600">NISN: <span class="font-bold text-black">${std.nisn || '-'}</span></p>
+                <p class="text-gray-600">Kelas: <span class="font-bold text-black">${std.kelas}</span></p>
+                <p class="text-gray-600">ID: <span class="font-mono text-black">${std.id_siswa}</span></p>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      html += `</div>`;
+      container.innerHTML = html;
+
+      // Generate QR Codes
+      cachedStudents.forEach((std, idx) => {
+        const qrBox = document.getElementById(`qr-card-${idx}`);
+        if (qrBox) {
+          qrBox.innerHTML = "";
+          new QRCode(qrBox, { text: std.id_siswa, width: 80, height: 80 });
+        }
+      });
+    }
+
+    function renderReportView() {
+      const tbody = document.getElementById('report-table-body');
+      const records = fetchedAttendanceHistory.length > 0 ? fetchedAttendanceHistory : fetchedTodayAttendance;
+
+      if (records.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-gray-400">Belum ada riwayat absensi.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = records.map((r, i) => `
+        <tr class="hover:bg-slate-50">
+          <td class="p-2 border border-gray-300 text-center font-bold">${i + 1}</td>
+          <td class="p-2 border border-gray-300 font-semibold text-gray-900">${r.nama}</td>
+          <td class="p-2 border border-gray-300">${r.kelas}</td>
+          <td class="p-2 border border-gray-300 text-center font-bold text-blue-800">${r.status_presensi || "HADIR"}</td>
+        </tr>
+      `).join('');
+    }
+
+    function renderTindakLanjutView() {
+      const container = document.getElementById('tindak-lanjut-list-container');
+      if (fetchedTindakLanjutHistory.length === 0) {
+        container.innerHTML = `<div class="bg-white p-4 rounded-2xl border border-gray-200 text-center text-xs text-gray-500">Belum ada pencatatan tindak lanjut.</div>`;
+        return;
+      }
+
+      container.innerHTML = fetchedTindakLanjutHistory.map(tl => `
+        <div class="bg-white p-3.5 rounded-2xl border border-gray-200 shadow-sm space-y-1">
+          <div class="flex items-center justify-between border-b border-gray-100 pb-1.5">
+            <span class="font-bold text-xs text-rose-700">${tl.kategori || "Pelanggaran Presensi"}</span>
+            <span class="text-[10px] text-gray-400 font-mono">${tl.tanggal}</span>
+          </div>
+          <p class="font-bold text-xs text-gray-900">${tl.nama} <span class="text-gray-500 font-normal">(${tl.kelas})</span></p>
+          <p class="text-xs text-gray-600 bg-slate-50 p-2 rounded-xl border border-slate-100">${tl.catatan || "Telah ditindaklanjuti."}</p>
+        </div>
+      `).join('');
+    }
+
+    // --- NAVIGASI MULTI-VIEW FIXED (V1.31) ---
+
+    async function toggleView(viewName) {
+      const views = [
+        'view-scanner', 'view-success', 'view-students', 'view-monitoring', 
+        'view-donation', 'view-print-qr', 'view-report', 'view-tindak-lanjut', 
+        'view-hari-libur', 'view-settings'
+      ];
+
+      views.forEach(v => {
+        const el = document.getElementById(v);
+        if (el) { el.classList.add('hidden'); el.classList.remove('flex'); }
+      });
+
+      const navScanner = document.getElementById('nav-scanner');
+      const navStudents = document.getElementById('nav-students');
+      const navMonitoring = document.getElementById('nav-monitoring');
+      const navDonation = document.getElementById('nav-donation');
+
+      navScanner.className = "flex-1 text-gray-400 hover:text-gray-600 flex flex-col items-center -mt-4";
+      navScanner.children[0].className = "w-12 h-12 rounded-full bg-slate-500 text-white shadow-md flex items-center justify-center border-4 border-white";
+      navStudents.className = "flex-1 text-gray-400 hover:text-gray-600 flex flex-col items-center";
+      navMonitoring.className = "flex-1 text-gray-400 hover:text-gray-600 flex flex-col items-center";
+      navDonation.className = "flex-1 text-gray-400 hover:text-gray-600 flex flex-col items-center";
+
+      if (viewName === 'students') {
+        document.getElementById('view-students').classList.remove('hidden');
+        document.getElementById('view-students').classList.add('flex');
+        navStudents.className = "flex-1 text-blue-600 flex flex-col items-center";
+        loadStudentsView();
+        await stopCameraIfActive();
+      } 
+      else if (viewName === 'monitoring') {
+        document.getElementById('view-monitoring').classList.remove('hidden');
+        document.getElementById('view-monitoring').classList.add('flex');
+        navMonitoring.className = "flex-1 text-blue-600 flex flex-col items-center";
+        updateMonitoringDashboard();
+        await stopCameraIfActive();
+      } 
+      else if (viewName === 'donation') {
+        document.getElementById('view-donation').classList.remove('hidden');
+        document.getElementById('view-donation').classList.add('flex');
+        navDonation.className = "flex-1 text-rose-600 flex flex-col items-center font-bold";
+        await stopCameraIfActive();
+      } 
+      else if (viewName === 'print-qr') {
+        document.getElementById('view-print-qr').classList.remove('hidden');
+        document.getElementById('view-print-qr').classList.add('flex');
+        renderPrintQRView();
+        await stopCameraIfActive();
+      } 
+      else if (viewName === 'report') {
+        document.getElementById('view-report').classList.remove('hidden');
+        document.getElementById('view-report').classList.add('flex');
+        renderReportView();
+        await stopCameraIfActive();
+      } 
+      else if (viewName === 'tindak-lanjut') {
+        document.getElementById('view-tindak-lanjut').classList.remove('hidden');
+        document.getElementById('view-tindak-lanjut').classList.add('flex');
+        renderTindakLanjutView();
+        await stopCameraIfActive();
+      } 
+      else if (viewName === 'hari-libur') {
+        document.getElementById('view-hari-libur').classList.remove('hidden');
+        document.getElementById('view-hari-libur').classList.add('flex');
+        renderHariLiburView();
+        await stopCameraIfActive();
+      } 
+      else if (viewName === 'settings') {
+        document.getElementById('view-settings').classList.remove('hidden');
+        document.getElementById('view-settings').classList.add('flex');
+        await stopCameraIfActive();
+      } 
+      else if (viewName === 'success') {
+        document.getElementById('view-success').classList.remove('hidden');
+        document.getElementById('view-success').classList.add('flex');
+      } 
+      else {
+        document.getElementById('view-scanner').classList.remove('hidden');
+        document.getElementById('view-scanner').classList.add('flex');
+        navScanner.className = "flex-1 text-blue-600 flex flex-col items-center -mt-4";
+        navScanner.children[0].className = "w-12 h-12 rounded-full bg-blue-600 text-white shadow-lg flex items-center justify-center border-4 border-white";
+        await stopCameraIfActive();
       }
     }
 
-    function toggleAddStudentModal() {
-      document.getElementById('add-student-modal').classList.toggle('hidden');
-    }
+    function toggleAddStudentModal() { document.getElementById('add-student-modal').classList.toggle('hidden'); }
+    function toggleMenuModal() { document.getElementById('menu-modal').classList.toggle('hidden'); }
 
     async function saveNewStudentToDB() {
       const idSiswa = document.getElementById('new-std-id').value.trim();
@@ -1114,7 +995,6 @@
       if (!idSiswa || !nama || !kelas) return alert("ID Siswa, Nama, dan Kelas wajib diisi!");
 
       const newStudent = { id_siswa: idSiswa, nisn: nisn || "-", nama: nama, kelas: kelas, status: "Aktif" };
-
       const tx = db.transaction("students", "readwrite");
       tx.objectStore("students").put(newStudent);
       tx.oncomplete = () => {
@@ -1142,15 +1022,13 @@
         return;
       }
 
-      const sortedList = [...fetchedHariLiburList].sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
-
-      container.innerHTML = sortedList.map(item => `
+      container.innerHTML = fetchedHariLiburList.map(item => `
         <div class="bg-slate-50 p-3 rounded-xl border border-gray-200 flex items-center justify-between text-xs">
           <div>
             <span class="font-bold text-blue-900 block">${item.tanggal}</span>
             <span class="text-gray-600 font-medium">${item.keterangan}</span>
           </div>
-          <button onclick="deleteHariLiburItem('${item.tanggal}')" class="px-2 py-1 bg-rose-50 text-rose-600 hover:bg-rose-100 font-bold rounded-lg border border-rose-200">
+          <button onclick="deleteHariLiburItem('${item.tanggal}')" class="px-2 py-1 bg-rose-50 text-rose-600 font-bold rounded-lg border border-rose-200">
             <i class="fa-solid fa-trash-can"></i>
           </button>
         </div>
@@ -1162,13 +1040,8 @@
       const ket = document.getElementById("input-libur-ket").value.trim();
 
       if (!tgl || !ket) return alert("Tanggal dan Keterangan Libur wajib diisi!");
-
       const newItem = { tanggal: tgl, keterangan: ket };
-      const existingIndex = fetchedHariLiburList.findIndex(h => h.tanggal === tgl);
-      if (existingIndex !== -1) fetchedHariLiburList[existingIndex].keterangan = ket;
-      else fetchedHariLiburList.push(newItem);
-
-      document.getElementById("input-libur-ket").value = "";
+      fetchedHariLiburList.push(newItem);
       renderHariLiburView();
 
       if (navigator.onLine) {
@@ -1179,25 +1052,7 @@
             headers: { "Content-Type": "text/plain" },
             body: JSON.stringify({ action: "SAVE_HARI_LIBUR", data: newItem })
           });
-          alert("Hari libur berhasil disimpan!");
-        } catch (e) {}
-      }
-    }
-
-    async function deleteHariLiburItem(tanggal) {
-      if (!confirm(`Hapus hari libur tanggal ${tanggal}?`)) return;
-
-      fetchedHariLiburList = fetchedHariLiburList.filter(h => h.tanggal !== tanggal);
-      renderHariLiburView();
-
-      if (navigator.onLine) {
-        try {
-          await fetch(GAS_WEB_APP_URL, {
-            method: "POST",
-            mode: "cors",
-            headers: { "Content-Type": "text/plain" },
-            body: JSON.stringify({ action: "DELETE_HARI_LIBUR", tanggal: tanggal })
-          });
+          alert("Hari libur tersimpan!");
         } catch (e) {}
       }
     }
@@ -1205,22 +1060,16 @@
     async function initScanner() {
       if (isCameraStarting || isCameraActive) return;
       isCameraStarting = true;
-
       try {
         if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
-
         document.getElementById('camera-off-placeholder').classList.add('hidden');
         document.getElementById('scan-frame-box').classList.remove('hidden');
-
         await html5QrCode.start({ facingMode: "environment" }, { fps: 15, qrbox: { width: 250, height: 250 } }, onScanSuccess);
-        
         isCameraActive = true;
         document.getElementById('btn-camera-text').innerText = "Matikan Kamera";
       } catch (err) {
         stopCameraIfActive();
-      } finally {
-        isCameraStarting = false;
-      }
+      } finally { isCameraStarting = false; }
     }
 
     function toggleCameraState() {
@@ -1234,7 +1083,6 @@
       }
       isCameraActive = false;
       isCameraStarting = false;
-
       document.getElementById('btn-camera-text').innerText = "Nyalakan Kamera";
       document.getElementById('camera-off-placeholder').classList.remove('hidden');
       document.getElementById('scan-frame-box').classList.add('hidden');
@@ -1245,15 +1093,23 @@
       await initScanner();
     }
 
+    function toggleScanSessionMode() {
+      if (currentScanSession === "PAGI") {
+        currentScanSession = "SIANG";
+        document.getElementById("session-icon").className = "fa-solid fa-moon text-indigo-400 text-sm";
+        document.getElementById("session-mode-text").innerText = "Mode Siang";
+      } else {
+        currentScanSession = "PAGI";
+        document.getElementById("session-icon").className = "fa-solid fa-sun text-amber-400 text-sm";
+        document.getElementById("session-mode-text").innerText = "Mode Pagi";
+      }
+    }
+
     function toggleTimeModeSetting() {
       if (!isManualTimeMode) {
-        const defaultDate = customScanDateOverride || new Date().toISOString().split('T')[0];
-        const defaultTime = customScanTimeOverride || new Date().toTimeString().split(' ')[0].substring(0, 5);
-
-        const inputDate = prompt("Mode Manual: Masukkan Tanggal Scan (Format: YYYY-MM-DD):", defaultDate);
+        const inputDate = prompt("Mode Manual: Tanggal Scan (YYYY-MM-DD):", new Date().toISOString().split('T')[0]);
         if (!inputDate) return;
-
-        const inputTime = prompt("Mode Manual: Masukkan Jam Scan (Format: HH:MM):", defaultTime);
+        const inputTime = prompt("Mode Manual: Jam Scan (HH:MM):", new Date().toTimeString().split(' ')[0].substring(0, 5));
         if (!inputTime) return;
 
         isManualTimeMode = true;
@@ -1263,9 +1119,7 @@
         isManualTimeMode = false;
         customScanDateOverride = null;
         customScanTimeOverride = null;
-        alert("Mode Waktu Scan dikembalikan ke AUTO.");
       }
-
       updateTimeModeIndicator();
     }
 
@@ -1289,50 +1143,22 @@
     async function processStudentAttendance(qrCodeKey, manualStatus = "HADIR", customDate = null) {
       const student = await getStudentFromDB(qrCodeKey);
       const now = new Date();
-      
       const dateStr = formatCleanDateJS(customDate || (isManualTimeMode ? customScanDateOverride : now.toISOString().split('T')[0]));
       const timeStr = (isManualTimeMode && customScanTimeOverride) ? customScanTimeOverride : now.toTimeString().split(' ')[0].substring(0, 5);
       const sesi = currentScanSession;
 
       if (student) {
-        const attendanceRecord = {
+        const record = {
           queue_id: `${dateStr}_${student.id_siswa}_${sesi}`,
-          tanggal: dateStr,
-          jam: timeStr,
-          id_siswa: student.id_siswa,
-          nama: student.nama,
-          kelas: student.kelas,
-          sesi: sesi,
-          status_presensi: manualStatus.toUpperCase(),
-          timestamp: Date.now()
+          tanggal: dateStr, jam: timeStr, id_siswa: student.id_siswa,
+          nama: student.nama, kelas: student.kelas, sesi: sesi,
+          status_presensi: manualStatus.toUpperCase(), timestamp: Date.now()
         };
-
-        await saveToAttendanceQueue(attendanceRecord);
-
-        const existingIdx = fetchedAttendanceHistory.findIndex(r => formatCleanDateJS(r.tanggal) === dateStr && String(r.id_siswa).trim() === String(student.id_siswa).trim());
-        if (existingIdx !== -1) {
-          fetchedAttendanceHistory[existingIdx].status_presensi = manualStatus.toUpperCase();
-          if (sesi === "SIANG") fetchedAttendanceHistory[existingIdx].jam_siang = timeStr;
-          else fetchedAttendanceHistory[existingIdx].jam_pagi = timeStr;
-        } else {
-          fetchedAttendanceHistory.push({
-            log_id: `${dateStr}-${student.id_siswa}`,
-            tanggal: dateStr,
-            id_siswa: student.id_siswa,
-            nama: student.nama,
-            kelas: student.kelas,
-            jam_pagi: sesi === "PAGI" ? timeStr : "",
-            jam_siang: sesi === "SIANG" ? timeStr : "",
-            status_presensi: manualStatus.toUpperCase()
-          });
-        }
-
+        await saveToAttendanceQueue(record);
         if (!customDate) showScanResultUI(student, timeStr, sesi, true, manualStatus.toUpperCase());
         if (navigator.onLine) syncQueueToGAS();
       } else {
-        if (!customDate) {
-          showScanResultUI({ id_siswa: qrCodeKey, nama: "Siswa Tidak Ditemukan", nisn: "-", kelas: "-" }, timeStr, sesi, false, manualStatus.toUpperCase());
-        }
+        if (!customDate) showScanResultUI({ id_siswa: qrCodeKey, nama: "Siswa Tidak Ditemukan", nisn: "-", kelas: "-" }, timeStr, sesi, false, manualStatus.toUpperCase());
       }
     }
 
@@ -1340,10 +1166,9 @@
       const classes = [...new Set(cachedStudents.map(s => s.kelas))].filter(Boolean).sort();
       const filterSelect = document.getElementById('filter-class-select');
       const monitoringSelect = document.getElementById('monitoring-class-filter');
-
       const classOptions = '<option value="ALL">Semua Kelas</option>' + classes.map(c => `<option value="${c}">${c}</option>`).join('');
-      filterSelect.innerHTML = classOptions;
-      monitoringSelect.innerHTML = classOptions;
+      if (filterSelect) filterSelect.innerHTML = classOptions;
+      if (monitoringSelect) monitoringSelect.innerHTML = classOptions;
     }
 
     function getAllStudentsFromDB() {
@@ -1365,164 +1190,59 @@
     function filterStudentsList() {
       const keyword = document.getElementById('search-student-input').value.toLowerCase();
       const selectedClass = document.getElementById('filter-class-select').value;
-
       const filtered = cachedStudents.filter(std => {
-        const matchKeyword = std.nama.toLowerCase().includes(keyword) || 
-                             std.id_siswa.toLowerCase().includes(keyword) || 
-                             (std.nisn && std.nisn.toString().includes(keyword));
+        const matchKeyword = std.nama.toLowerCase().includes(keyword) || std.id_siswa.toLowerCase().includes(keyword) || (std.nisn && std.nisn.toString().includes(keyword));
         const matchClass = (selectedClass === "ALL") || (std.kelas === selectedClass);
         return matchKeyword && matchClass;
       });
-
       renderStudentsList(filtered);
     }
 
     function renderStudentsList(students) {
       const container = document.getElementById('students-list-container');
       document.getElementById('student-count-badge').innerText = `${students.length} Siswa`;
-
       if (students.length === 0) {
         container.innerHTML = `<div class="text-center py-8 bg-white rounded-2xl border border-gray-100 p-4"><p class="text-xs font-semibold text-gray-600">Tidak ada siswa ditemukan</p></div>`;
         return;
       }
-
       container.innerHTML = students.map(std => `
         <div class="bg-white p-3 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
           <div class="flex items-center space-x-3 min-w-0">
-            <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-sm flex-shrink-0">
-              <i class="fa-solid fa-user"></i>
-            </div>
+            <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-sm flex-shrink-0"><i class="fa-solid fa-user"></i></div>
             <div class="truncate">
               <h4 class="font-bold text-xs text-gray-900 truncate">${std.nama}</h4>
               <p class="text-[10px] text-gray-500">ID: ${std.id_siswa} | NISN: ${std.nisn || '-'}</p>
             </div>
           </div>
-          <span class="px-2 py-1 bg-emerald-50 text-emerald-700 font-bold text-[10px] rounded-lg border border-emerald-200 ml-2 flex-shrink-0">
-            ${std.kelas}
-          </span>
+          <span class="px-2 py-1 bg-emerald-50 text-emerald-700 font-bold text-[10px] rounded-lg border border-emerald-200 flex-shrink-0">${std.kelas}</span>
         </div>
       `).join('');
     }
 
     async function updateMonitoringDashboard() {
       const targetDateStr = formatCleanDateJS(document.getElementById('monitoring-date-filter').value || new Date().toISOString().split('T')[0]);
-      const selectedClass = document.getElementById('monitoring-class-filter').value;
-      const selectedSession = document.getElementById('monitoring-session-filter').value;
-      
-      const todayStr = new Date().toISOString().split('T')[0];
-      const nowHM = new Date().toTimeString().substring(0, 5);
-
-      const dayCfg = getCurrentDayConfig(targetDateStr);
-
-      if (dayCfg.isHoliday) {
-        document.getElementById('unscanned-students-container').innerHTML = `
-          <div class="bg-blue-50 border border-blue-200 p-4 rounded-2xl text-center text-blue-800 text-xs font-bold">
-            Tanggal ${targetDateStr} Libur Absensi (${dayCfg.name || 'Non-Aktif'}).
-          </div>
-        `;
-        renderPieChart(0, 0, 0, 0, 0, 0);
-        return;
-      }
-
       const queueRecords = await getAllQueueFromDB();
-      const allTargetRecords = [...fetchedTodayAttendance, ...fetchedAttendanceHistory, ...queueRecords]
-        .filter(r => formatCleanDateJS(r.tanggal) === targetDateStr);
+      const allRecords = [...fetchedTodayAttendance, ...fetchedAttendanceHistory, ...queueRecords].filter(r => formatCleanDateJS(r.tanggal) === targetDateStr);
 
-      const classStudents = selectedClass === "ALL" ? cachedStudents : cachedStudents.filter(s => s.kelas === selectedClass);
-
-      let countHadir = 0, countAlpa = 0, countBolos = 0, countSakit = 0, countIzin = 0, countKegiatan = 0;
-      let unresolvedStudents = [];
-
-      const isToday = targetDateStr === todayStr;
-
-      classStudents.forEach(student => {
-        const studentIdClean = String(student.id_siswa).trim();
-
-        const studentPagi = allTargetRecords.find(r => String(r.id_siswa).trim() === studentIdClean && (r.sesi === "PAGI" || (r.jam_pagi && r.jam_pagi !== "" && r.jam_pagi !== "-")));
-        const studentSiang = allTargetRecords.find(r => String(r.id_siswa).trim() === studentIdClean && (r.sesi === "SIANG" || (r.jam_siang && r.jam_siang !== "" && r.jam_siang !== "-")));
-        const anyRecord = allTargetRecords.find(r => String(r.id_siswa).trim() === studentIdClean);
-
-        if (selectedSession === "PAGI") {
-          if (studentPagi) {
-            const st = String(studentPagi.status_presensi || "HADIR").toUpperCase();
-            if (st === "HADIR") countHadir++;
-            else if (st === "SAKIT") countSakit++;
-            else if (st === "IZIN") countIzin++;
-            else if (st === "KEGIATAN") countKegiatan++;
-            else if (st === "ALPA") countAlpa++;
-          } else {
-            if (!isToday || nowHM > dayCfg.pagiLimit) {
-              countAlpa++;
-              unresolvedStudents.push({ ...student, reason: "Belum Absen Pagi (Alpa)" });
-            } else {
-              unresolvedStudents.push({ ...student, reason: "Belum Absen Pagi" });
-            }
-          }
-        } 
-        else if (selectedSession === "SIANG") {
-          if (studentSiang) {
-            const st = String(studentSiang.status_presensi || "HADIR").toUpperCase();
-            if (st === "HADIR") countHadir++;
-            else if (st === "SAKIT") countSakit++;
-            else if (st === "IZIN") countIzin++;
-            else if (st === "KEGIATAN") countKegiatan++;
-            else if (st === "ALPA") countAlpa++;
-          } else {
-            if (!isToday || nowHM > dayCfg.siangLimit) {
-              if (studentPagi) {
-                countBolos++;
-                unresolvedStudents.push({ ...student, reason: "Sudah Pagi, Siang Tidak Scan (Bolos)" });
-              } else {
-                countAlpa++;
-                unresolvedStudents.push({ ...student, reason: "Belum Absen Siang (Alpa)" });
-              }
-            } else {
-              unresolvedStudents.push({ ...student, reason: "Belum Absen Siang" });
-            }
-          }
-        } 
-        else {
-          if (anyRecord) {
-            const st = String(anyRecord.status_presensi || "HADIR").toUpperCase();
-            if (st === "HADIR") {
-              if (studentPagi && !studentSiang && (!isToday || nowHM > dayCfg.siangLimit)) {
-                countBolos++;
-                unresolvedStudents.push({ ...student, reason: "Sudah Hadir Pagi, Siang Tidak Scan (Bolos)" });
-              } else {
-                countHadir++;
-              }
-            } else if (st === "SAKIT") countSakit++;
-            else if (st === "IZIN") countIzin++;
-            else if (st === "KEGIATAN") countKegiatan++;
-            else if (st === "BOLOS") {
-              countBolos++;
-              unresolvedStudents.push({ ...student, reason: "Dicatat Bolos" });
-            } else if (st === "ALPA") {
-              countAlpa++;
-              unresolvedStudents.push({ ...student, reason: "Dicatat Alpa" });
-            }
-          } else {
-            if (!isToday || nowHM > dayCfg.pagiLimit) {
-              countAlpa++;
-              unresolvedStudents.push({ ...student, reason: "Belum Scan Sama Sekali (Alpa)" });
-            } else {
-              unresolvedStudents.push({ ...student, reason: "Belum Scan Hari Ini" });
-            }
-          }
-        }
+      let hadir = 0, alpa = 0, bolos = 0, sakit = 0, izin = 0, kegiatan = 0;
+      allRecords.forEach(r => {
+        const st = String(r.status_presensi || "HADIR").toUpperCase();
+        if (st === "HADIR") hadir++;
+        else if (st === "ALPA") alpa++;
+        else if (st === "BOLOS") bolos++;
+        else if (st === "SAKIT") sakit++;
+        else if (st === "IZIN") izin++;
+        else if (st === "KEGIATAN") kegiatan++;
       });
 
-      document.getElementById('stat-hadir').innerText = countHadir;
-      document.getElementById('stat-alpa').innerText = countAlpa;
-      document.getElementById('stat-bolos').innerText = countBolos;
-      document.getElementById('stat-sakit').innerText = countSakit;
-      document.getElementById('stat-izin').innerText = countIzin;
-      document.getElementById('stat-kegiatan').innerText = countKegiatan;
+      document.getElementById('stat-hadir').innerText = hadir;
+      document.getElementById('stat-alpa').innerText = alpa;
+      document.getElementById('stat-bolos').innerText = bolos;
+      document.getElementById('stat-sakit').innerText = sakit;
+      document.getElementById('stat-izin').innerText = izin;
+      document.getElementById('stat-kegiatan').innerText = kegiatan;
 
-      document.getElementById('unscanned-count-badge').innerText = `${unresolvedStudents.length} Murid`;
-
-      renderPieChart(countHadir, countAlpa, countBolos, countSakit, countIzin, countKegiatan);
-      renderUnscannedStudentsList(unresolvedStudents, targetDateStr);
+      renderPieChart(hadir, alpa, bolos, sakit, izin, kegiatan);
     }
 
     function renderPieChart(hadir, alpa, bolos, sakit, izin, kegiatan) {
@@ -1531,7 +1251,6 @@
 
       const total = hadir + alpa + bolos + sakit + izin + kegiatan;
       const pctHadir = total > 0 ? Math.round((hadir / total) * 100) : 0;
-
       document.getElementById('chart-center-percent').innerText = `${pctHadir}%`;
 
       myPieChart = new Chart(ctx, {
@@ -1541,50 +1260,11 @@
           datasets: [{
             data: [hadir, alpa, bolos, sakit, izin, kegiatan],
             backgroundColor: ['#10b981', '#f59e0b', '#f43f5e', '#3b82f6', '#6366f1', '#a855f7'],
-            borderWidth: 2,
-            hoverOffset: 4
+            borderWidth: 2
           }]
         },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          cutout: '72%',
-          plugins: { legend: { display: false } }
-        }
+        options: { responsive: true, maintainAspectRatio: false, cutout: '72%', plugins: { legend: { display: false } } }
       });
-    }
-
-    function renderUnscannedStudentsList(unresolved, targetDateStr) {
-      const container = document.getElementById('unscanned-students-container');
-
-      if (unresolved.length === 0) {
-        container.innerHTML = `
-          <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl text-center text-emerald-800 text-xs font-bold">
-            Semua siswa telah melakukan presensi dengan lengkap!
-          </div>
-        `;
-        return;
-      }
-
-      container.innerHTML = unresolved.map(std => `
-        <div class="bg-white p-3 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
-          <div class="truncate min-w-0 pr-2">
-            <h4 class="font-bold text-xs text-gray-900 truncate">${std.nama}</h4>
-            <p class="text-[10px] text-amber-600 font-semibold truncate">${std.reason}</p>
-          </div>
-          <div class="flex items-center space-x-1 flex-shrink-0">
-            <button onclick="setManualStudentStatus('${std.id_siswa}', 'HADIR', '${targetDateStr}')" class="px-2 py-1 bg-emerald-50 text-emerald-700 font-bold text-[10px] rounded-lg border border-emerald-200 hover:bg-emerald-100">Hadir</button>
-            <button onclick="setManualStudentStatus('${std.id_siswa}', 'SAKIT', '${targetDateStr}')" class="px-2 py-1 bg-blue-50 text-blue-600 font-bold text-[10px] rounded-lg border border-blue-200 hover:bg-blue-100">Sakit</button>
-            <button onclick="setManualStudentStatus('${std.id_siswa}', 'IZIN', '${targetDateStr}')" class="px-2 py-1 bg-indigo-50 text-indigo-600 font-bold text-[10px] rounded-lg border border-indigo-200 hover:bg-indigo-100">Izin</button>
-            <button onclick="setManualStudentStatus('${std.id_siswa}', 'KEGIATAN', '${targetDateStr}')" class="px-2 py-1 bg-purple-50 text-purple-600 font-bold text-[10px] rounded-lg border border-purple-200 hover:bg-purple-100">Keg.</button>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    async function setManualStudentStatus(idSiswa, status, targetDateStr) {
-      await processStudentAttendance(idSiswa, status, targetDateStr);
-      updateMonitoringDashboard();
     }
 
     function getStudentFromDB(qrKey) {
@@ -1602,10 +1282,7 @@
         const tx = db.transaction("attendance_queue", "readwrite");
         const store = tx.objectStore("attendance_queue");
         store.put(record);
-        tx.oncomplete = () => {
-          updateQueueCountUI();
-          resolve();
-        };
+        tx.oncomplete = () => { updateQueueCountUI(); resolve(); };
       });
     }
 
@@ -1623,100 +1300,28 @@
         const tx = db.transaction("attendance_queue", "readwrite");
         const store = tx.objectStore("attendance_queue");
         queueIds.forEach(id => store.delete(id));
-        tx.oncomplete = () => {
-          updateQueueCountUI();
-          resolve();
-        };
+        tx.oncomplete = () => { updateQueueCountUI(); resolve(); };
       });
     }
 
     function updateQueueCountUI() {
-      getAllQueueFromDB().then(records => {
-        document.getElementById('queue-count').innerText = records.length;
-      });
+      getAllQueueFromDB().then(records => { document.getElementById('queue-count').innerText = records.length; });
     }
 
     async function syncQueueToGAS() {
       const queueData = await getAllQueueFromDB();
       if (queueData.length === 0) return;
-
       try {
         const response = await fetch(GAS_WEB_APP_URL, {
-          method: "POST",
-          mode: "cors",
-          headers: { "Content-Type": "text/plain" },
-          body: JSON.stringify({
-            action: "SYNC_ATTENDANCE_BATCH",
-            data: queueData
-          })
+          method: "POST", mode: "cors", headers: { "Content-Type": "text/plain" },
+          body: JSON.stringify({ action: "SYNC_ATTENDANCE_BATCH", data: queueData })
         });
-
         const result = await response.json();
         if (result.success) {
           const syncedIds = queueData.map(q => q.queue_id);
           await clearQueueFromDB(syncedIds);
         }
       } catch (err) {}
-    }
-
-    async function toggleView(viewName) {
-      const views = ['view-scanner', 'view-success', 'view-students', 'view-monitoring', 'view-donation', 'view-print-qr', 'view-report', 'view-tindak-lanjut', 'view-hari-libur', 'view-settings'];
-      views.forEach(v => {
-        const el = document.getElementById(v);
-        if (el) { el.classList.add('hidden'); el.classList.remove('flex'); }
-      });
-
-      const navScanner = document.getElementById('nav-scanner');
-      const navStudents = document.getElementById('nav-students');
-      const navMonitoring = document.getElementById('nav-monitoring');
-      const navDonation = document.getElementById('nav-donation');
-
-      navScanner.className = "flex-1 text-gray-400 hover:text-gray-600 flex flex-col items-center -mt-4";
-      navScanner.children[0].className = "w-12 h-12 rounded-full bg-slate-500 text-white shadow-md flex items-center justify-center border-4 border-white";
-      navStudents.className = "flex-1 text-gray-400 hover:text-gray-600 flex flex-col items-center";
-      navMonitoring.className = "flex-1 text-gray-400 hover:text-gray-600 flex flex-col items-center";
-      navDonation.className = "flex-1 text-gray-400 hover:text-gray-600 flex flex-col items-center";
-
-      if (viewName === 'students') {
-        document.getElementById('view-students').classList.remove('hidden');
-        document.getElementById('view-students').classList.add('flex');
-        navStudents.className = "flex-1 text-blue-600 flex flex-col items-center";
-        loadStudentsView();
-        await stopCameraIfActive();
-      } else if (viewName === 'monitoring') {
-        document.getElementById('view-monitoring').classList.remove('hidden');
-        document.getElementById('view-monitoring').classList.add('flex');
-        navMonitoring.className = "flex-1 text-blue-600 flex flex-col items-center";
-        updateMonitoringDashboard();
-        await stopCameraIfActive();
-      } else if (viewName === 'donation') {
-        document.getElementById('view-donation').classList.remove('hidden');
-        document.getElementById('view-donation').classList.add('flex');
-        navDonation.className = "flex-1 text-rose-600 flex flex-col items-center font-bold";
-        await stopCameraIfActive();
-      } else if (viewName === 'hari-libur') {
-        document.getElementById('view-hari-libur').classList.remove('hidden');
-        document.getElementById('view-hari-libur').classList.add('flex');
-        renderHariLiburView();
-        await stopCameraIfActive();
-      } else if (viewName === 'settings') {
-        document.getElementById('view-settings').classList.remove('hidden');
-        document.getElementById('view-settings').classList.add('flex');
-        await stopCameraIfActive();
-      } else if (viewName === 'success') {
-        document.getElementById('view-success').classList.remove('hidden');
-        document.getElementById('view-success').classList.add('flex');
-      } else {
-        document.getElementById('view-scanner').classList.remove('hidden');
-        document.getElementById('view-scanner').classList.add('flex');
-        navScanner.className = "flex-1 text-blue-600 flex flex-col items-center -mt-4";
-        navScanner.children[0].className = "w-12 h-12 rounded-full bg-blue-600 text-white shadow-lg flex items-center justify-center border-4 border-white";
-        await stopCameraIfActive();
-      }
-    }
-
-    function toggleMenuModal() {
-      document.getElementById('menu-modal').classList.toggle('hidden');
     }
 
     function showScanResultUI(student, timeStr, sesi, isSuccess, manualStatus = "HADIR") {
@@ -1731,14 +1336,11 @@
       const banner = document.getElementById('success-banner');
       if (!isSuccess) {
         banner.className = "bg-amber-600 text-white p-4 flex items-center space-x-3 shadow-md";
-        document.getElementById('success-title').innerText = "Siswa Tidak Ditemukan / Non-Aktif!";
-        document.getElementById('success-subtitle').innerText = "Siswa belum terdaftar atau berstatus Tidak Aktif.";
+        document.getElementById('success-title').innerText = "Siswa Tidak Ditemukan!";
       } else {
         banner.className = "bg-emerald-600 text-white p-4 flex items-center space-x-3 shadow-md";
-        document.getElementById('success-title').innerText = "Scan / Catat Berhasil!";
-        document.getElementById('success-subtitle').innerText = `Status presensi: ${manualStatus}`;
+        document.getElementById('success-title').innerText = "Scan Berhasil!";
       }
-
       toggleView('success');
     }
 
@@ -1747,22 +1349,15 @@
       if (qrInput) processStudentAttendance(qrInput.trim());
     }
 
-    function triggerManualSync() {
-      if (navigator.onLine) syncQueueToGAS();
-    }
+    function triggerManualSync() { if (navigator.onLine) syncQueueToGAS(); }
 
     setInterval(() => {
       const isOnline = navigator.onLine;
       document.getElementById('status-dot').className = `w-2.5 h-2.5 rounded-full ${isOnline ? 'bg-green-400' : 'bg-amber-400'} inline-block`;
       document.getElementById('status-text').innerText = isOnline ? 'Online' : 'Offline';
-
-      autoUpdateShiftLabel();
     }, 1000);
 
-    window.addEventListener('online', () => {
-      autoDownloadMasterStudents();
-      syncQueueToGAS();
-    });
+    window.addEventListener('online', () => { autoDownloadMasterStudents(); syncQueueToGAS(); });
 
     window.onload = async () => {
       loadAppConfigs();
