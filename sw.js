@@ -1,4 +1,4 @@
-const CACHE_NAME = 'absensi-app-cache-v2.9';
+const CACHE_NAME = 'absensi-app-cache-v2.10';
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -11,7 +11,12 @@ const STATIC_ASSETS = [
 self.addEventListener('install', (e) => {
   e.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(STATIC_ASSETS);
+      // Menggunakan mode no-cors untuk resource eksternal CDN agar berhasil di-cache 100%
+      const cachePromises = STATIC_ASSETS.map(url => {
+        const req = new Request(url, { mode: 'no-cors' });
+        return fetch(req).then(res => cache.put(url, res)).catch(err => console.log('Fail caching: ', url));
+      });
+      return Promise.all(cachePromises);
     }).then(() => self.skipWaiting())
   );
 });
@@ -32,17 +37,16 @@ self.addEventListener('activate', (e) => {
 
 self.addEventListener('fetch', (e) => {
   if (e.request.url.includes('script.google.com')) {
-    return; // Request API Google Apps Script dikelola langsung oleh fungsi async js
+    return; // Panggilan API Google Apps Script diserahkan ke async handler
   }
 
   e.respondWith(
     caches.match(e.request).then((cachedResponse) => {
       if (cachedResponse) {
-        // Ambil dari Cache Lokal Terlebih Dahulu (Cache-First Strategy)
         return cachedResponse;
       }
       return fetch(e.request).then((networkResponse) => {
-        if (e.request.method === 'GET' && networkResponse.status === 200) {
+        if (e.request.method === 'GET') {
           const responseToCache = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => {
             cache.put(e.request, responseToCache);
