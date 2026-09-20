@@ -124,8 +124,8 @@
   <!-- Container Mobile -->
   <div class="w-full max-w-md h-[100vh] sm:h-[840px] bg-white flex flex-col justify-between shadow-2xl overflow-hidden sm:rounded-3xl relative border border-gray-200">
 
-    <!-- HEADER UTAMA -->
-    <header class="bg-[#0b3c5d] text-white py-3.5 px-4 z-20 shadow-md">
+    <!-- HEADER UTAMA (FIXED / STICKY UNTUK MENCEGAH TERGULIR) -->
+    <header class="bg-[#0b3c5d] text-white py-3.5 px-4 z-30 shadow-md flex-shrink-0">
       <div class="flex items-center justify-between">
         <div class="flex items-center space-x-3">
           <div class="min-w-0 flex-1">
@@ -328,7 +328,6 @@
         <h4 class="text-xs font-bold text-gray-700 mb-2">Persentase Kehadiran</h4>
         <div class="w-48 h-48 mx-auto relative flex items-center justify-center">
           <canvas id="attendancePieChart"></canvas>
-          <!-- ELEMEN ANGKA PERSENTASE TENGAH LINGKARAN -->
           <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
             <span id="chart-center-percent" class="text-2xl font-black text-emerald-600 leading-none">0%</span>
             <span class="text-[9px] font-bold text-gray-400 mt-0.5">Tingkat Hadir</span>
@@ -650,7 +649,7 @@
         <div class="pt-6 flex justify-end">
           <div class="text-center text-xs w-60 space-y-10">
             <div>
-              <p><span id="rep-ttd-tempat">Wakatobi</span>, <span id="rep-ttd-tanggal">19 September 2026</span></p>
+              <p><span id="rep-ttd-tempat">Wakatobi</span>, <span id="rep-ttd-tanggal">20 September 2026</span></p>
               <p class="font-semibold">Kepala Sekolah,</p>
             </div>
             <div>
@@ -879,8 +878,8 @@
     </div>
 
 
-    <!-- BOTTOM NAVIGATION -->
-    <nav class="bg-white border-t border-gray-200 px-3 py-1.5 flex justify-between items-center text-center z-20">
+    <!-- BOTTOM NAVIGATION (FIXED / STICKY UNTUK MENCEGAH TERGULIR) -->
+    <nav class="bg-white border-t border-gray-200 px-3 py-1.5 flex justify-between items-center text-center z-30 flex-shrink-0">
       <button id="nav-students" onclick="toggleView('students')" class="flex-1 text-gray-400 hover:text-gray-600 flex flex-col items-center">
         <div class="w-7 h-7 flex items-center justify-center mb-0.5">
           <i class="fa-solid fa-user-group text-sm"></i>
@@ -1862,10 +1861,10 @@
       processStudentAttendance(decodedText.trim());
     }
 
-    async function processStudentAttendance(qrCodeKey, manualStatus = "HADIR") {
+    async function processStudentAttendance(qrCodeKey, manualStatus = "HADIR", customDate = null) {
       const student = await getStudentFromDB(qrCodeKey);
       const now = new Date();
-      const dateStr = now.toISOString().split('T')[0];
+      const dateStr = customDate || now.toISOString().split('T')[0];
       const timeStr = now.toTimeString().split(' ')[0].substring(0, 5);
       const sesi = currentScanSession;
 
@@ -1882,17 +1881,42 @@
           timestamp: Date.now()
         };
 
+        // Simpan langsung ke memori lokal & queue
         await saveToAttendanceQueue(attendanceRecord);
-        showScanResultUI(student, timeStr, sesi, true, manualStatus);
+
+        // Update memori lokal aplikasi secara langsung tanpa butuh refresh
+        const existingIdx = fetchedAttendanceHistory.findIndex(r => r.tanggal === dateStr && r.id_siswa === student.id_siswa);
+        if (existingIdx !== -1) {
+          fetchedAttendanceHistory[existingIdx].status_presensi = manualStatus;
+          if (sesi === "SIANG") fetchedAttendanceHistory[existingIdx].jam_siang = timeStr;
+          else fetchedAttendanceHistory[existingIdx].jam_pagi = timeStr;
+        } else {
+          fetchedAttendanceHistory.push({
+            log_id: `${dateStr}-${student.id_siswa}`,
+            tanggal: dateStr,
+            id_siswa: student.id_siswa,
+            nama: student.nama,
+            kelas: student.kelas,
+            jam_pagi: sesi === "PAGI" ? timeStr : "",
+            jam_siang: sesi === "SIANG" ? timeStr : "",
+            status_presensi: manualStatus
+          });
+        }
+
+        if (!customDate) {
+          showScanResultUI(student, timeStr, sesi, true, manualStatus);
+        }
 
         if (navigator.onLine) syncQueueToGAS();
       } else {
-        showScanResultUI({
-          id_siswa: qrCodeKey,
-          nama: "Siswa Tidak Ditemukan / Non-Aktif",
-          nisn: "-",
-          kelas: "-"
-        }, timeStr, sesi, false, manualStatus);
+        if (!customDate) {
+          showScanResultUI({
+            id_siswa: qrCodeKey,
+            nama: "Siswa Tidak Ditemukan / Non-Aktif",
+            nisn: "-",
+            kelas: "-"
+          }, timeStr, sesi, false, manualStatus);
+        }
       }
     }
 
@@ -2089,7 +2113,7 @@
       document.getElementById('unscanned-count-badge').innerText = `${unresolvedStudents.length} Murid`;
 
       renderPieChart(countHadir, countAlpa, countBolos, countSakit, countIzin, countKegiatan);
-      renderUnscannedStudentsList(unresolvedStudents);
+      renderUnscannedStudentsList(unresolvedStudents, targetDateStr);
     }
 
     function renderPieChart(hadir, alpa, bolos, sakit, izin, kegiatan) {
@@ -2099,7 +2123,6 @@
       const total = hadir + alpa + bolos + sakit + izin + kegiatan;
       const pctHadir = total > 0 ? Math.round((hadir / total) * 100) : 0;
 
-      // UPDATE ANGKA PRESENTASE DI TENGAH GRAFIK
       document.getElementById('chart-center-percent').innerText = `${pctHadir}%`;
 
       myPieChart = new Chart(ctx, {
@@ -2122,7 +2145,8 @@
       });
     }
 
-    function renderUnscannedStudentsList(unresolved) {
+    // LIST SISWA DI MONITORING TANPA TOMBOL "BOLOS" MANUAL
+    function renderUnscannedStudentsList(unresolved, targetDateStr) {
       const container = document.getElementById('unscanned-students-container');
 
       if (unresolved.length === 0) {
@@ -2142,17 +2166,16 @@
             <p class="text-[10px] text-amber-600 font-semibold truncate">${std.reason}</p>
           </div>
           <div class="flex items-center space-x-1 flex-shrink-0">
-            <button onclick="setManualStudentStatus('${std.id_siswa}', 'SAKIT')" class="px-2 py-1 bg-blue-50 text-blue-600 font-bold text-[9px] rounded-lg border border-blue-200 hover:bg-blue-100">Sakit</button>
-            <button onclick="setManualStudentStatus('${std.id_siswa}', 'IZIN')" class="px-2 py-1 bg-indigo-50 text-indigo-600 font-bold text-[9px] rounded-lg border border-indigo-200 hover:bg-indigo-100">Izin</button>
-            <button onclick="setManualStudentStatus('${std.id_siswa}', 'KEGIATAN')" class="px-2 py-1 bg-purple-50 text-purple-600 font-bold text-[9px] rounded-lg border border-purple-200 hover:bg-purple-100">Keg.</button>
-            <button onclick="setManualStudentStatus('${std.id_siswa}', 'BOLOS')" class="px-2 py-1 bg-rose-50 text-rose-600 font-bold text-[9px] rounded-lg border border-rose-200 hover:bg-rose-100">Bolos</button>
+            <button onclick="setManualStudentStatus('${std.id_siswa}', 'SAKIT', '${targetDateStr}')" class="px-2.5 py-1 bg-blue-50 text-blue-600 font-bold text-[10px] rounded-lg border border-blue-200 hover:bg-blue-100">Sakit</button>
+            <button onclick="setManualStudentStatus('${std.id_siswa}', 'IZIN', '${targetDateStr}')" class="px-2.5 py-1 bg-indigo-50 text-indigo-600 font-bold text-[10px] rounded-lg border border-indigo-200 hover:bg-indigo-100">Izin</button>
+            <button onclick="setManualStudentStatus('${std.id_siswa}', 'KEGIATAN', '${targetDateStr}')" class="px-2.5 py-1 bg-purple-50 text-purple-600 font-bold text-[10px] rounded-lg border border-purple-200 hover:bg-purple-100">Keg.</button>
           </div>
         </div>
       `).join('');
     }
 
-    async function setManualStudentStatus(idSiswa, status) {
-      await processStudentAttendance(idSiswa, status);
+    async function setManualStudentStatus(idSiswa, status, targetDateStr) {
+      await processStudentAttendance(idSiswa, status, targetDateStr);
       updateMonitoringDashboard();
     }
 
