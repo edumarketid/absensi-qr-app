@@ -4,24 +4,25 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#0b3c5d">
-  <title>Sistem Absensi Murid - v2.7</title>
+  <title>Sistem Absensi Murid - v2.8</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #f1f5f9; color: #172033; }
+    html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #f1f5f9; color: #172033; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     #reader video { object-fit: cover !important; width: 100% !important; height: 100% !important; border-radius: 1rem; }
   </style>
 </head>
-<body class="flex justify-center items-center min-h-screen p-0 sm:p-4">
+<body class="flex justify-center items-center h-full p-0 sm:p-4">
 
-  <div class="w-full max-w-md h-[100vh] sm:h-[840px] bg-white flex flex-col justify-between shadow-2xl overflow-hidden sm:rounded-3xl relative border border-gray-200">
+  <!-- CONTAINER APLIKASI UTAMA (LOCKED HEIGHT) -->
+  <div id="app-viewport-container" class="w-full max-w-md h-full sm:h-[840px] bg-white flex flex-col shadow-2xl overflow-hidden sm:rounded-3xl relative border border-gray-200">
 
-    <!-- FITUR 6: FIXED STICKY HEADER UTAMA (TIDAK IKUT TERGULIR) -->
-    <header class="bg-[#0b3c5d] text-white py-3.5 px-4 z-40 shadow-md flex-shrink-0 sticky top-0">
+    <!-- 1. FIXED HEADER UTAMA (TERKUNCI DI ATAS) -->
+    <header class="bg-[#0b3c5d] text-white py-3.5 px-4 z-40 shadow-md flex-shrink-0">
       <div class="flex items-center justify-between">
         <div class="flex items-center space-x-3">
           <div class="min-w-0 flex-1">
@@ -34,16 +35,16 @@
             <span id="status-dot" class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span>
             <span id="status-text" class="text-xs font-semibold">Memeriksa...</span>
           </div>
-          <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30 block mt-0.5">v2.7</span>
+          <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30 block mt-0.5">v2.8</span>
         </div>
       </div>
     </header>
 
-    <!-- AREA BADAN APLIKASI (SCROLLABLE CONTAINER) -->
-    <div class="flex-1 overflow-y-auto no-scrollbar relative flex flex-col">
+    <!-- 2. AREA KONTEN UTAMA (DAPAT DI-SCROLL MANDIRI) -->
+    <div class="flex-1 overflow-y-auto no-scrollbar relative bg-slate-50">
 
       <!-- VIEW 1: SCANNER KAMERA -->
-      <main id="view-scanner" class="flex-1 flex flex-col justify-between relative bg-gray-900 min-h-full">
+      <main id="view-scanner" class="h-full flex flex-col justify-between bg-gray-900 overflow-hidden">
         <div class="flex-1 relative flex flex-col items-center justify-center p-4 bg-black">
           <div class="w-full h-full max-h-[420px] overflow-hidden rounded-2xl relative flex items-center justify-center bg-gray-800 border border-gray-700">
             <div id="reader" class="w-full h-full"></div>
@@ -98,7 +99,7 @@
       </main>
 
       <!-- VIEW 2: HASIL SCAN -->
-      <main id="view-success" class="flex-1 flex-col bg-slate-50 p-4 hidden">
+      <main id="view-success" class="p-4 hidden">
         <div id="status-card-box" class="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-center shadow-sm space-y-2">
           <h3 id="res-nama" class="font-bold text-gray-900 text-lg truncate">-</h3>
           <p class="text-xs text-gray-600">NISN: <span id="res-nisn" class="font-bold">-</span> | Kelas: <span id="res-kelas" class="font-bold">-</span></p>
@@ -111,7 +112,7 @@
       </main>
 
       <!-- VIEW 3: DATA MASTER SISWA -->
-      <main id="view-students" class="flex-1 flex-col bg-slate-50 p-4 hidden">
+      <main id="view-students" class="p-4 hidden">
         <div class="flex items-center justify-between mb-2">
           <div>
             <h2 class="font-bold text-lg text-gray-900">Data Master Siswa</h2>
@@ -134,7 +135,6 @@
           </div>
         </div>
 
-        <!-- FITUR 4: DAFTAR RINCIAN JUMLAH SISWA MASING-MASING KELAS -->
         <div class="mb-3">
           <label class="block text-[10px] font-bold text-gray-600 mb-1">Rincian Siswa Per Kelas:</label>
           <div id="class-summary-badges" class="flex gap-1.5 overflow-x-auto no-scrollbar pb-1"></div>
@@ -148,7 +148,7 @@
       </main>
 
       <!-- VIEW 4: MONITORING PRESENSI -->
-      <main id="view-monitoring" class="flex-1 flex-col bg-slate-50 p-4 hidden">
+      <main id="view-monitoring" class="p-4 hidden">
         <div class="flex items-center justify-between mb-3">
           <div>
             <h2 class="font-bold text-lg text-gray-900">Monitoring Absensi</h2>
@@ -156,7 +156,6 @@
           </div>
         </div>
 
-        <!-- FITUR 3: FILTER MONITORING DENGAN MODE PAGI & SIANG -->
         <div class="bg-white p-3 rounded-2xl border border-gray-200 shadow-sm space-y-2 mb-3">
           <div class="grid grid-cols-3 gap-1.5">
             <div>
@@ -219,7 +218,7 @@
       </main>
 
       <!-- VIEW 5: DONASI / DUKUNGAN -->
-      <main id="view-donation" class="flex-1 flex-col bg-slate-50 p-4 hidden">
+      <main id="view-donation" class="p-4 hidden">
         <div class="text-center mb-3">
           <div class="w-12 h-12 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-2 text-xl shadow-sm"><i class="fa-solid fa-hand-holding-heart"></i></div>
           <h2 class="font-bold text-lg text-gray-900">❤️ Dukung Pengembangan</h2>
@@ -255,7 +254,7 @@
       </main>
 
       <!-- VIEW 6: TINDAK LANJUT SISWA -->
-      <main id="view-tindak-lanjut" class="flex-1 flex-col bg-slate-50 p-4 hidden">
+      <main id="view-tindak-lanjut" class="p-4 hidden">
         <div class="flex items-center justify-between mb-3">
           <div>
             <h2 class="font-bold text-lg text-gray-900">🚩 Tindak Lanjut Siswa</h2>
@@ -266,7 +265,7 @@
       </main>
 
       <!-- VIEW 7: ATUR HARI LIBUR -->
-      <main id="view-hari-libur" class="flex-1 flex-col bg-slate-50 p-4 hidden">
+      <main id="view-hari-libur" class="p-4 hidden">
         <div class="mb-3">
           <h2 class="font-bold text-lg text-gray-900">📅 Atur Hari Libur</h2>
           <p class="text-xs text-gray-500">Tandai Hari Libur Nasional & Sekolah</p>
@@ -288,7 +287,7 @@
       </main>
 
       <!-- VIEW 8: PENGATURAN SYSTEM -->
-      <main id="view-settings" class="flex-1 flex-col bg-slate-50 p-4 hidden">
+      <main id="view-settings" class="p-4 hidden">
         <div class="mb-3">
           <h2 class="font-bold text-lg text-gray-900">Pengaturan System</h2>
           <p class="text-xs text-gray-500">Konfigurasi Jam Presensi & Identitas Sekolah</p>
@@ -405,8 +404,8 @@
       </div>
     </div>
 
-    <!-- FITUR 5: FIXED STICKY FOOTER BOTTOM NAVIGATION (TIDAK IKUT TERGULIR) -->
-    <nav class="bg-white border-t border-gray-200 px-2 py-1.5 flex justify-between items-center text-center z-40 flex-shrink-0 sticky bottom-0">
+    <!-- 3. FIXED BOTTOM NAVIGATION (TERKUNCI DI BAWAH) -->
+    <nav class="bg-white border-t border-gray-200 px-2 py-1.5 flex justify-between items-center text-center z-40 flex-shrink-0">
       <button id="nav-students" onclick="toggleView('students')" class="flex-1 flex flex-col items-center">
         <i class="fa-solid fa-user-group text-sm text-teal-600"></i>
         <span class="text-[10px] font-bold text-teal-700 mt-0.5">Data Siswa</span>
@@ -437,7 +436,7 @@
 
   </div>
 
-  <!-- REGISTRASI SERVICE WORKER OFFLINE FIRST -->
+  <!-- REGISTRASI SERVICE WORKER -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
@@ -736,7 +735,6 @@
       }
     }
 
-    // FITUR 4: MENAMPILKAN RINGKASAN SISWA MASING-MASING KELAS DI DATA SISWA
     async function loadStudentsView() {
       const tx = db.transaction("students", "readonly");
       tx.objectStore("students").getAll().onsuccess = (e) => {
@@ -793,7 +791,7 @@
       document.getElementById('view-' + viewName).classList.remove('hidden');
 
       if (viewName === 'students') loadStudentsView();
-      if (viewName === 'monitoring') updateMonitoringDashboard(); // FITUR 3: REFRESH OTOMATIS SAAT DIKLIK
+      if (viewName === 'monitoring') updateMonitoringDashboard();
       if (viewName === 'tindak-lanjut') renderTindakLanjutView();
       if (viewName === 'hari-libur') renderHariLiburView();
       if (viewName === 'settings') renderDaysConfigForm();
@@ -802,7 +800,6 @@
     function toggleMenuModal() { document.getElementById('menu-modal').classList.toggle('hidden'); }
     function toggleAddStudentModal() { document.getElementById('add-student-modal').classList.toggle('hidden'); }
 
-    // FITUR 3: DUKUNGAN FILTER MODE PAGI / SIANG DI DASHBOARD MONITORING
     async function updateMonitoringDashboard() {
       const targetDate = document.getElementById('monitoring-date-filter').value || new Date().toISOString().split('T')[0];
       const selectedClass = document.getElementById('monitoring-class-filter').value;
