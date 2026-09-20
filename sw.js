@@ -1,5 +1,5 @@
-const CACHE_NAME = 'absensi-app-cache-v2.5';
-const ASSETS_TO_CACHE = [
+const CACHE_NAME = 'absensi-app-cache-v2.6';
+const STATIC_ASSETS = [
   './',
   './index.html',
   'https://cdn.tailwindcss.com',
@@ -11,7 +11,7 @@ const ASSETS_TO_CACHE = [
 self.addEventListener('install', (e) => {
   e.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
+      return cache.addAll(STATIC_ASSETS);
     }).then(() => self.skipWaiting())
   );
 });
@@ -31,6 +31,10 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
+  if (e.request.url.includes('script.google.com')) {
+    return; // Request GAS selalu diloloskan langsung
+  }
+
   e.respondWith(
     caches.match(e.request).then((cachedResponse) => {
       if (cachedResponse) {
@@ -49,4 +53,4 @@ self.addEventListener('fetch', (e) => {
       });
     })
   );
-});
+});s
