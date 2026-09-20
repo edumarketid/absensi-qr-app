@@ -1,4 +1,4 @@
-const CACHE_NAME = 'absensi-app-cache-v2.7';
+const CACHE_NAME = 'absensi-app-cache-v2.9';
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -32,20 +32,13 @@ self.addEventListener('activate', (e) => {
 
 self.addEventListener('fetch', (e) => {
   if (e.request.url.includes('script.google.com')) {
-    return;
+    return; // Request API Google Apps Script dikelola langsung oleh fungsi async js
   }
 
   e.respondWith(
     caches.match(e.request).then((cachedResponse) => {
       if (cachedResponse) {
-        // Stale-While-Revalidate untuk aset statis saat online
-        if (navigator.onLine) {
-          fetch(e.request).then((networkResponse) => {
-            if (e.request.method === 'GET' && networkResponse.status === 200) {
-              caches.open(CACHE_NAME).then((cache) => cache.put(e.request, networkResponse));
-            }
-          }).catch(() => {});
-        }
+        // Ambil dari Cache Lokal Terlebih Dahulu (Cache-First Strategy)
         return cachedResponse;
       }
       return fetch(e.request).then((networkResponse) => {
