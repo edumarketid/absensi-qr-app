@@ -146,9 +146,16 @@
     <!-- VIEW 1: CAMERA SCANNER -->
     <main id="view-scanner" class="flex-1 flex flex-col justify-between relative bg-gray-900 overflow-hidden">
       <div class="flex-1 relative flex flex-col items-center justify-center p-4 bg-black">
-        <div id="reader" class="w-full h-full max-h-[420px] overflow-hidden rounded-2xl relative"></div>
+        
+        <!-- TAMPILAN KAMERA ATAU PLACEHOLDER SAAT KAMERA MATI -->
+        <div id="reader" class="w-full h-full max-h-[420px] overflow-hidden rounded-2xl relative flex items-center justify-center bg-gray-800 border border-gray-700">
+          <div id="camera-off-placeholder" class="text-center p-6 space-y-3">
+            <i class="fa-solid fa-camera text-gray-500 text-4xl"></i>
+            <p class="text-xs text-gray-400 font-semibold">Kamera non-aktif.<br>Klik tombol di bawah untuk menyalakan.</p>
+          </div>
+        </div>
 
-        <div class="absolute w-64 h-64 pointer-events-none flex items-center justify-center z-10">
+        <div id="scan-frame-box" class="absolute w-64 h-64 pointer-events-none flex items-center justify-center z-10 hidden">
           <div class="absolute -top-1 -left-1 w-8 h-8 border-t-4 border-l-4 border-green-400 rounded-tl-xl"></div>
           <div class="absolute -top-1 -right-1 w-8 h-8 border-t-4 border-r-4 border-green-400 rounded-tr-xl"></div>
           <div class="absolute -bottom-1 -left-1 w-8 h-8 border-b-4 border-l-4 border-green-400 rounded-bl-xl"></div>
@@ -167,12 +174,13 @@
           
           <button id="btn-toggle-camera" onclick="toggleCameraState()" class="bg-blue-600 hover:bg-blue-700 text-white flex-[2] py-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 shadow-lg">
             <i class="fa-solid fa-video"></i>
-            <span id="btn-camera-text">Matikan Kamera</span>
+            <span id="btn-camera-text">Nyalakan Kamera</span>
           </button>
 
-          <button onclick="promptManualInput()" class="bg-black/60 hover:bg-black/80 text-white flex-1 py-2.5 rounded-xl text-xs font-medium flex flex-col items-center justify-center gap-1 backdrop-blur-md border border-white/10">
-            <i class="fa-solid fa-keyboard text-sm"></i>
-            <span>Input Manual</span>
+          <!-- TOMBOL ATUR TANGGAL & JAM SCAN MANUAL -->
+          <button onclick="promptCustomScanTime()" class="bg-black/60 hover:bg-black/80 text-white flex-1 py-2.5 rounded-xl text-xs font-medium flex flex-col items-center justify-center gap-1 backdrop-blur-md border border-white/10">
+            <i class="fa-solid fa-clock text-amber-400 text-sm"></i>
+            <span>Atur Tgl Scan</span>
           </button>
         </div>
       </div>
@@ -937,6 +945,10 @@
     let logoRightSrc = localStorage.getItem("LOGO_RIGHT") || "";
     let kopSuratSrc = localStorage.getItem("KOP_SURAT") || "";
     let currentReportType = "HARIAN";
+
+    // VARIABEL ATUR TANGGAL & JAM SCAN MANUAL (DEFAULT NULL = PAKAI WAKTU SEKARANG)
+    let customScanDateOverride = null;
+    let customScanTimeOverride = null;
 
     const DAYS_LIST = [
       { key: "sun", label: "Minggu (Ekstrakurikuler)" },
@@ -1824,10 +1836,13 @@
       }
     }
 
-    // 9. SCANNER CONTROLLER
+    // 9. SCANNER CONTROLLER (TIDAK OTOMATIS AKTIF KECUALI DIKLIK)
     function initScanner() {
       if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
       const config = { fps: 15, qrbox: { width: 250, height: 250 } };
+
+      document.getElementById('camera-off-placeholder').classList.add('hidden');
+      document.getElementById('scan-frame-box').classList.remove('hidden');
 
       html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess)
         .then(() => {
@@ -1835,28 +1850,59 @@
           document.getElementById('btn-camera-text').innerText = "Matikan Kamera";
         })
         .catch(() => {
+          stopCameraIfActive();
           document.getElementById('btn-camera-text').innerText = "Nyalakan Kamera";
-          isCameraActive = false;
         });
     }
 
     function toggleCameraState() {
       if (isCameraActive) {
-        html5QrCode.stop().then(() => {
-          isCameraActive = false;
-          document.getElementById('btn-camera-text').innerText = "Nyalakan Kamera";
-        });
+        stopCameraIfActive();
       } else {
         initScanner();
       }
     }
 
-    // 10. PROCESS SCAN & STATUS
-    async function onScanSuccess(decodedText) {
-      if (isCameraActive) {
-        await html5QrCode.stop();
-        isCameraActive = false;
+    function stopCameraIfActive() {
+      if (isCameraActive && html5QrCode) {
+        html5QrCode.stop().then(() => {
+          isCameraActive = false;
+          document.getElementById('btn-camera-text').innerText = "Nyalakan Kamera";
+          document.getElementById('camera-off-placeholder').classList.remove('hidden');
+          document.getElementById('scan-frame-box').classList.add('hidden');
+        }).catch(() => {
+          isCameraActive = false;
+          document.getElementById('btn-camera-text').innerText = "Nyalakan Kamera";
+          document.getElementById('camera-off-placeholder').classList.remove('hidden');
+          document.getElementById('scan-frame-box').classList.add('hidden');
+        });
+      } else {
+        document.getElementById('btn-camera-text').innerText = "Nyalakan Kamera";
+        document.getElementById('camera-off-placeholder').classList.remove('hidden');
+        document.getElementById('scan-frame-box').classList.add('hidden');
       }
+    }
+
+    // 10. ATUR TANGGAL & JAM SCAN MANUAL (RETROAKTIF)
+    function promptCustomScanTime() {
+      const defaultDate = customScanDateOverride || new Date().toISOString().split('T')[0];
+      const defaultTime = customScanTimeOverride || new Date().toTimeString().split(' ')[0].substring(0, 5);
+
+      const inputDate = prompt("Masukkan Tanggal Scan (Format: YYYY-MM-DD):", defaultDate);
+      if (!inputDate) return;
+
+      const inputTime = prompt("Masukkan Jam Scan (Format: HH:MM):", defaultTime);
+      if (!inputTime) return;
+
+      customScanDateOverride = inputDate.trim();
+      customScanTimeOverride = inputTime.trim();
+
+      alert(`Mode Tanggal/Jam Manual Aktif!\nSemua scan berikutnya akan dicatat pada:\nTanggal: ${customScanDateOverride}\nJam: ${customScanTimeOverride}`);
+    }
+
+    // 11. PROCESS SCAN & STATUS
+    async function onScanSuccess(decodedText) {
+      stopCameraIfActive();
       if (navigator.vibrate) navigator.vibrate(200);
       processStudentAttendance(decodedText.trim());
     }
@@ -1864,8 +1910,9 @@
     async function processStudentAttendance(qrCodeKey, manualStatus = "HADIR", customDate = null) {
       const student = await getStudentFromDB(qrCodeKey);
       const now = new Date();
-      const dateStr = customDate || now.toISOString().split('T')[0];
-      const timeStr = now.toTimeString().split(' ')[0].substring(0, 5);
+      
+      const dateStr = customDate || customScanDateOverride || now.toISOString().split('T')[0];
+      const timeStr = customScanTimeOverride || now.toTimeString().split(' ')[0].substring(0, 5);
       const sesi = currentScanSession;
 
       if (student) {
@@ -1881,10 +1928,8 @@
           timestamp: Date.now()
         };
 
-        // Simpan langsung ke memori lokal & queue
         await saveToAttendanceQueue(attendanceRecord);
 
-        // Update memori lokal aplikasi secara langsung tanpa butuh refresh
         const existingIdx = fetchedAttendanceHistory.findIndex(r => r.tanggal === dateStr && r.id_siswa === student.id_siswa);
         if (existingIdx !== -1) {
           fetchedAttendanceHistory[existingIdx].status_presensi = manualStatus;
@@ -1920,7 +1965,7 @@
       }
     }
 
-    // 11. POPULATE CLASS DROPDOWNS
+    // 12. POPULATE CLASS DROPDOWNS
     function populateClassDropdowns() {
       const classes = [...new Set(cachedStudents.map(s => s.kelas))].filter(Boolean).sort();
       const filterSelect = document.getElementById('filter-class-select');
@@ -1936,7 +1981,7 @@
       if (repClassSelect) repClassSelect.innerHTML = classOptions;
     }
 
-    // 12. DATA SISWA & FILTER KELAS
+    // 13. DATA SISWA & FILTER KELAS
     function getAllStudentsFromDB() {
       return new Promise((resolve) => {
         const tx = db.transaction("students", "readonly");
@@ -2000,7 +2045,7 @@
       `).join('');
     }
 
-    // 13. DASHBOARD MONITORING DENGAN FILTER TANGGAL & DUAL FILTER
+    // 14. DASHBOARD MONITORING DENGAN FILTER TANGGAL & DUAL FILTER
     async function updateMonitoringDashboard() {
       const targetDateStr = document.getElementById('monitoring-date-filter').value || new Date().toISOString().split('T')[0];
       const selectedClass = document.getElementById('monitoring-class-filter').value;
@@ -2145,7 +2190,7 @@
       });
     }
 
-    // LIST SISWA DI MONITORING TANPA TOMBOL "BOLOS" MANUAL
+    // LIST SISWA DI MONITORING DENGAN TOMBOL HADIR MANUAL (SOLUSI BARCODE RUSAK)
     function renderUnscannedStudentsList(unresolved, targetDateStr) {
       const container = document.getElementById('unscanned-students-container');
 
@@ -2166,9 +2211,10 @@
             <p class="text-[10px] text-amber-600 font-semibold truncate">${std.reason}</p>
           </div>
           <div class="flex items-center space-x-1 flex-shrink-0">
-            <button onclick="setManualStudentStatus('${std.id_siswa}', 'SAKIT', '${targetDateStr}')" class="px-2.5 py-1 bg-blue-50 text-blue-600 font-bold text-[10px] rounded-lg border border-blue-200 hover:bg-blue-100">Sakit</button>
-            <button onclick="setManualStudentStatus('${std.id_siswa}', 'IZIN', '${targetDateStr}')" class="px-2.5 py-1 bg-indigo-50 text-indigo-600 font-bold text-[10px] rounded-lg border border-indigo-200 hover:bg-indigo-100">Izin</button>
-            <button onclick="setManualStudentStatus('${std.id_siswa}', 'KEGIATAN', '${targetDateStr}')" class="px-2.5 py-1 bg-purple-50 text-purple-600 font-bold text-[10px] rounded-lg border border-purple-200 hover:bg-purple-100">Keg.</button>
+            <button onclick="setManualStudentStatus('${std.id_siswa}', 'HADIR', '${targetDateStr}')" class="px-2 py-1 bg-emerald-50 text-emerald-700 font-bold text-[10px] rounded-lg border border-emerald-200 hover:bg-emerald-100">Hadir</button>
+            <button onclick="setManualStudentStatus('${std.id_siswa}', 'SAKIT', '${targetDateStr}')" class="px-2 py-1 bg-blue-50 text-blue-600 font-bold text-[10px] rounded-lg border border-blue-200 hover:bg-blue-100">Sakit</button>
+            <button onclick="setManualStudentStatus('${std.id_siswa}', 'IZIN', '${targetDateStr}')" class="px-2 py-1 bg-indigo-50 text-indigo-600 font-bold text-[10px] rounded-lg border border-indigo-200 hover:bg-indigo-100">Izin</button>
+            <button onclick="setManualStudentStatus('${std.id_siswa}', 'KEGIATAN', '${targetDateStr}')" class="px-2 py-1 bg-purple-50 text-purple-600 font-bold text-[10px] rounded-lg border border-purple-200 hover:bg-purple-100">Keg.</button>
           </div>
         </div>
       `).join('');
@@ -2179,7 +2225,7 @@
       updateMonitoringDashboard();
     }
 
-    // 14. HELPER DATABASE & QUEUE
+    // 15. HELPER DATABASE & QUEUE
     function getStudentFromDB(qrKey) {
       return new Promise((resolve) => {
         const tx = db.transaction("students", "readonly");
@@ -2241,7 +2287,7 @@
       });
     }
 
-    // 15. AUTO SYNC ANTREAN KE GOOGLE SHEETS
+    // 16. AUTO SYNC ANTREAN KE GOOGLE SHEETS
     async function syncQueueToGAS() {
       const queueData = await getAllQueueFromDB();
       if (queueData.length === 0) return;
@@ -2267,7 +2313,7 @@
       }
     }
 
-    // 16. NAVIGATION TOGGLE
+    // 17. NAVIGATION TOGGLE
     function toggleView(viewName) {
       const views = ['view-scanner', 'view-success', 'view-students', 'view-monitoring', 'view-donation', 'view-print-qr', 'view-report', 'view-tindak-lanjut', 'view-hari-libur', 'view-settings'];
       views.forEach(v => {
@@ -2336,18 +2382,14 @@
         document.getElementById('view-scanner').classList.add('flex');
         navScanner.className = "flex-1 text-blue-600 flex flex-col items-center -mt-4";
         navScanner.children[0].className = "w-12 h-12 rounded-full bg-blue-600 text-white shadow-lg flex items-center justify-center border-4 border-white";
-        initScanner();
+        
+        // Kamera dibuat MATI secara default saat membuka tab Scanner
+        stopCameraIfActive();
       }
     }
 
     function toggleMenuModal() {
       document.getElementById('menu-modal').classList.toggle('hidden');
-    }
-
-    function stopCameraIfActive() {
-      if (isCameraActive && html5QrCode) {
-        html5QrCode.stop().then(() => isCameraActive = false);
-      }
     }
 
     function showScanResultUI(student, timeStr, sesi, isSuccess, manualStatus = "HADIR") {
@@ -2396,12 +2438,12 @@
       syncQueueToGAS();
     });
 
-    // RUN INITIAL LOAD
+    // RUN INITIAL LOAD (KAMERA TIDAK OTOMATIS TERBUKA)
     window.onload = async () => {
       loadAppConfigs();
       await initDatabase();
       await autoDownloadMasterStudents();
-      initScanner();
+      stopCameraIfActive();
     };
   </script>
 
