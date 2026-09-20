@@ -1,4 +1,4 @@
-const CACHE_NAME = 'absensi-app-cache-v2.6';
+const CACHE_NAME = 'absensi-app-cache-v2.7';
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -32,12 +32,20 @@ self.addEventListener('activate', (e) => {
 
 self.addEventListener('fetch', (e) => {
   if (e.request.url.includes('script.google.com')) {
-    return; // Request GAS selalu diloloskan langsung
+    return;
   }
 
   e.respondWith(
     caches.match(e.request).then((cachedResponse) => {
       if (cachedResponse) {
+        // Stale-While-Revalidate untuk aset statis saat online
+        if (navigator.onLine) {
+          fetch(e.request).then((networkResponse) => {
+            if (e.request.method === 'GET' && networkResponse.status === 200) {
+              caches.open(CACHE_NAME).then((cache) => cache.put(e.request, networkResponse));
+            }
+          }).catch(() => {});
+        }
         return cachedResponse;
       }
       return fetch(e.request).then((networkResponse) => {
@@ -53,4 +61,4 @@ self.addEventListener('fetch', (e) => {
       });
     })
   );
-});s
+});
