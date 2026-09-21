@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0b3c5d">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Sistem Absensi Murid - v2.16</title>
+  <title>Sistem Absensi Murid - v2.17</title>
   <!-- MANIFEST INLINE UNTUK DUKUNGAN PWA OFFLINE MANDIRI -->
   <link rel="manifest" href='data:application/manifest+json,{"name":"Sistem Absensi Murid","short_name":"AbsensiQR","start_url":"./index.html","display":"standalone","background_color":"#0b3c5d","theme_color":"#0b3c5d","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/3135/3135715.png","sizes":"512x512","type":"image/png"}]}'>
   <script src="https://cdn.tailwindcss.com"></script>
@@ -37,7 +37,7 @@
             <span id="status-dot" class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span>
             <span id="status-text" class="text-xs font-semibold">Memeriksa...</span>
           </div>
-          <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30 block mt-0.5">v2.16</span>
+          <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30 block mt-0.5">v2.17</span>
         </div>
       </div>
     </header>
@@ -424,7 +424,6 @@
     ];
     const DEFAULT_TIME_SETTINGS = { pagiStart: "06:00", pagiLimit: "07:15", siangStart: "12:00", siangLimit: "16:00" };
 
-    // HELPER UNTUK MEMASTIKAN FORMAT HH:mm SELALU 5 KARAKTER (Contoh: "6:17" -> "06:17")
     function padZeroTime(timeStr) {
       if (!timeStr) return "00:00";
       const parts = String(timeStr).trim().split(":");
@@ -470,8 +469,9 @@
       return { dayKey, active, pStart, pLimit, sStart, sLimit };
     }
 
-    // KOREKSI UTAMA UNTUK KOMPARASI WAKTU AKURAT
-    function autoDetectOrSyncSessionMode(timeStr, targetDateObj = new Date()) {
+    // INTERAKSI PRESISI DENGAN PENGATURAN WAKTU MANDIRI & SWEEP
+    function autoDetectOrSyncSessionMode(timeStr, targetDateObj) {
+      if (!targetDateObj) targetDateObj = new Date();
       const timeClean = padZeroTime(timeStr);
       const config = getTodayTimeConfig(targetDateObj);
       const textEl = document.getElementById("session-mode-text");
@@ -507,26 +507,27 @@
       }
     }
 
+    // SINKRONISASI MUTLAK DENGAN TOMBOL MODE WAKTU MANUAL / AUTO
     function toggleTimeModeSetting() {
       if (!isManualTimeMode) {
         const todayStr = new Date().toISOString().split('T')[0];
         const nowTimeStr = padZeroTime(new Date().toTimeString().split(' ')[0].substring(0, 5));
         const inputDate = prompt("Mode Manual: Tanggal Scan (YYYY-MM-DD):", todayStr);
-        if (!inputDate) return;
+        if (!inputDate || !inputDate.trim()) return;
         const inputTime = prompt("Mode Manual: Jam Scan (HH:MM):", nowTimeStr);
-        if (!inputTime) return;
+        if (!inputTime || !inputTime.trim()) return;
+
         isManualTimeMode = true;
         customScanDateOverride = inputDate.trim();
         customScanTimeOverride = padZeroTime(inputTime.trim());
-        autoDetectOrSyncSessionMode(customScanTimeOverride, new Date(customScanDateOverride));
       } else {
         isManualTimeMode = false;
         customScanDateOverride = null;
         customScanTimeOverride = null;
-        const nowTimeStr = padZeroTime(new Date().toTimeString().split(' ')[0].substring(0, 5));
-        autoDetectOrSyncSessionMode(nowTimeStr, new Date());
       }
+      
       updateTimeModeIndicator();
+      refreshRealtimeSessionUI();
     }
 
     function updateTimeModeIndicator() {
@@ -538,6 +539,18 @@
         indicator.innerText = "Mode Waktu: AUTO (Realtime Perangkat)";
         indicator.className = "absolute top-4 left-4 right-4 bg-blue-900/80 text-blue-100 text-[10px] font-bold py-1 px-3 rounded-full text-center border border-blue-400/30 backdrop-blur-sm z-20 shadow";
       }
+    }
+
+    function refreshRealtimeSessionUI() {
+      let activeDateObj = new Date();
+      let activeTimeStr = padZeroTime(activeDateObj.toTimeString().split(' ')[0].substring(0, 5));
+
+      if (isManualTimeMode && customScanDateOverride && customScanTimeOverride) {
+        activeDateObj = new Date(customScanDateOverride + "T00:00:00");
+        activeTimeStr = customScanTimeOverride;
+      }
+
+      autoDetectOrSyncSessionMode(activeTimeStr, activeDateObj);
     }
 
     function renderTimeSettingsSummary() {
@@ -640,6 +653,7 @@
         timeSettingsToSave[`TIME_${day.key}_SIANG_LIMIT`] = sLimit;
       });
       renderTimeSettingsSummary();
+      refreshRealtimeSessionUI();
 
       if (navigator.onLine) {
         try {
@@ -671,9 +685,7 @@
         }
       }
       renderDaysConfigForm();
-      const nowTimeStr = padZeroTime((isManualTimeMode && customScanTimeOverride) ? customScanTimeOverride : new Date().toTimeString().split(' ')[0].substring(0, 5));
-      const targetDateObj = (isManualTimeMode && customScanDateOverride) ? new Date(customScanDateOverride) : new Date();
-      autoDetectOrSyncSessionMode(nowTimeStr, targetDateObj);
+      refreshRealtimeSessionUI();
     }
 
     async function autoDownloadMasterStudents() {
@@ -837,6 +849,7 @@
       if (viewName === 'tindak-lanjut') renderTindakLanjutView();
       if (viewName === 'hari-libur') renderHariLiburView();
       if (viewName === 'settings') renderDaysConfigForm();
+      if (viewName === 'scanner') refreshRealtimeSessionUI();
     }
 
     function toggleMenuModal() { document.getElementById('menu-modal').classList.toggle('hidden'); }
@@ -1155,9 +1168,7 @@
 
     function toggleScanSessionMode() {
       currentScanSession = currentScanSession === "PAGI" ? "SIANG" : "PAGI";
-      const nowTimeStr = padZeroTime((isManualTimeMode && customScanTimeOverride) ? customScanTimeOverride : new Date().toTimeString().split(' ')[0].substring(0, 5));
-      const targetDateObj = (isManualTimeMode && customScanDateOverride) ? new Date(customScanDateOverride) : new Date();
-      autoDetectOrSyncSessionMode(nowTimeStr, targetDateObj);
+      refreshRealtimeSessionUI();
     }
 
     async function initScanner() {
@@ -1189,18 +1200,24 @@
     async function onScanSuccess(text) {
       await stopCamera();
       
-      const now = new Date();
-      const dateStr = (isManualTimeMode && customScanDateOverride) ? customScanDateOverride : now.toISOString().split('T')[0];
-      const timeStr = padZeroTime((isManualTimeMode && customScanTimeOverride) ? customScanTimeOverride : now.toTimeString().split(' ')[0].substring(0, 5));
-      const scanDateObj = new Date(dateStr);
-      const timeConfig = getTodayTimeConfig(scanDateObj);
+      let nowDateObj = new Date();
+      let dateStr = nowDateObj.toISOString().split('T')[0];
+      let timeStr = padZeroTime(nowDateObj.toTimeString().split(' ')[0].substring(0, 5));
+
+      if (isManualTimeMode && customScanDateOverride && customScanTimeOverride) {
+        dateStr = customScanDateOverride;
+        timeStr = customScanTimeOverride;
+        nowDateObj = new Date(dateStr + "T00:00:00");
+      }
+
+      const timeConfig = getTodayTimeConfig(nowDateObj);
 
       if (!timeConfig.active) {
         alert(`Presensi Ditolak! Hari ${timeConfig.dayKey.toUpperCase()} diatur sebagai Hari Libur / Non-Aktif.`);
         return initScanner();
       }
 
-      autoDetectOrSyncSessionMode(timeStr, scanDateObj);
+      autoDetectOrSyncSessionMode(timeStr, nowDateObj);
 
       let computedStatus = "HADIR";
       if (currentScanSession === "PAGI") {
@@ -1321,14 +1338,13 @@
 
     function triggerManualSync() { if (navigator.onLine) syncQueueToGAS(); }
 
+    // REALTIME TICKER
     setInterval(() => {
       const isOnline = navigator.onLine;
       document.getElementById('status-dot').className = `w-2.5 h-2.5 rounded-full ${isOnline ? 'bg-green-400' : 'bg-amber-400'} inline-block`;
       document.getElementById('status-text').innerText = isOnline ? 'Online' : 'Offline';
 
-      const nowTimeStr = padZeroTime((isManualTimeMode && customScanTimeOverride) ? customScanTimeOverride : new Date().toTimeString().split(' ')[0].substring(0, 5));
-      const targetDateObj = (isManualTimeMode && customScanDateOverride) ? new Date(customScanDateOverride) : new Date();
-      autoDetectOrSyncSessionMode(nowTimeStr, targetDateObj);
+      refreshRealtimeSessionUI();
     }, 1000);
 
     window.addEventListener('online', () => {
@@ -1352,8 +1368,8 @@
       } else {
         loadLocalHistoryToMemory();
       }
-      const nowTimeStr = padZeroTime(new Date().toTimeString().split(' ')[0].substring(0, 5));
-      autoDetectOrSyncSessionMode(nowTimeStr, new Date());
+      
+      refreshRealtimeSessionUI();
     };
   </script>
 </body>
