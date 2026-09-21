@@ -514,7 +514,7 @@
             <div>
               <span class="font-bold text-gray-900">${day.label}</span>
               ${active ? 
-                `<p class="text-gray-500">Pagi: <b class="text-emerald-700">${pStart} -${pLimit}</b> | Siang: <b class="text-blue-700">${sStart} -${sLimit}</b></p>` : 
+                `<p class="text-gray-500">Pagi: <b class="text-emerald-700">${pStart} - ${pLimit}</b> | Siang: <b class="text-blue-700">${sStart} - ${sLimit}</b></p>` : 
                 `<p class="text-rose-500 font-semibold">Status: Libur / Non-Aktif</p>`
               }
             </div>
@@ -674,9 +674,11 @@
                 storeHist.put({
                   queue_id: `${rec.tanggal}_${rec.id_siswa}_${rec.sesi || 'PAGI'}`,
                   tanggal: rec.tanggal, jam: rec.jam || rec.jam_pagi || rec.jam_siang || "",
-                  jam_pagi: rec.jam_pagi || "", jam_siang: rec.jam_siang || "",
+                  jam_pagi: rec.jam_pagi || "", status_pagi: rec.status_pagi || "",
+                  jam_siang: rec.jam_siang || "", status_siang: rec.status_siang || "",
                   id_siswa: rec.id_siswa, nama: rec.nama, kelas: rec.kelas,
-                  sesi: rec.sesi || "PAGI", status_presensi: rec.status_presensi || "HADIR"
+                  sesi: rec.sesi || "PAGI", status_presensi: rec.status_akhir || rec.status_presensi || "HADIR",
+                  status_akhir: rec.status_akhir || rec.status_presensi || "HADIR"
                 });
               }
             });
@@ -800,6 +802,7 @@
       const localHist = await getAllLocalHistoryFromDB();
       
       let rawRecords = [...localHist, ...fetchedTodayAttendance, ...fetchedAttendanceHistory, ...queueRecords].filter(r => r.tanggal === targetDate);
+      
       if (selectedSessionFilter !== "ALL") {
         rawRecords = rawRecords.filter(r => String(r.sesi || "PAGI").toUpperCase() === selectedSessionFilter);
       }
@@ -808,33 +811,43 @@
       let hadir = 0, terlambat = 0, alpa = 0, bolos = 0, sakit = 0, izin = 0, kegiatan = 0;
       const unabsentedStudents = [];
 
+      const dateObj = new Date(targetDate);
+      const timeConfig = getTodayTimeConfig(dateObj);
+      const now = new Date();
+      const nowStr = now.toTimeString().split(' ')[0];
+      const siangLimitWithSec = timeConfig.sLimit + ":01";
+      
+      const isPastSiangLimit = (targetDate < now.toISOString().split('T')[0]) || 
+                               (targetDate === now.toISOString().split('T')[0] && nowStr >= siangLimitWithSec);
+
       classStudents.forEach(std => {
         const stdRec = rawRecords.find(r => r.id_siswa === std.id_siswa);
+        
         if (!stdRec) {
-          alpa++;
+          if (isPastSiangLimit) {
+            alpa++;
+          }
           unabsentedStudents.push(std);
         } else {
-          const st = String(stdRec.status_presensi || "HADIR").toUpperCase();
-          const jamPagi = stdRec.jam_pagi || stdRec.jam || "";
-          const jamSiang = stdRec.jam_siang || "";
+          const jamPagi = stdRec.jam_pagi || (stdRec.sesi === "PAGI" ? stdRec.jam : "");
+          const jamSiang = stdRec.jam_siang || (stdRec.sesi === "SIANG" ? stdRec.jam : "");
+          const stAkhir = String(stdRec.status_akhir || stdRec.status_presensi || "HADIR").toUpperCase();
 
-          if (jamPagi && !jamSiang && st === "HADIR" && currentScanSession === "SIANG") {
+          if (["IZIN", "SAKIT", "KEGIATAN"].includes(stAkhir)) {
+            if (stAkhir === "IZIN") izin++;
+            else if (stAkhir === "SAKIT") sakit++;
+            else if (stAkhir === "KEGIATAN") kegiatan++;
+          } else if (jamPagi && !jamSiang && isPastSiangLimit) {
             bolos++;
-          } else if (st === "HADIR") {
-            hadir++;
-          } else if (st === "TERLAMBAT") {
+          } else if (stAkhir === "TERLAMBAT" || stdRec.status_pagi === "TERLAMBAT" || stdRec.status_siang === "TERLAMBAT") {
             terlambat++;
-          } else if (st === "ALPA") {
+          } else if (stAkhir === "HADIR") {
+            hadir++;
+          } else if (stAkhir === "BOLOS") {
+            bolos++;
+          } else if (stAkhir === "ALPA") {
             alpa++;
             unabsentedStudents.push(std);
-          } else if (st === "BOLOS") {
-            bolos++;
-          } else if (st === "SAKIT") {
-            sakit++;
-          } else if (st === "IZIN") {
-            izin++;
-          } else if (st === "KEGIATAN") {
-            kegiatan++;
           }
         }
       });
@@ -867,7 +880,7 @@
         studentsInCls.forEach(std => {
           const stdRec = attendanceRecords.find(r => r.id_siswa === std.id_siswa);
           if (stdRec) {
-            const st = String(stdRec.status_presensi || "HADIR").toUpperCase();
+            const st = String(stdRec.status_akhir || stdRec.status_presensi || "HADIR").toUpperCase();
             if (st === "HADIR" || st === "TERLAMBAT") countHadirVal++;
           }
         });
@@ -950,7 +963,7 @@
         queue_id: `${targetDate}_${idSiswa}_${currentScanSession}`,
         tanggal: targetDate, jam: timeStr, id_siswa: idSiswa,
         nama: student.nama, kelas: student.kelas, sesi: currentScanSession,
-        status_presensi: status, timestamp: Date.now()
+        status_presensi: status, status_manual: status, timestamp: Date.now()
       };
       await saveToAttendanceQueue(record);
       await saveToLocalHistoryDB(record);
