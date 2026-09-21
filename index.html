@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0b3c5d">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Sistem Absensi Murid - v2.13</title>
+  <title>Sistem Absensi Murid - v2.14</title>
   <!-- MANIFEST INLINE UNTUK DUKUNGAN PWA OFFLINE MANDIRI -->
   <link rel="manifest" href='data:application/manifest+json,{"name":"Sistem Absensi Murid","short_name":"AbsensiQR","start_url":"./index.html","display":"standalone","background_color":"#0b3c5d","theme_color":"#0b3c5d","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/3135/3135715.png","sizes":"512x512","type":"image/png"}]}'>
   <script src="https://cdn.tailwindcss.com"></script>
@@ -37,7 +37,7 @@
             <span id="status-dot" class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span>
             <span id="status-text" class="text-xs font-semibold">Memeriksa...</span>
           </div>
-          <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30 block mt-0.5">v2.13</span>
+          <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30 block mt-0.5">v2.14</span>
         </div>
       </div>
     </header>
@@ -193,7 +193,7 @@
         </div>
         <div class="bg-white p-3 rounded-2xl border border-gray-200 shadow-sm mb-4">
           <h3 class="font-bold text-xs text-gray-800 mb-2 border-b border-gray-100 pb-1.5 flex items-center justify-between">
-            <span>Siswa Belum Absen & Aksi Presensi</span>
+            <span id="monitoring-action-header-title">Siswa Belum Absen & Aksi Presensi</span>
             <span id="monitoring-count-badge" class="text-[10px] text-rose-600 font-bold bg-rose-50 px-2 py-0.5 rounded-md">0 Siswa Belum</span>
           </h3>
           <div id="monitoring-student-action-list" class="space-y-2.5 max-h-[380px] overflow-y-auto no-scrollbar pr-1"></div>
@@ -514,7 +514,7 @@
             <div>
               <span class="font-bold text-gray-900">${day.label}</span>
               ${active ? 
-                `<p class="text-gray-500">Pagi: <b class="text-emerald-700">${pStart} -${pLimit}</b> | Siang: <b class="text-blue-700">${sStart} -${sLimit}</b></p>` : 
+                `<p class="text-gray-500">Pagi: <b class="text-emerald-700">${pStart} - ${pLimit}</b> | Siang: <b class="text-blue-700">${sStart} - ${sLimit}</b></p>` : 
                 `<p class="text-rose-500 font-semibold">Status: Libur / Non-Aktif</p>`
               }
             </div>
@@ -874,9 +874,10 @@
       document.getElementById('stat-izin').innerText = izin;
       document.getElementById('stat-kegiatan').innerText = kegiatan;
 
-      renderPieChart(hadir, terlambat, alpa, bolos, sakit, izin, kegiatan);
+      // KOREKSI PRESENSI: Gunakan total seluruh siswa kelas yang difilter sebagai pembagi resmi
+      renderPieChart(hadir, terlambat, alpa, bolos, sakit, izin, kegiatan, classStudents.length);
       renderClassBarChartHorizontal(rawRecords);
-      renderMonitoringActionListOnlyUnabsented(targetDate, unabsentedStudents);
+      renderMonitoringActionListOnlyUnabsented(targetDate, unabsentedStudents, isPastSiangLimit);
     }
 
     function renderClassBarChartHorizontal(attendanceRecords) {
@@ -939,9 +940,21 @@
       });
     }
 
-    function renderMonitoringActionListOnlyUnabsented(targetDate, unabsentedStudents) {
+    function renderMonitoringActionListOnlyUnabsented(targetDate, unabsentedStudents, isPastSiangLimit) {
       const container = document.getElementById('monitoring-student-action-list');
-      document.getElementById('monitoring-count-badge').innerText = `${unabsentedStudents.length} Siswa Belum Absen`;
+      const badgeEl = document.getElementById('monitoring-count-badge');
+      const headerTitleEl = document.getElementById('monitoring-action-header-title');
+
+      if (!isPastSiangLimit) {
+        headerTitleEl.innerText = "Siswa Belum Melakukan Absen Pagi";
+        badgeEl.innerText = `${unabsentedStudents.length} Belum Absen Pagi`;
+        badgeEl.className = "text-[10px] text-amber-700 font-bold bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200";
+      } else {
+        headerTitleEl.innerText = "Siswa Belum Absen & Aksi Presensi";
+        badgeEl.innerText = `${unabsentedStudents.length} Siswa Belum Absen`;
+        badgeEl.className = "text-[10px] text-rose-600 font-bold bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200";
+      }
+
       if (unabsentedStudents.length === 0) {
         container.innerHTML = `<div class="bg-emerald-50 border border-emerald-200 p-4 rounded-xl text-center text-xs text-emerald-800 font-bold"><i class="fa-solid fa-circle-check"></i> Semua siswa pada kelas ini sudah melakukan presensi!</div>`;
         return;
@@ -955,7 +968,9 @@
                 <h5 class="font-bold text-xs text-gray-900 truncate">${std.nama}</h5>
                 <p class="text-[10px] text-gray-500">${std.kelas} | ID: ${std.id_siswa}</p>
               </div>
-              <span class="text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-red-100 text-red-800">BELUM SCAN</span>
+              <span class="text-[9px] font-extrabold px-2 py-0.5 rounded-full ${!isPastSiangLimit ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800'}">
+                ${!isPastSiangLimit ? 'BELUM ABSEN PAGI' : 'BELUM SCAN'}
+              </span>
             </div>
             <div class="grid grid-cols-4 gap-1.5 pt-1">
               <button onclick="setManualPresensiAction('${std.id_siswa}', 'HADIR', '${targetDate}')" class="py-1 bg-emerald-600 text-white font-bold text-[9px] rounded-lg shadow-sm">Hadir</button>
@@ -998,13 +1013,15 @@
       if (navigator.onLine) syncQueueToGAS();
     }
 
-    function renderPieChart(hadir, terlambat, alpa, bolos, sakit, izin, kegiatan) {
+    function renderPieChart(hadir, terlambat, alpa, bolos, sakit, izin, kegiatan, totalStudentsCount) {
       const ctx = document.getElementById('attendancePieChart').getContext('2d');
       if (myPieChart) myPieChart.destroy();
 
-      const total = hadir + terlambat + alpa + bolos + sakit + izin + kegiatan;
       const totalHadirVal = hadir + terlambat;
-      document.getElementById('chart-center-percent').innerText = `${total > 0 ? Math.round((totalHadirVal / total) * 100) : 0}%`;
+      const effectiveTotal = totalStudentsCount || (hadir + terlambat + alpa + bolos + sakit + izin + kegiatan);
+      const percentVal = effectiveTotal > 0 ? Math.round((totalHadirVal / effectiveTotal) * 100) : 0;
+      
+      document.getElementById('chart-center-percent').innerText = `${percentVal}%`;
 
       myPieChart = new Chart(ctx, {
         type: 'doughnut',
