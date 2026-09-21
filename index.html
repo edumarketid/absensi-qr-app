@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0b3c5d">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Sistem Absensi Murid - v2.17</title>
+  <title>Sistem Absensi Murid - v2.18</title>
   <!-- MANIFEST INLINE UNTUK DUKUNGAN PWA OFFLINE MANDIRI -->
   <link rel="manifest" href='data:application/manifest+json,{"name":"Sistem Absensi Murid","short_name":"AbsensiQR","start_url":"./index.html","display":"standalone","background_color":"#0b3c5d","theme_color":"#0b3c5d","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/3135/3135715.png","sizes":"512x512","type":"image/png"}]}'>
   <script src="https://cdn.tailwindcss.com"></script>
@@ -37,7 +37,7 @@
             <span id="status-dot" class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span>
             <span id="status-text" class="text-xs font-semibold">Memeriksa...</span>
           </div>
-          <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30 block mt-0.5">v2.17</span>
+          <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30 block mt-0.5">v2.18</span>
         </div>
       </div>
     </header>
@@ -424,17 +424,21 @@
     ];
     const DEFAULT_TIME_SETTINGS = { pagiStart: "06:00", pagiLimit: "07:15", siangStart: "12:00", siangLimit: "16:00" };
 
+    // HELPER PAD ZERO YANG LEBIH KETAT DAN AMAN DARI KARAKTER TULISAN/GARBAGE
     function padZeroTime(timeStr) {
-      if (!timeStr) return "00:00";
-      const parts = String(timeStr).trim().split(":");
+      if (!timeStr || typeof timeStr !== "string") return "00:00";
+      const clean = timeStr.trim();
+      const parts = clean.split(":");
       if (parts.length >= 2) {
-        let h = parts[0].trim();
-        let m = parts[1].trim();
+        let h = parts[0].replace(/\D/g, "").trim();
+        let m = parts[1].replace(/\D/g, "").trim();
+        if (h === "") h = "00";
+        if (m === "") m = "00";
         if (h.length === 1) h = "0" + h;
         if (m.length === 1) m = "0" + m;
         return h.substring(0, 2) + ":" + m.substring(0, 2);
       }
-      return timeStr;
+      return "00:00";
     }
 
     function bukaHalamanLaporan() { window.open(GAS_WEB_APP_URL + "?page=laporan", "_blank"); }
@@ -462,14 +466,20 @@
       const dayKeys = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
       const dayKey = dayKeys[dateObj.getDay()];
       const active = localStorage.getItem(`DAY_ACTIVE_${dayKey}`) !== null ? (localStorage.getItem(`DAY_ACTIVE_${dayKey}`) === "true") : (dayKey !== "sun");
-      const pStart = padZeroTime(localStorage.getItem(`TIME_${dayKey}_PAGI_START`) || DEFAULT_TIME_SETTINGS.pagiStart);
-      const pLimit = padZeroTime(localStorage.getItem(`TIME_${dayKey}_PAGI_LIMIT`) || DEFAULT_TIME_SETTINGS.pagiLimit);
-      const sStart = padZeroTime(localStorage.getItem(`TIME_${dayKey}_SIANG_START`) || DEFAULT_TIME_SETTINGS.siangStart);
-      const sLimit = padZeroTime(localStorage.getItem(`TIME_${dayKey}_SIANG_LIMIT`) || DEFAULT_TIME_SETTINGS.siangLimit);
+      
+      const rawPStart = localStorage.getItem(`TIME_${dayKey}_PAGI_START`);
+      const rawPLimit = localStorage.getItem(`TIME_${dayKey}_PAGI_LIMIT`);
+      const rawSStart = localStorage.getItem(`TIME_${dayKey}_SIANG_START`);
+      const rawSLimit = localStorage.getItem(`TIME_${dayKey}_SIANG_LIMIT`);
+
+      const pStart = padZeroTime(rawPStart && rawPStart.includes(":") ? rawPStart : DEFAULT_TIME_SETTINGS.pagiStart);
+      const pLimit = padZeroTime(rawPLimit && rawPLimit.includes(":") ? rawPLimit : DEFAULT_TIME_SETTINGS.pagiLimit);
+      const sStart = padZeroTime(rawSStart && rawSStart.includes(":") ? rawSStart : DEFAULT_TIME_SETTINGS.siangStart);
+      const sLimit = padZeroTime(rawSLimit && rawSLimit.includes(":") ? rawSLimit : DEFAULT_TIME_SETTINGS.siangLimit);
+
       return { dayKey, active, pStart, pLimit, sStart, sLimit };
     }
 
-    // INTERAKSI PRESISI DENGAN PENGATURAN WAKTU MANDIRI & SWEEP
     function autoDetectOrSyncSessionMode(timeStr, targetDateObj) {
       if (!targetDateObj) targetDateObj = new Date();
       const timeClean = padZeroTime(timeStr);
@@ -507,7 +517,6 @@
       }
     }
 
-    // SINKRONISASI MUTLAK DENGAN TOMBOL MODE WAKTU MANUAL / AUTO
     function toggleTimeModeSetting() {
       if (!isManualTimeMode) {
         const todayStr = new Date().toISOString().split('T')[0];
@@ -553,16 +562,25 @@
       autoDetectOrSyncSessionMode(activeTimeStr, activeDateObj);
     }
 
+    // PENYEMPURNAAN RENDER RINGKASAN WAKTU TERSIMPAN
     function renderTimeSettingsSummary() {
       const container = document.getElementById("saved-time-summary-box");
+      if (!container) return;
       let html = "";
       DAYS_LIST.forEach(day => {
         const defaultActive = day.key !== "sun";
         const active = localStorage.getItem(`DAY_ACTIVE_${day.key}`) !== null ? (localStorage.getItem(`DAY_ACTIVE_${day.key}`) === "true") : defaultActive;
-        const pStart = padZeroTime(localStorage.getItem(`TIME_${day.key}_PAGI_START`) || DEFAULT_TIME_SETTINGS.pagiStart);
-        const pLimit = padZeroTime(localStorage.getItem(`TIME_${day.key}_PAGI_LIMIT`) || DEFAULT_TIME_SETTINGS.pagiLimit);
-        const sStart = padZeroTime(localStorage.getItem(`TIME_${day.key}_SIANG_START`) || DEFAULT_TIME_SETTINGS.siangStart);
-        const sLimit = padZeroTime(localStorage.getItem(`TIME_${day.key}_SIANG_LIMIT`) || DEFAULT_TIME_SETTINGS.siangLimit);
+        
+        const rawPStart = localStorage.getItem(`TIME_${day.key}_PAGI_START`);
+        const rawPLimit = localStorage.getItem(`TIME_${day.key}_PAGI_LIMIT`);
+        const rawSStart = localStorage.getItem(`TIME_${day.key}_SIANG_START`);
+        const rawSLimit = localStorage.getItem(`TIME_${day.key}_SIANG_LIMIT`);
+
+        const pStart = padZeroTime(rawPStart && rawPStart.includes(":") ? rawPStart : DEFAULT_TIME_SETTINGS.pagiStart);
+        const pLimit = padZeroTime(rawPLimit && rawPLimit.includes(":") ? rawPLimit : DEFAULT_TIME_SETTINGS.pagiLimit);
+        const sStart = padZeroTime(rawSStart && rawSStart.includes(":") ? rawSStart : DEFAULT_TIME_SETTINGS.siangStart);
+        const sLimit = padZeroTime(rawSLimit && rawSLimit.includes(":") ? rawSLimit : DEFAULT_TIME_SETTINGS.siangLimit);
+
         html += `
           <div class="p-2 bg-slate-50 border border-gray-100 rounded-xl flex items-center justify-between text-[10px]">
             <div>
@@ -583,15 +601,21 @@
 
     function renderDaysConfigForm() {
       const container = document.getElementById("days-config-container");
+      if (!container) return;
       let html = "";
       DAYS_LIST.forEach(day => {
         const defaultActive = day.key !== "sun";
         const active = localStorage.getItem(`DAY_ACTIVE_${day.key}`) !== null ? (localStorage.getItem(`DAY_ACTIVE_${day.key}`) === "true") : defaultActive;
         
-        const pStart = padZeroTime(localStorage.getItem(`TIME_${day.key}_PAGI_START`) || DEFAULT_TIME_SETTINGS.pagiStart);
-        const pLimit = padZeroTime(localStorage.getItem(`TIME_${day.key}_PAGI_LIMIT`) || DEFAULT_TIME_SETTINGS.pagiLimit);
-        const sStart = padZeroTime(localStorage.getItem(`TIME_${day.key}_SIANG_START`) || DEFAULT_TIME_SETTINGS.siangStart);
-        const sLimit = padZeroTime(localStorage.getItem(`TIME_${day.key}_SIANG_LIMIT`) || DEFAULT_TIME_SETTINGS.siangLimit);
+        const rawPStart = localStorage.getItem(`TIME_${day.key}_PAGI_START`);
+        const rawPLimit = localStorage.getItem(`TIME_${day.key}_PAGI_LIMIT`);
+        const rawSStart = localStorage.getItem(`TIME_${day.key}_SIANG_START`);
+        const rawSLimit = localStorage.getItem(`TIME_${day.key}_SIANG_LIMIT`);
+
+        const pStart = padZeroTime(rawPStart && rawPStart.includes(":") ? rawPStart : DEFAULT_TIME_SETTINGS.pagiStart);
+        const pLimit = padZeroTime(rawPLimit && rawPLimit.includes(":") ? rawPLimit : DEFAULT_TIME_SETTINGS.pagiLimit);
+        const sStart = padZeroTime(rawSStart && rawSStart.includes(":") ? rawSStart : DEFAULT_TIME_SETTINGS.siangStart);
+        const sLimit = padZeroTime(rawSLimit && rawSLimit.includes(":") ? rawSLimit : DEFAULT_TIME_SETTINGS.siangLimit);
 
         html += `
           <div class="p-3 bg-slate-50 border border-gray-200 rounded-xl space-y-2">
@@ -681,7 +705,12 @@
     function applyTimeSettingsFromCloud(timeObj) {
       for (let key in timeObj) {
         if (timeObj.hasOwnProperty(key) && timeObj[key] !== "") {
-          localStorage.setItem(key, padZeroTime(timeObj[key]));
+          const valStr = String(timeObj[key]);
+          if (valStr === "true" || valStr === "false") {
+            localStorage.setItem(key, valStr);
+          } else {
+            localStorage.setItem(key, padZeroTime(valStr));
+          }
         }
       }
       renderDaysConfigForm();
