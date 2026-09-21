@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0b3c5d">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Sistem Absensi Murid - v2.15</title>
+  <title>Sistem Absensi Murid - v2.16</title>
   <!-- MANIFEST INLINE UNTUK DUKUNGAN PWA OFFLINE MANDIRI -->
   <link rel="manifest" href='data:application/manifest+json,{"name":"Sistem Absensi Murid","short_name":"AbsensiQR","start_url":"./index.html","display":"standalone","background_color":"#0b3c5d","theme_color":"#0b3c5d","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/3135/3135715.png","sizes":"512x512","type":"image/png"}]}'>
   <script src="https://cdn.tailwindcss.com"></script>
@@ -37,7 +37,7 @@
             <span id="status-dot" class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span>
             <span id="status-text" class="text-xs font-semibold">Memeriksa...</span>
           </div>
-          <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30 block mt-0.5">v2.15</span>
+          <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30 block mt-0.5">v2.16</span>
         </div>
       </div>
     </header>
@@ -63,7 +63,6 @@
             Mode Waktu: AUTO (Realtime Perangkat)
           </div>
           <div class="absolute bottom-4 left-4 right-4 flex items-center justify-between gap-2 z-20">
-            <!-- TOMBOL DINAMIS SIKLUS WAKTU -->
             <button onclick="toggleScanSessionMode()" class="bg-black/60 text-white flex-1 py-2 rounded-xl text-[11px] font-medium flex flex-col items-center justify-center gap-0.5 backdrop-blur-md border border-white/10">
               <i id="session-icon" class="fa-solid fa-sun text-amber-400 text-xs"></i>
               <span id="session-mode-text">Mode Pagi</span>
@@ -425,6 +424,20 @@
     ];
     const DEFAULT_TIME_SETTINGS = { pagiStart: "06:00", pagiLimit: "07:15", siangStart: "12:00", siangLimit: "16:00" };
 
+    // HELPER UNTUK MEMASTIKAN FORMAT HH:mm SELALU 5 KARAKTER (Contoh: "6:17" -> "06:17")
+    function padZeroTime(timeStr) {
+      if (!timeStr) return "00:00";
+      const parts = String(timeStr).trim().split(":");
+      if (parts.length >= 2) {
+        let h = parts[0].trim();
+        let m = parts[1].trim();
+        if (h.length === 1) h = "0" + h;
+        if (m.length === 1) m = "0" + m;
+        return h.substring(0, 2) + ":" + m.substring(0, 2);
+      }
+      return timeStr;
+    }
+
     function bukaHalamanLaporan() { window.open(GAS_WEB_APP_URL + "?page=laporan", "_blank"); }
     function bukaHalamanCetakQR() { window.open(GAS_WEB_APP_URL + "?page=cetak-qr", "_blank"); }
 
@@ -450,15 +463,16 @@
       const dayKeys = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
       const dayKey = dayKeys[dateObj.getDay()];
       const active = localStorage.getItem(`DAY_ACTIVE_${dayKey}`) !== null ? (localStorage.getItem(`DAY_ACTIVE_${dayKey}`) === "true") : (dayKey !== "sun");
-      const pStart = localStorage.getItem(`TIME_${dayKey}_PAGI_START`) || DEFAULT_TIME_SETTINGS.pagiStart;
-      const pLimit = localStorage.getItem(`TIME_${dayKey}_PAGI_LIMIT`) || DEFAULT_TIME_SETTINGS.pagiLimit;
-      const sStart = localStorage.getItem(`TIME_${dayKey}_SIANG_START`) || DEFAULT_TIME_SETTINGS.siangStart;
-      const sLimit = localStorage.getItem(`TIME_${dayKey}_SIANG_LIMIT`) || DEFAULT_TIME_SETTINGS.siangLimit;
+      const pStart = padZeroTime(localStorage.getItem(`TIME_${dayKey}_PAGI_START`) || DEFAULT_TIME_SETTINGS.pagiStart);
+      const pLimit = padZeroTime(localStorage.getItem(`TIME_${dayKey}_PAGI_LIMIT`) || DEFAULT_TIME_SETTINGS.pagiLimit);
+      const sStart = padZeroTime(localStorage.getItem(`TIME_${dayKey}_SIANG_START`) || DEFAULT_TIME_SETTINGS.siangStart);
+      const sLimit = padZeroTime(localStorage.getItem(`TIME_${dayKey}_SIANG_LIMIT`) || DEFAULT_TIME_SETTINGS.siangLimit);
       return { dayKey, active, pStart, pLimit, sStart, sLimit };
     }
 
-    // PENYESUAIAN UTAMA LOGIKA STATUS SESI TAMPILAN TOMBOL (DENGAN REFRESH REALTIME)
+    // KOREKSI UTAMA UNTUK KOMPARASI WAKTU AKURAT
     function autoDetectOrSyncSessionMode(timeStr, targetDateObj = new Date()) {
+      const timeClean = padZeroTime(timeStr);
       const config = getTodayTimeConfig(targetDateObj);
       const textEl = document.getElementById("session-mode-text");
       const iconEl = document.getElementById("session-icon");
@@ -470,19 +484,19 @@
         return;
       }
 
-      if (timeStr < config.pStart) {
+      if (timeClean < config.pStart) {
         if (textEl) textEl.innerText = "Belum Mulai";
         if (iconEl) iconEl.className = "fa-solid fa-hourglass-start text-amber-400 text-xs";
         currentScanSession = "PAGI";
-      } else if (timeStr >= config.pStart && timeStr <= config.pLimit) {
+      } else if (timeClean >= config.pStart && timeClean <= config.pLimit) {
         if (textEl) textEl.innerText = "Mode Pagi";
         if (iconEl) iconEl.className = "fa-solid fa-sun text-amber-400 text-xs";
         currentScanSession = "PAGI";
-      } else if (timeStr > config.pLimit && timeStr < config.sStart) {
+      } else if (timeClean > config.pLimit && timeClean < config.sStart) {
         if (textEl) textEl.innerText = "Terlambat";
         if (iconEl) iconEl.className = "fa-solid fa-triangle-exclamation text-amber-400 text-xs";
         currentScanSession = "PAGI";
-      } else if (timeStr >= config.sStart && timeStr <= config.sLimit) {
+      } else if (timeClean >= config.sStart && timeClean <= config.sLimit) {
         if (textEl) textEl.innerText = "Mode Siang";
         if (iconEl) iconEl.className = "fa-solid fa-cloud-sun text-blue-400 text-xs";
         currentScanSession = "SIANG";
@@ -496,20 +510,20 @@
     function toggleTimeModeSetting() {
       if (!isManualTimeMode) {
         const todayStr = new Date().toISOString().split('T')[0];
-        const nowTimeStr = new Date().toTimeString().split(' ')[0].substring(0, 5);
+        const nowTimeStr = padZeroTime(new Date().toTimeString().split(' ')[0].substring(0, 5));
         const inputDate = prompt("Mode Manual: Tanggal Scan (YYYY-MM-DD):", todayStr);
         if (!inputDate) return;
         const inputTime = prompt("Mode Manual: Jam Scan (HH:MM):", nowTimeStr);
         if (!inputTime) return;
         isManualTimeMode = true;
         customScanDateOverride = inputDate.trim();
-        customScanTimeOverride = inputTime.trim();
+        customScanTimeOverride = padZeroTime(inputTime.trim());
         autoDetectOrSyncSessionMode(customScanTimeOverride, new Date(customScanDateOverride));
       } else {
         isManualTimeMode = false;
         customScanDateOverride = null;
         customScanTimeOverride = null;
-        const nowTimeStr = new Date().toTimeString().split(' ')[0].substring(0, 5);
+        const nowTimeStr = padZeroTime(new Date().toTimeString().split(' ')[0].substring(0, 5));
         autoDetectOrSyncSessionMode(nowTimeStr, new Date());
       }
       updateTimeModeIndicator();
@@ -532,10 +546,10 @@
       DAYS_LIST.forEach(day => {
         const defaultActive = day.key !== "sun";
         const active = localStorage.getItem(`DAY_ACTIVE_${day.key}`) !== null ? (localStorage.getItem(`DAY_ACTIVE_${day.key}`) === "true") : defaultActive;
-        const pStart = localStorage.getItem(`TIME_${day.key}_PAGI_START`) || DEFAULT_TIME_SETTINGS.pagiStart;
-        const pLimit = localStorage.getItem(`TIME_${day.key}_PAGI_LIMIT`) || DEFAULT_TIME_SETTINGS.pagiLimit;
-        const sStart = localStorage.getItem(`TIME_${day.key}_SIANG_START`) || DEFAULT_TIME_SETTINGS.siangStart;
-        const sLimit = localStorage.getItem(`TIME_${day.key}_SIANG_LIMIT`) || DEFAULT_TIME_SETTINGS.siangLimit;
+        const pStart = padZeroTime(localStorage.getItem(`TIME_${day.key}_PAGI_START`) || DEFAULT_TIME_SETTINGS.pagiStart);
+        const pLimit = padZeroTime(localStorage.getItem(`TIME_${day.key}_PAGI_LIMIT`) || DEFAULT_TIME_SETTINGS.pagiLimit);
+        const sStart = padZeroTime(localStorage.getItem(`TIME_${day.key}_SIANG_START`) || DEFAULT_TIME_SETTINGS.siangStart);
+        const sLimit = padZeroTime(localStorage.getItem(`TIME_${day.key}_SIANG_LIMIT`) || DEFAULT_TIME_SETTINGS.siangLimit);
         html += `
           <div class="p-2 bg-slate-50 border border-gray-100 rounded-xl flex items-center justify-between text-[10px]">
             <div>
@@ -561,10 +575,10 @@
         const defaultActive = day.key !== "sun";
         const active = localStorage.getItem(`DAY_ACTIVE_${day.key}`) !== null ? (localStorage.getItem(`DAY_ACTIVE_${day.key}`) === "true") : defaultActive;
         
-        const pStart = localStorage.getItem(`TIME_${day.key}_PAGI_START`) || DEFAULT_TIME_SETTINGS.pagiStart;
-        const pLimit = localStorage.getItem(`TIME_${day.key}_PAGI_LIMIT`) || DEFAULT_TIME_SETTINGS.pagiLimit;
-        const sStart = localStorage.getItem(`TIME_${day.key}_SIANG_START`) || DEFAULT_TIME_SETTINGS.siangStart;
-        const sLimit = localStorage.getItem(`TIME_${day.key}_SIANG_LIMIT`) || DEFAULT_TIME_SETTINGS.siangLimit;
+        const pStart = padZeroTime(localStorage.getItem(`TIME_${day.key}_PAGI_START`) || DEFAULT_TIME_SETTINGS.pagiStart);
+        const pLimit = padZeroTime(localStorage.getItem(`TIME_${day.key}_PAGI_LIMIT`) || DEFAULT_TIME_SETTINGS.pagiLimit);
+        const sStart = padZeroTime(localStorage.getItem(`TIME_${day.key}_SIANG_START`) || DEFAULT_TIME_SETTINGS.siangStart);
+        const sLimit = padZeroTime(localStorage.getItem(`TIME_${day.key}_SIANG_LIMIT`) || DEFAULT_TIME_SETTINGS.siangLimit);
 
         html += `
           <div class="p-3 bg-slate-50 border border-gray-200 rounded-xl space-y-2">
@@ -608,10 +622,10 @@
       const timeSettingsToSave = {};
       DAYS_LIST.forEach(day => {
         const active = document.getElementById(`toggle-${day.key}`).checked;
-        const pStart = document.getElementById(`pagi-start-${day.key}`).value || DEFAULT_TIME_SETTINGS.pagiStart;
-        const pLimit = document.getElementById(`pagi-limit-${day.key}`).value || DEFAULT_TIME_SETTINGS.pagiLimit;
-        const sStart = document.getElementById(`siang-start-${day.key}`).value || DEFAULT_TIME_SETTINGS.siangStart;
-        const sLimit = document.getElementById(`siang-limit-${day.key}`).value || DEFAULT_TIME_SETTINGS.siangLimit;
+        const pStart = padZeroTime(document.getElementById(`pagi-start-${day.key}`).value || DEFAULT_TIME_SETTINGS.pagiStart);
+        const pLimit = padZeroTime(document.getElementById(`pagi-limit-${day.key}`).value || DEFAULT_TIME_SETTINGS.pagiLimit);
+        const sStart = padZeroTime(document.getElementById(`siang-start-${day.key}`).value || DEFAULT_TIME_SETTINGS.siangStart);
+        const sLimit = padZeroTime(document.getElementById(`siang-limit-${day.key}`).value || DEFAULT_TIME_SETTINGS.siangLimit);
 
         localStorage.setItem(`DAY_ACTIVE_${day.key}`, active);
         localStorage.setItem(`TIME_${day.key}_PAGI_START`, pStart);
@@ -653,11 +667,11 @@
     function applyTimeSettingsFromCloud(timeObj) {
       for (let key in timeObj) {
         if (timeObj.hasOwnProperty(key) && timeObj[key] !== "") {
-          localStorage.setItem(key, timeObj[key]);
+          localStorage.setItem(key, padZeroTime(timeObj[key]));
         }
       }
       renderDaysConfigForm();
-      const nowTimeStr = (isManualTimeMode && customScanTimeOverride) ? customScanTimeOverride : new Date().toTimeString().split(' ')[0].substring(0, 5);
+      const nowTimeStr = padZeroTime((isManualTimeMode && customScanTimeOverride) ? customScanTimeOverride : new Date().toTimeString().split(' ')[0].substring(0, 5));
       const targetDateObj = (isManualTimeMode && customScanDateOverride) ? new Date(customScanDateOverride) : new Date();
       autoDetectOrSyncSessionMode(nowTimeStr, targetDateObj);
     }
@@ -706,9 +720,9 @@
                 if (rec.id_siswa && rec.tanggal) {
                   storeHist.put({
                     queue_id: `${rec.tanggal}_${rec.id_siswa}_${rec.sesi || 'PAGI'}`,
-                    tanggal: rec.tanggal, jam: rec.jam || rec.jam_pagi || rec.jam_siang || "",
-                    jam_pagi: rec.jam_pagi || "", status_pagi: rec.status_pagi || "",
-                    jam_siang: rec.jam_siang || "", status_siang: rec.status_siang || "",
+                    tanggal: rec.tanggal, jam: padZeroTime(rec.jam || rec.jam_pagi || rec.jam_siang || ""),
+                    jam_pagi: padZeroTime(rec.jam_pagi || ""), status_pagi: rec.status_pagi || "",
+                    jam_siang: padZeroTime(rec.jam_siang || ""), status_siang: rec.status_siang || "",
                     id_siswa: rec.id_siswa, nama: rec.nama, kelas: rec.kelas,
                     sesi: rec.sesi || "PAGI", status_presensi: rec.status_akhir || rec.status_presensi || "HADIR",
                     status_akhir: rec.status_akhir || rec.status_presensi || "HADIR"
@@ -854,7 +868,7 @@
       const dateObj = new Date(targetDate);
       const timeConfig = getTodayTimeConfig(dateObj);
       const now = new Date();
-      const nowStr = now.toTimeString().split(' ')[0];
+      const nowStr = padZeroTime(now.toTimeString().split(' ')[0]);
       const siangLimitWithSec = timeConfig.sLimit + ":01";
       
       const isPastSiangLimit = (targetDate < now.toISOString().split('T')[0]) || 
@@ -1016,7 +1030,7 @@
       const student = cachedStudents.find(s => s.id_siswa === idSiswa);
       if (!student) return;
       
-      const timeStr = (isManualTimeMode && customScanTimeOverride) ? customScanTimeOverride : new Date().toTimeString().split(' ')[0].substring(0, 5);
+      const timeStr = padZeroTime((isManualTimeMode && customScanTimeOverride) ? customScanTimeOverride : new Date().toTimeString().split(' ')[0].substring(0, 5));
       const record = {
         queue_id: `${targetDate}_${idSiswa}_${currentScanSession}`,
         tanggal: targetDate, jam: timeStr, id_siswa: idSiswa,
@@ -1140,9 +1154,8 @@
     }
 
     function toggleScanSessionMode() {
-      // Manual Toggle Mode Sesi (jika pengguna menekan tombol secara sengaja)
       currentScanSession = currentScanSession === "PAGI" ? "SIANG" : "PAGI";
-      const nowTimeStr = (isManualTimeMode && customScanTimeOverride) ? customScanTimeOverride : new Date().toTimeString().split(' ')[0].substring(0, 5);
+      const nowTimeStr = padZeroTime((isManualTimeMode && customScanTimeOverride) ? customScanTimeOverride : new Date().toTimeString().split(' ')[0].substring(0, 5));
       const targetDateObj = (isManualTimeMode && customScanDateOverride) ? new Date(customScanDateOverride) : new Date();
       autoDetectOrSyncSessionMode(nowTimeStr, targetDateObj);
     }
@@ -1178,7 +1191,7 @@
       
       const now = new Date();
       const dateStr = (isManualTimeMode && customScanDateOverride) ? customScanDateOverride : now.toISOString().split('T')[0];
-      const timeStr = (isManualTimeMode && customScanTimeOverride) ? customScanTimeOverride : now.toTimeString().split(' ')[0].substring(0, 5);
+      const timeStr = padZeroTime((isManualTimeMode && customScanTimeOverride) ? customScanTimeOverride : now.toTimeString().split(' ')[0].substring(0, 5));
       const scanDateObj = new Date(dateStr);
       const timeConfig = getTodayTimeConfig(scanDateObj);
 
@@ -1308,13 +1321,12 @@
 
     function triggerManualSync() { if (navigator.onLine) syncQueueToGAS(); }
 
-    // REALTIME TICKER UNTUK UPDATE OTO-STATUS SESI DARI WAKTU JAM
     setInterval(() => {
       const isOnline = navigator.onLine;
       document.getElementById('status-dot').className = `w-2.5 h-2.5 rounded-full ${isOnline ? 'bg-green-400' : 'bg-amber-400'} inline-block`;
       document.getElementById('status-text').innerText = isOnline ? 'Online' : 'Offline';
 
-      const nowTimeStr = (isManualTimeMode && customScanTimeOverride) ? customScanTimeOverride : new Date().toTimeString().split(' ')[0].substring(0, 5);
+      const nowTimeStr = padZeroTime((isManualTimeMode && customScanTimeOverride) ? customScanTimeOverride : new Date().toTimeString().split(' ')[0].substring(0, 5));
       const targetDateObj = (isManualTimeMode && customScanDateOverride) ? new Date(customScanDateOverride) : new Date();
       autoDetectOrSyncSessionMode(nowTimeStr, targetDateObj);
     }, 1000);
@@ -1340,7 +1352,7 @@
       } else {
         loadLocalHistoryToMemory();
       }
-      const nowTimeStr = new Date().toTimeString().split(' ')[0].substring(0, 5);
+      const nowTimeStr = padZeroTime(new Date().toTimeString().split(' ')[0].substring(0, 5));
       autoDetectOrSyncSessionMode(nowTimeStr, new Date());
     };
   </script>
