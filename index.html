@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0b3c5d">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Sistem Absensi Murid - v2.11</title>
+  <title>Sistem Absensi Murid - v2.12</title>
   <!-- MANIFEST INLINE UNTUK DUKUNGAN PWA OFFLINE MANDIRI -->
   <link rel="manifest" href='data:application/manifest+json,{"name":"Sistem Absensi Murid","short_name":"AbsensiQR","start_url":"./index.html","display":"standalone","background_color":"#0b3c5d","theme_color":"#0b3c5d","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/3135/3135715.png","sizes":"512x512","type":"image/png"}]}'>
   <script src="https://cdn.tailwindcss.com"></script>
@@ -37,7 +37,7 @@
             <span id="status-dot" class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span>
             <span id="status-text" class="text-xs font-semibold">Memeriksa...</span>
           </div>
-          <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30 block mt-0.5">v2.11</span>
+          <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30 block mt-0.5">v2.12</span>
         </div>
       </div>
     </header>
@@ -514,7 +514,7 @@
             <div>
               <span class="font-bold text-gray-900">${day.label}</span>
               ${active ? 
-                `<p class="text-gray-500">Pagi: <b class="text-emerald-700">${pStart} - ${pLimit}</b> | Siang: <b class="text-blue-700">${sStart} - ${sLimit}</b></p>` : 
+                `<p class="text-gray-500">Pagi: <b class="text-emerald-700">${pStart} -${pLimit}</b> | Siang: <b class="text-blue-700">${sStart} -${sLimit}</b></p>` : 
                 `<p class="text-rose-500 font-semibold">Status: Libur / Non-Aktif</p>`
               }
             </div>
@@ -669,19 +669,23 @@
           if (db) {
             const txHist = db.transaction("attendance_history", "readwrite");
             const storeHist = txHist.objectStore("attendance_history");
-            combinedHist.forEach(rec => {
-              if (rec.id_siswa && rec.tanggal) {
-                storeHist.put({
-                  queue_id: `${rec.tanggal}_${rec.id_siswa}_${rec.sesi || 'PAGI'}`,
-                  tanggal: rec.tanggal, jam: rec.jam || rec.jam_pagi || rec.jam_siang || "",
-                  jam_pagi: rec.jam_pagi || "", status_pagi: rec.status_pagi || "",
-                  jam_siang: rec.jam_siang || "", status_siang: rec.status_siang || "",
-                  id_siswa: rec.id_siswa, nama: rec.nama, kelas: rec.kelas,
-                  sesi: rec.sesi || "PAGI", status_presensi: rec.status_akhir || rec.status_presensi || "HADIR",
-                  status_akhir: rec.status_akhir || rec.status_presensi || "HADIR"
-                });
-              }
-            });
+            
+            // PERBAIKAN: Bersihkan cache riwayat lokal lama agar tidak mengendap saat data di sheet dihapus
+            storeHist.clear().onsuccess = () => {
+              combinedHist.forEach(rec => {
+                if (rec.id_siswa && rec.tanggal) {
+                  storeHist.put({
+                    queue_id: `${rec.tanggal}_${rec.id_siswa}_${rec.sesi || 'PAGI'}`,
+                    tanggal: rec.tanggal, jam: rec.jam || rec.jam_pagi || rec.jam_siang || "",
+                    jam_pagi: rec.jam_pagi || "", status_pagi: rec.status_pagi || "",
+                    jam_siang: rec.jam_siang || "", status_siang: rec.status_siang || "",
+                    id_siswa: rec.id_siswa, nama: rec.nama, kelas: rec.kelas,
+                    sesi: rec.sesi || "PAGI", status_presensi: rec.status_akhir || rec.status_presensi || "HADIR",
+                    status_akhir: rec.status_akhir || rec.status_presensi || "HADIR"
+                  });
+                }
+              });
+            };
           }
 
           if (result.students) {
@@ -692,6 +696,7 @@
             tx.oncomplete = () => {
               loadStudentsView();
               populateClassDropdowns();
+              updateMonitoringDashboard(); // Refresh tampilan monitoring segera
             };
           }
         }
@@ -799,9 +804,17 @@
       const selectedSessionFilter = document.getElementById('monitoring-session-filter').value;
       
       const queueRecords = await getAllQueueFromDB();
-      const localHist = await getAllLocalHistoryFromDB();
       
-      let rawRecords = [...localHist, ...fetchedTodayAttendance, ...fetchedAttendanceHistory, ...queueRecords].filter(r => r.tanggal === targetDate);
+      let rawRecords = [];
+      
+      if (navigator.onLine) {
+        // PERBAIKAN: Gunakan murni data Cloud Google Sheet saat Online + Antrean Queue
+        rawRecords = [...fetchedTodayAttendance, ...fetchedAttendanceHistory, ...queueRecords].filter(r => r.tanggal === targetDate);
+      } else {
+        // SAAT OFFLINE: Gunakan cache lokal IndexedDB
+        const localHist = await getAllLocalHistoryFromDB();
+        rawRecords = [...localHist, ...queueRecords].filter(r => r.tanggal === targetDate);
+      }
       
       if (selectedSessionFilter !== "ALL") {
         rawRecords = rawRecords.filter(r => String(r.sesi || "PAGI").toUpperCase() === selectedSessionFilter);
