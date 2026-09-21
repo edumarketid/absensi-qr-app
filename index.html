@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0b3c5d">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Sistem Absensi Murid - v2.12</title>
+  <title>Sistem Absensi Murid - v2.13</title>
   <!-- MANIFEST INLINE UNTUK DUKUNGAN PWA OFFLINE MANDIRI -->
   <link rel="manifest" href='data:application/manifest+json,{"name":"Sistem Absensi Murid","short_name":"AbsensiQR","start_url":"./index.html","display":"standalone","background_color":"#0b3c5d","theme_color":"#0b3c5d","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/3135/3135715.png","sizes":"512x512","type":"image/png"}]}'>
   <script src="https://cdn.tailwindcss.com"></script>
@@ -37,7 +37,7 @@
             <span id="status-dot" class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span>
             <span id="status-text" class="text-xs font-semibold">Memeriksa...</span>
           </div>
-          <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30 block mt-0.5">v2.12</span>
+          <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30 block mt-0.5">v2.13</span>
         </div>
       </div>
     </header>
@@ -638,7 +638,8 @@
         return;
       }
       try {
-        const response = await fetch(`${GAS_WEB_APP_URL}?action=GET_APP_DATA`);
+        const targetDateFilter = document.getElementById('monitoring-date-filter').value || new Date().toISOString().split('T')[0];
+        const response = await fetch(`${GAS_WEB_APP_URL}?action=GET_APP_DATA&tanggal=${targetDateFilter}`);
         const result = await response.json();
         if (result.success) {
           if (result.time_settings) applyTimeSettingsFromCloud(result.time_settings);
@@ -670,7 +671,6 @@
             const txHist = db.transaction("attendance_history", "readwrite");
             const storeHist = txHist.objectStore("attendance_history");
             
-            // PERBAIKAN: Bersihkan cache riwayat lokal lama agar tidak mengendap saat data di sheet dihapus
             storeHist.clear().onsuccess = () => {
               combinedHist.forEach(rec => {
                 if (rec.id_siswa && rec.tanggal) {
@@ -696,7 +696,7 @@
             tx.oncomplete = () => {
               loadStudentsView();
               populateClassDropdowns();
-              updateMonitoringDashboard(); // Refresh tampilan monitoring segera
+              updateMonitoringDashboard();
             };
           }
         }
@@ -789,7 +789,7 @@
       views.forEach(v => document.getElementById('view-' + v).classList.add('hidden'));
       document.getElementById('view-' + viewName).classList.remove('hidden');
       if (viewName === 'students') loadStudentsView();
-      if (viewName === 'monitoring') updateMonitoringDashboard();
+      if (viewName === 'monitoring') autoDownloadMasterStudents();
       if (viewName === 'tindak-lanjut') renderTindakLanjutView();
       if (viewName === 'hari-libur') renderHariLiburView();
       if (viewName === 'settings') renderDaysConfigForm();
@@ -806,12 +806,9 @@
       const queueRecords = await getAllQueueFromDB();
       
       let rawRecords = [];
-      
       if (navigator.onLine) {
-        // PERBAIKAN: Gunakan murni data Cloud Google Sheet saat Online + Antrean Queue
         rawRecords = [...fetchedTodayAttendance, ...fetchedAttendanceHistory, ...queueRecords].filter(r => r.tanggal === targetDate);
       } else {
-        // SAAT OFFLINE: Gunakan cache lokal IndexedDB
         const localHist = await getAllLocalHistoryFromDB();
         rawRecords = [...localHist, ...queueRecords].filter(r => r.tanggal === targetDate);
       }
@@ -846,21 +843,25 @@
           const jamSiang = stdRec.jam_siang || (stdRec.sesi === "SIANG" ? stdRec.jam : "");
           const stAkhir = String(stdRec.status_akhir || stdRec.status_presensi || "HADIR").toUpperCase();
 
-          if (["IZIN", "SAKIT", "KEGIATAN"].includes(stAkhir)) {
-            if (stAkhir === "IZIN") izin++;
-            else if (stAkhir === "SAKIT") sakit++;
-            else if (stAkhir === "KEGIATAN") kegiatan++;
-          } else if (jamPagi && !jamSiang && isPastSiangLimit) {
+          if (stAkhir === "ALPA") {
+            alpa++;
+            unabsentedStudents.push(std);
+          } else if (stAkhir === "BOLOS") {
             bolos++;
+          } else if (stAkhir === "IZIN") {
+            izin++;
+          } else if (stAkhir === "SAKIT") {
+            sakit++;
+          } else if (stAkhir === "KEGIATAN") {
+            kegiatan++;
           } else if (stAkhir === "TERLAMBAT" || stdRec.status_pagi === "TERLAMBAT" || stdRec.status_siang === "TERLAMBAT") {
             terlambat++;
           } else if (stAkhir === "HADIR") {
-            hadir++;
-          } else if (stAkhir === "BOLOS") {
-            bolos++;
-          } else if (stAkhir === "ALPA") {
-            alpa++;
-            unabsentedStudents.push(std);
+            if (jamPagi && !jamSiang && isPastSiangLimit) {
+              bolos++;
+            } else {
+              hadir++;
+            }
           }
         }
       });
