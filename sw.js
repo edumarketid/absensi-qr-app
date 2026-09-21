@@ -1,4 +1,4 @@
-const CACHE_NAME = 'absensi-app-cache-v2.10';
+const CACHE_NAME = 'absensi-app-cache-v2.11';
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -11,10 +11,12 @@ const STATIC_ASSETS = [
 self.addEventListener('install', (e) => {
   e.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      // Menggunakan mode no-cors untuk resource eksternal CDN agar berhasil di-cache 100%
       const cachePromises = STATIC_ASSETS.map(url => {
-        const req = new Request(url, { mode: 'no-cors' });
-        return fetch(req).then(res => cache.put(url, res)).catch(err => console.log('Fail caching: ', url));
+        return fetch(url).then(res => {
+          if (res.status === 200 || res.type === 'opaque') {
+            return cache.put(url, res);
+          }
+        }).catch(err => console.log('Fail caching: ', url));
       });
       return Promise.all(cachePromises);
     }).then(() => self.skipWaiting())
@@ -37,9 +39,8 @@ self.addEventListener('activate', (e) => {
 
 self.addEventListener('fetch', (e) => {
   if (e.request.url.includes('script.google.com')) {
-    return; // Panggilan API Google Apps Script diserahkan ke async handler
+    return;
   }
-
   e.respondWith(
     caches.match(e.request).then((cachedResponse) => {
       if (cachedResponse) {
