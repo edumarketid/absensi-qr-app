@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0b3c5d">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Sistem Absensi Murid - v2.14</title>
+  <title>Sistem Absensi Murid - v2.15</title>
   <!-- MANIFEST INLINE UNTUK DUKUNGAN PWA OFFLINE MANDIRI -->
   <link rel="manifest" href='data:application/manifest+json,{"name":"Sistem Absensi Murid","short_name":"AbsensiQR","start_url":"./index.html","display":"standalone","background_color":"#0b3c5d","theme_color":"#0b3c5d","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/3135/3135715.png","sizes":"512x512","type":"image/png"}]}'>
   <script src="https://cdn.tailwindcss.com"></script>
@@ -37,7 +37,7 @@
             <span id="status-dot" class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span>
             <span id="status-text" class="text-xs font-semibold">Memeriksa...</span>
           </div>
-          <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30 block mt-0.5">v2.14</span>
+          <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30 block mt-0.5">v2.15</span>
         </div>
       </div>
     </header>
@@ -63,6 +63,7 @@
             Mode Waktu: AUTO (Realtime Perangkat)
           </div>
           <div class="absolute bottom-4 left-4 right-4 flex items-center justify-between gap-2 z-20">
+            <!-- TOMBOL DINAMIS SIKLUS WAKTU -->
             <button onclick="toggleScanSessionMode()" class="bg-black/60 text-white flex-1 py-2 rounded-xl text-[11px] font-medium flex flex-col items-center justify-center gap-0.5 backdrop-blur-md border border-white/10">
               <i id="session-icon" class="fa-solid fa-sun text-amber-400 text-xs"></i>
               <span id="session-mode-text">Mode Pagi</span>
@@ -456,14 +457,40 @@
       return { dayKey, active, pStart, pLimit, sStart, sLimit };
     }
 
+    // PENYESUAIAN UTAMA LOGIKA STATUS SESI TAMPILAN TOMBOL (DENGAN REFRESH REALTIME)
     function autoDetectOrSyncSessionMode(timeStr, targetDateObj = new Date()) {
       const config = getTodayTimeConfig(targetDateObj);
-      if (timeStr >= config.sStart) {
+      const textEl = document.getElementById("session-mode-text");
+      const iconEl = document.getElementById("session-icon");
+
+      if (!config.active) {
+        if (textEl) textEl.innerText = "Hari Libur";
+        if (iconEl) iconEl.className = "fa-solid fa-umbrella-beach text-amber-400 text-xs";
+        currentScanSession = "PAGI";
+        return;
+      }
+
+      if (timeStr < config.pStart) {
+        if (textEl) textEl.innerText = "Belum Mulai";
+        if (iconEl) iconEl.className = "fa-solid fa-hourglass-start text-amber-400 text-xs";
+        currentScanSession = "PAGI";
+      } else if (timeStr >= config.pStart && timeStr <= config.pLimit) {
+        if (textEl) textEl.innerText = "Mode Pagi";
+        if (iconEl) iconEl.className = "fa-solid fa-sun text-amber-400 text-xs";
+        currentScanSession = "PAGI";
+      } else if (timeStr > config.pLimit && timeStr < config.sStart) {
+        if (textEl) textEl.innerText = "Terlambat";
+        if (iconEl) iconEl.className = "fa-solid fa-triangle-exclamation text-amber-400 text-xs";
+        currentScanSession = "PAGI";
+      } else if (timeStr >= config.sStart && timeStr <= config.sLimit) {
+        if (textEl) textEl.innerText = "Mode Siang";
+        if (iconEl) iconEl.className = "fa-solid fa-cloud-sun text-blue-400 text-xs";
         currentScanSession = "SIANG";
       } else {
-        currentScanSession = "PAGI";
+        if (textEl) textEl.innerText = "Selesai";
+        if (iconEl) iconEl.className = "fa-solid fa-circle-check text-emerald-400 text-xs";
+        currentScanSession = "SIANG";
       }
-      document.getElementById("session-mode-text").innerText = `Mode ${currentScanSession === 'PAGI' ? 'Pagi' : 'Siang'}`;
     }
 
     function toggleTimeModeSetting() {
@@ -630,6 +657,9 @@
         }
       }
       renderDaysConfigForm();
+      const nowTimeStr = (isManualTimeMode && customScanTimeOverride) ? customScanTimeOverride : new Date().toTimeString().split(' ')[0].substring(0, 5);
+      const targetDateObj = (isManualTimeMode && customScanDateOverride) ? new Date(customScanDateOverride) : new Date();
+      autoDetectOrSyncSessionMode(nowTimeStr, targetDateObj);
     }
 
     async function autoDownloadMasterStudents() {
@@ -874,7 +904,6 @@
       document.getElementById('stat-izin').innerText = izin;
       document.getElementById('stat-kegiatan').innerText = kegiatan;
 
-      // KOREKSI PRESENSI: Gunakan total seluruh siswa kelas yang difilter sebagai pembagi resmi
       renderPieChart(hadir, terlambat, alpa, bolos, sakit, izin, kegiatan, classStudents.length);
       renderClassBarChartHorizontal(rawRecords);
       renderMonitoringActionListOnlyUnabsented(targetDate, unabsentedStudents, isPastSiangLimit);
@@ -1111,8 +1140,11 @@
     }
 
     function toggleScanSessionMode() {
+      // Manual Toggle Mode Sesi (jika pengguna menekan tombol secara sengaja)
       currentScanSession = currentScanSession === "PAGI" ? "SIANG" : "PAGI";
-      document.getElementById("session-mode-text").innerText = `Mode ${currentScanSession === 'PAGI' ? 'Pagi' : 'Siang'}`;
+      const nowTimeStr = (isManualTimeMode && customScanTimeOverride) ? customScanTimeOverride : new Date().toTimeString().split(' ')[0].substring(0, 5);
+      const targetDateObj = (isManualTimeMode && customScanDateOverride) ? new Date(customScanDateOverride) : new Date();
+      autoDetectOrSyncSessionMode(nowTimeStr, targetDateObj);
     }
 
     async function initScanner() {
@@ -1276,10 +1308,15 @@
 
     function triggerManualSync() { if (navigator.onLine) syncQueueToGAS(); }
 
+    // REALTIME TICKER UNTUK UPDATE OTO-STATUS SESI DARI WAKTU JAM
     setInterval(() => {
       const isOnline = navigator.onLine;
       document.getElementById('status-dot').className = `w-2.5 h-2.5 rounded-full ${isOnline ? 'bg-green-400' : 'bg-amber-400'} inline-block`;
       document.getElementById('status-text').innerText = isOnline ? 'Online' : 'Offline';
+
+      const nowTimeStr = (isManualTimeMode && customScanTimeOverride) ? customScanTimeOverride : new Date().toTimeString().split(' ')[0].substring(0, 5);
+      const targetDateObj = (isManualTimeMode && customScanDateOverride) ? new Date(customScanDateOverride) : new Date();
+      autoDetectOrSyncSessionMode(nowTimeStr, targetDateObj);
     }, 1000);
 
     window.addEventListener('online', () => {
