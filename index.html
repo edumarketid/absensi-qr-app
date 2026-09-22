@@ -34,7 +34,7 @@
             <span id="status-dot" class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span>
             <span id="status-text" class="text-xs font-semibold">Memeriksa...</span>
           </div>
-          <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30 block mt-0.5">v2.24</span>
+          <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30 block mt-0.5">v2.25</span>
         </div>
       </div>
     </header>
@@ -368,10 +368,15 @@
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js').then(reg => {
-          console.log('SW Registered: ', reg.scope);
-        }).catch(err => {
-          console.log('SW Registration failed: ', err);
-        });
+          reg.onupdatefound = () => {
+            const installingWorker = reg.installing;
+            installingWorker.onstatechange = () => {
+              if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                window.location.reload();
+              }
+            };
+          };
+        }).catch(err => console.log('SW Fail: ', err));
       });
     }
   </script>
@@ -406,71 +411,20 @@
     };
 
     function padZeroTime(timeStr) {
-  if (!timeStr || typeof timeStr !== "string" || timeStr.trim() === "" || timeStr === "undefined" || timeStr === "null") return "00:00";
-  var clean = timeStr.trim();
-  var parts = clean.split(":");
-  if (parts.length >= 2) {
-    var h = parseInt(parts[0].replace(/\D/g, ""), 10);
-    var m = parseInt(parts[1].replace(/\D/g, ""), 10);
-    if (isNaN(h) || h > 23 || h < 0) h = 0;
-    if (isNaN(m) || m > 59 || m < 0) m = 0;
-    
-    var hStr = h < 10 ? "0" + h : "" + h;
-    var mStr = m < 10 ? "0" + m : "" + m;
-    return hStr + ":" + mStr;
-  }
-  return "00:00";
-}
-
-async function renderTimeSettingsSummary() {
-  const container = document.getElementById("saved-time-summary-box");
-  if (!container) return;
-  
-  container.innerHTML = `<div class="text-center py-2 text-[10px] text-gray-400"><i class="fa-solid fa-spinner fa-spin"></i> Menyinkronkan dari Sheet...</div>`;
-
-  // Jika online, tarik data paling segar dari Google Sheets
-  if (navigator.onLine) {
-    try {
-      const res = await fetch(`${GAS_WEB_APP_URL}?action=GET_TIME_SETTINGS`);
-      const data = await res.json();
-      if (data.success && data.time_settings) {
-        applyTimeSettingsFromCloud(data.time_settings);
+      if (!timeStr || typeof timeStr !== "string" || timeStr.trim() === "" || timeStr === "undefined" || timeStr === "null") return "00:00";
+      var clean = timeStr.trim();
+      var parts = clean.split(":");
+      if (parts.length >= 2) {
+        var h = parseInt(parts[0].replace(/\D/g, ""), 10);
+        var m = parseInt(parts[1].replace(/\D/g, ""), 10);
+        if (isNaN(h) || h > 23 || h < 0) h = 0;
+        if (isNaN(m) || m > 59 || m < 0) m = 0;
+        var hStr = h < 10 ? "0" + h : "" + h;
+        var mStr = m < 10 ? "0" + m : "" + m;
+        return hStr + ":" + mStr;
       }
-    } catch(e) {}
-  }
-
-  let html = "";
-  DAYS_LIST.forEach(day => {
-    const def = DEFAULT_TIME_CONFIGS[day.key];
-    const active = localStorage.getItem(`DAY_ACTIVE_${day.key}`) !== null ? (localStorage.getItem(`DAY_ACTIVE_${day.key}`) === "true") : def.active;
-    
-    const rawPStart = localStorage.getItem(`TIME_${day.key}_PAGI_START`);
-    const rawPLimit = localStorage.getItem(`TIME_${day.key}_PAGI_LIMIT`);
-    const rawSStart = localStorage.getItem(`TIME_${day.key}_SIANG_START`);
-    const rawSLimit = localStorage.getItem(`TIME_${day.key}_SIANG_LIMIT`);
-
-    const pStart = padZeroTime(rawPStart && rawPStart.includes(":") ? rawPStart : def.pStart);
-    const pLimit = padZeroTime(rawPLimit && rawPLimit.includes(":") ? rawPLimit : def.pLimit);
-    const sStart = padZeroTime(rawSStart && rawSStart.includes(":") ? rawSStart : def.sStart);
-    const sLimit = padZeroTime(rawSLimit && rawSLimit.includes(":") ? rawSLimit : def.sLimit);
-
-    html += `
-      <div class="p-2 bg-slate-50 border border-gray-100 rounded-xl flex items-center justify-between text-[10px]">
-        <div>
-          <span class="font-bold text-gray-900">${day.label}</span>
-          ${active ? 
-            `<p class="text-gray-500">Pagi: <b class="text-emerald-700">${pStart} -${pLimit}</b> | Siang: <b class="text-blue-700">${sStart} -${sLimit}</b></p>` : 
-            `<p class="text-rose-500 font-semibold">Status: Libur / Non-Aktif</p>`
-          }
-        </div>
-        <span class="px-2 py-0.5 rounded-md font-bold text-[9px] ${active ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-100 text-gray-500'}">
-          ${active ? 'Aktif' : 'Libur'}
-        </span>
-      </div>
-    `;
-  });
-  container.innerHTML = html;
-}
+      return "00:00";
+    }
 
     function formatCleanDateLocal(val) {
       if (!val) return "";
@@ -602,9 +556,22 @@ async function renderTimeSettingsSummary() {
       autoDetectOrSyncSessionMode(activeTimeStr, activeDateObj);
     }
 
-    function renderTimeSettingsSummary() {
+    async function renderTimeSettingsSummary() {
       const container = document.getElementById("saved-time-summary-box");
       if (!container) return;
+      
+      container.innerHTML = `<div class="text-center py-2 text-[10px] text-gray-400"><i class="fa-solid fa-spinner fa-spin"></i> Menyinkronkan dari Sheet...</div>`;
+
+      if (navigator.onLine) {
+        try {
+          const res = await fetch(`${GAS_WEB_APP_URL}?action=GET_TIME_SETTINGS`);
+          const data = await res.json();
+          if (data.success && data.time_settings) {
+            applyTimeSettingsFromCloud(data.time_settings);
+          }
+        } catch(e) {}
+      }
+
       let html = "";
       DAYS_LIST.forEach(day => {
         const def = DEFAULT_TIME_CONFIGS[day.key];
@@ -1262,95 +1229,91 @@ async function renderTimeSettingsSummary() {
     }
 
     async function onScanSuccess(text) {
-  await stopCamera();
-  
-  let nowDateObj = new Date();
-  let dateStr = nowDateObj.toISOString().split('T')[0];
-  let timeStr = padZeroTime(nowDateObj.toTimeString().split(' ')[0].substring(0, 5));
-
-  if (isManualTimeMode && customScanDateOverride && customScanTimeOverride) {
-    dateStr = customScanDateOverride;
-    timeStr = customScanTimeOverride;
-    nowDateObj = new Date(dateStr + "T00:00:00");
-  }
-
-  const timeConfig = getTodayTimeConfig(nowDateObj);
-
-  if (!timeConfig.active) {
-    alert(`Presensi Ditolak! Hari ${timeConfig.dayKey.toUpperCase()} diatur sebagai Hari Libur / Non-Aktif.`);
-    return initScanner();
-  }
-
-  // PENTING: Sinkronkan mode sesi sebelum menghitung status
-  autoDetectOrSyncSessionMode(timeStr, nowDateObj);
-
-  let computedStatus = "HADIR";
-
-  if (currentScanSession === "PAGI") {
-    // Jika jam scan kurang dari Mulai Pagi
-    if (timeStr < timeConfig.pStart) {
-      alert(`Presensi Pagi Ditolak! Belum memasuki jam mulai pagi (${timeConfig.pStart}).`);
-      return initScanner();
-    } 
-    // Jika jam scan LEBIH DARI Toleransi/Batas Pagi -> Ditetapkan TERLAMBAT
-    else if (timeStr > timeConfig.pLimit) {
-      computedStatus = "TERLAMBAT";
-    }
-  } else if (currentScanSession === "SIANG") {
-    if (timeStr < timeConfig.sStart) {
-      alert(`Presensi Siang Ditolak! Belum memasuki jam mulai siang (${timeConfig.sStart}).`);
-      return initScanner();
-    } else if (timeStr > timeConfig.sLimit) {
-      computedStatus = "TERLAMBAT";
-    }
-  }
-
-  const tx = db.transaction("students", "readonly");
-  tx.objectStore("students").get(text.trim()).onsuccess = async (e) => {
-    const student = e.target.result;
-    if (student) {
-      const record = {
-        queue_id: `${dateStr}_${student.id_siswa}_${currentScanSession}`,
-        tanggal: dateStr, 
-        jam: timeStr, 
-        id_siswa: student.id_siswa,
-        nama: student.nama, 
-        kelas: student.kelas, 
-        sesi: currentScanSession,
-        status_presensi: computedStatus, 
-        status_pagi: currentScanSession === "PAGI" ? computedStatus : "",
-        status_siang: currentScanSession === "SIANG" ? computedStatus : "",
-        timestamp: Date.now()
-      };
+      await stopCamera();
       
-      await saveToAttendanceQueue(record);
-      await saveToLocalHistoryDB(record);
-      if (navigator.onLine) syncQueueToGAS();
+      let nowDateObj = new Date();
+      let dateStr = nowDateObj.toISOString().split('T')[0];
+      let timeStr = padZeroTime(nowDateObj.toTimeString().split(' ')[0].substring(0, 5));
 
-      document.getElementById('res-nama').innerText = student.nama;
-      document.getElementById('res-nisn').innerText = student.nisn || "-";
-      document.getElementById('res-kelas').innerText = student.kelas;
-      document.getElementById('res-jam-scan').innerText = timeStr;
-      
-      const statusCardBox = document.getElementById('status-card-box');
-      const badgeBox = document.getElementById('res-badge-box');
-      const statusText = document.getElementById('res-presensi-status');
-      statusText.innerText = computedStatus;
-
-      if (computedStatus === "TERLAMBAT") {
-        statusCardBox.className = "bg-amber-50 border border-amber-200 rounded-2xl p-4 text-center shadow-sm space-y-2";
-        badgeBox.className = "text-amber-600 font-extrabold text-xl";
-      } else {
-        statusCardBox.className = "bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-center shadow-sm space-y-2";
-        badgeBox.className = "text-emerald-600 font-extrabold text-xl";
+      if (isManualTimeMode && customScanDateOverride && customScanTimeOverride) {
+        dateStr = customScanDateOverride;
+        timeStr = customScanTimeOverride;
+        nowDateObj = new Date(dateStr + "T00:00:00");
       }
-      toggleView('success');
-    } else {
-      alert("Siswa tidak ditemukan!");
-      initScanner();
+
+      const timeConfig = getTodayTimeConfig(nowDateObj);
+
+      if (!timeConfig.active) {
+        alert(`Presensi Ditolak! Hari ${timeConfig.dayKey.toUpperCase()} diatur sebagai Hari Libur / Non-Aktif.`);
+        return initScanner();
+      }
+
+      autoDetectOrSyncSessionMode(timeStr, nowDateObj);
+
+      let computedStatus = "HADIR";
+
+      if (currentScanSession === "PAGI") {
+        if (timeStr < timeConfig.pStart) {
+          alert(`Presensi Pagi Ditolak! Belum memasuki jam mulai pagi (${timeConfig.pStart}).`);
+          return initScanner();
+        } else if (timeStr > timeConfig.pLimit) {
+          computedStatus = "TERLAMBAT";
+        }
+      } else if (currentScanSession === "SIANG") {
+        if (timeStr < timeConfig.sStart) {
+          alert(`Presensi Siang Ditolak! Belum memasuki jam mulai siang (${timeConfig.sStart}).`);
+          return initScanner();
+        } else if (timeStr > timeConfig.sLimit) {
+          computedStatus = "TERLAMBAT";
+        }
+      }
+
+      const tx = db.transaction("students", "readonly");
+      tx.objectStore("students").get(text.trim()).onsuccess = async (e) => {
+        const student = e.target.result;
+        if (student) {
+          const record = {
+            queue_id: `${dateStr}_${student.id_siswa}_${currentScanSession}`,
+            tanggal: dateStr, 
+            jam: timeStr, 
+            id_siswa: student.id_siswa,
+            nama: student.nama, 
+            kelas: student.kelas, 
+            sesi: currentScanSession,
+            status_presensi: computedStatus, 
+            status_pagi: currentScanSession === "PAGI" ? computedStatus : "",
+            status_siang: currentScanSession === "SIANG" ? computedStatus : "",
+            timestamp: Date.now()
+          };
+          
+          await saveToAttendanceQueue(record);
+          await saveToLocalHistoryDB(record);
+          if (navigator.onLine) syncQueueToGAS();
+
+          document.getElementById('res-nama').innerText = student.nama;
+          document.getElementById('res-nisn').innerText = student.nisn || "-";
+          document.getElementById('res-kelas').innerText = student.kelas;
+          document.getElementById('res-jam-scan').innerText = timeStr;
+          
+          const statusCardBox = document.getElementById('status-card-box');
+          const badgeBox = document.getElementById('res-badge-box');
+          const statusText = document.getElementById('res-presensi-status');
+          statusText.innerText = computedStatus;
+
+          if (computedStatus === "TERLAMBAT") {
+            statusCardBox.className = "bg-amber-50 border border-amber-200 rounded-2xl p-4 text-center shadow-sm space-y-2";
+            badgeBox.className = "text-amber-600 font-extrabold text-xl";
+          } else {
+            statusCardBox.className = "bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-center shadow-sm space-y-2";
+            badgeBox.className = "text-emerald-600 font-extrabold text-xl";
+          }
+          toggleView('success');
+        } else {
+          alert("Siswa tidak ditemukan!");
+          initScanner();
+        }
+      };
     }
-  };
-}
 
     function saveToAttendanceQueue(record) {
       return new Promise((resolve) => {
