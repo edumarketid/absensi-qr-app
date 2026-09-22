@@ -6,8 +6,7 @@
   <meta name="theme-color" content="#0b3c5d">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Sistem Absensi Murid - v2.18</title>
-  <!-- MANIFEST INLINE UNTUK DUKUNGAN PWA OFFLINE MANDIRI -->
+  <title>Sistem Absensi Murid - v2.19</title>
   <link rel="manifest" href='data:application/manifest+json,{"name":"Sistem Absensi Murid","short_name":"AbsensiQR","start_url":"./index.html","display":"standalone","background_color":"#0b3c5d","theme_color":"#0b3c5d","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/3135/3135715.png","sizes":"512x512","type":"image/png"}]}'>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -21,9 +20,7 @@
   </style>
 </head>
 <body class="flex justify-center items-center h-full p-0 sm:p-4">
-  <!-- CONTAINER APLIKASI UTAMA -->
   <div id="app-viewport-container" class="w-full max-w-md h-full sm:h-[840px] bg-white flex flex-col shadow-2xl overflow-hidden sm:rounded-3xl relative border border-gray-200">
-    <!-- 1. FIXED HEADER UTAMA -->
     <header class="bg-[#0b3c5d] text-white py-3.5 px-4 z-40 shadow-md flex-shrink-0">
       <div class="flex items-center justify-between">
         <div class="flex items-center space-x-3">
@@ -37,13 +34,11 @@
             <span id="status-dot" class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span>
             <span id="status-text" class="text-xs font-semibold">Memeriksa...</span>
           </div>
-          <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30 block mt-0.5">v2.18</span>
+          <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30 block mt-0.5">v2.19</span>
         </div>
       </div>
     </header>
-    <!-- 2. AREA KONTEN UTAMA -->
     <div class="flex-1 overflow-y-auto no-scrollbar relative bg-slate-50">
-      <!-- VIEW 1: SCANNER KAMERA -->
       <main id="view-scanner" class="h-full flex flex-col justify-between bg-gray-900 overflow-hidden">
         <div class="flex-1 relative flex flex-col items-center justify-center p-4 bg-black">
           <div class="w-full h-full max-h-[420px] overflow-hidden rounded-2xl relative flex items-center justify-center bg-gray-800 border border-gray-700">
@@ -91,7 +86,6 @@
           </div>
         </div>
       </main>
-      <!-- VIEW 2: HASIL SCAN -->
       <main id="view-success" class="p-4 hidden">
         <div id="status-card-box" class="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-center shadow-sm space-y-2">
           <h3 id="res-nama" class="font-bold text-gray-900 text-lg truncate">-</h3>
@@ -103,7 +97,6 @@
           <i class="fa-solid fa-qrcode"></i> Scan Siswa Berikutnya
         </button>
       </main>
-      <!-- VIEW 3: DATA MASTER SISWA -->
       <main id="view-students" class="p-4 hidden">
         <div class="flex items-center justify-between mb-2">
           <div>
@@ -135,7 +128,6 @@
         </div>
         <div id="students-list-container" class="space-y-2 pb-4"></div>
       </main>
-      <!-- VIEW 4: MONITORING PRESENSI -->
       <main id="view-monitoring" class="p-4 hidden">
         <div class="flex items-center justify-between mb-3">
           <div>
@@ -199,7 +191,6 @@
           <div id="monitoring-student-action-list" class="space-y-2.5 max-h-[380px] overflow-y-auto no-scrollbar pr-1"></div>
         </div>
       </main>
-      <!-- VIEW 5: DONASI / DUKUNGAN -->
       <main id="view-donation" class="p-4 hidden">
         <div class="text-center mb-3">
           <div class="w-12 h-12 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-2 text-xl shadow-sm"><i class="fa-solid fa-hand-holding-heart"></i></div>
@@ -232,7 +223,6 @@
         </div>
         <p class="text-[10px] text-center text-gray-400 italic">Tidak ada kewajiban untuk memberikan dukungan. Terima kasih sudah menggunakan dan ikut menyebarkan manfaat.</p>
       </main>
-      <!-- VIEW 6: TINDAK LANJUT SISWA -->
       <main id="view-tindak-lanjut" class="p-4 hidden">
         <div class="flex items-center justify-between mb-3">
           <div>
@@ -242,7 +232,6 @@
         </div>
         <div id="tindak-lanjut-list-container" class="space-y-3 pb-6"></div>
       </main>
-      <!-- VIEW 7: ATUR HARI LIBUR -->
       <main id="view-hari-libur" class="p-4 hidden">
         <div class="mb-3">
           <h2 class="font-bold text-lg text-gray-900">Atur Hari Libur</h2>
@@ -261,7 +250,6 @@
         </div>
         <div id="hari-libur-list-container" class="space-y-2"></div>
       </main>
-      <!-- VIEW 8: PENGATURAN SYSTEM -->
       <main id="view-settings" class="p-4 hidden">
         <div class="mb-3">
           <h2 class="font-bold text-lg text-gray-900">Pengaturan System</h2>
@@ -316,7 +304,6 @@
         </div>
       </main>
     </div>
-    <!-- MODAL POPUP TAMBAH SISWA BARU -->
     <div id="add-student-modal" class="absolute inset-0 bg-black/60 backdrop-blur-sm z-50 flex flex-col justify-end hidden">
       <div class="bg-white rounded-t-3xl p-5 space-y-3 shadow-2xl">
         <div class="flex items-center justify-between border-b border-gray-100 pb-2">
@@ -330,7 +317,6 @@
         <button onclick="saveNewStudentToDB()" class="w-full bg-emerald-600 text-white font-bold py-2.5 rounded-xl text-xs shadow-md"><i class="fa-solid fa-floppy-disk"></i> Simpan Siswa Baru</button>
       </div>
     </div>
-    <!-- MODAL MENU POPUP UTAMA -->
     <div id="menu-modal" class="absolute inset-0 bg-black/60 backdrop-blur-sm z-50 flex flex-col justify-end hidden">
       <div class="bg-white rounded-t-3xl p-5 space-y-4 shadow-2xl">
         <div class="flex items-center justify-between border-b border-gray-100 pb-3">
@@ -365,7 +351,6 @@
         </div>
       </div>
     </div>
-    <!-- 3. FIXED BOTTOM NAVIGATION -->
     <nav class="bg-white border-t border-gray-200 px-2 py-1.5 flex justify-between items-center text-center z-40 flex-shrink-0">
       <button id="nav-students" onclick="toggleView('students')" class="flex-1 flex flex-col items-center">
         <i class="fa-solid fa-user-group text-sm text-teal-600"></i>
@@ -424,7 +409,6 @@
     ];
     const DEFAULT_TIME_SETTINGS = { pagiStart: "06:00", pagiLimit: "07:15", siangStart: "12:00", siangLimit: "16:00" };
 
-    // HELPER PAD ZERO YANG LEBIH KETAT DAN AMAN DARI KARAKTER TULISAN/GARBAGE
     function padZeroTime(timeStr) {
       if (!timeStr || typeof timeStr !== "string") return "00:00";
       const clean = timeStr.trim();
@@ -562,7 +546,6 @@
       autoDetectOrSyncSessionMode(activeTimeStr, activeDateObj);
     }
 
-    // PENYEMPURNAAN RENDER RINGKASAN WAKTU TERSIMPAN
     function renderTimeSettingsSummary() {
       const container = document.getElementById("saved-time-summary-box");
       if (!container) return;
@@ -874,7 +857,10 @@
       views.forEach(v => document.getElementById('view-' + v).classList.add('hidden'));
       document.getElementById('view-' + viewName).classList.remove('hidden');
       if (viewName === 'students') loadStudentsView();
-      if (viewName === 'monitoring') autoDownloadMasterStudents();
+      if (viewName === 'monitoring') {
+        updateMonitoringDashboard();
+        if (navigator.onLine) autoDownloadMasterStudents();
+      }
       if (viewName === 'tindak-lanjut') renderTindakLanjutView();
       if (viewName === 'hari-libur') renderHariLiburView();
       if (viewName === 'settings') renderDaysConfigForm();
@@ -1367,7 +1353,6 @@
 
     function triggerManualSync() { if (navigator.onLine) syncQueueToGAS(); }
 
-    // REALTIME TICKER
     setInterval(() => {
       const isOnline = navigator.onLine;
       document.getElementById('status-dot').className = `w-2.5 h-2.5 rounded-full ${isOnline ? 'bg-green-400' : 'bg-amber-400'} inline-block`;
@@ -1393,6 +1378,7 @@
       renderDaysConfigForm();
       
       if (navigator.onLine) {
+        await pullTimeSettingsFromSheet();
         await autoDownloadMasterStudents();
       } else {
         loadLocalHistoryToMemory();
