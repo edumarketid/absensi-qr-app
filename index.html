@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0b3c5d">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Sistem Absensi Murid - v2.19</title>
+  <title>Sistem Absensi Murid - v2.20</title>
   <link rel="manifest" href='data:application/manifest+json,{"name":"Sistem Absensi Murid","short_name":"AbsensiQR","start_url":"./index.html","display":"standalone","background_color":"#0b3c5d","theme_color":"#0b3c5d","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/3135/3135715.png","sizes":"512x512","type":"image/png"}]}'>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -34,7 +34,7 @@
             <span id="status-dot" class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span>
             <span id="status-text" class="text-xs font-semibold">Memeriksa...</span>
           </div>
-          <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30 block mt-0.5">v2.19</span>
+          <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30 block mt-0.5">v2.20</span>
         </div>
       </div>
     </header>
@@ -273,7 +273,7 @@
               <p class="text-[10px] text-blue-100">Tarik data jam dari Sheet ke aplikasi.</p>
             </div>
           </div>
-          <button onclick="pullTimeSettingsFromSheet()" class="w-full bg-white text-blue-900 font-extrabold py-2 rounded-xl text-xs shadow-sm flex items-center justify-center space-x-1.5">
+          <button onclick="pullTimeSettingsFromSheet(true)" class="w-full bg-white text-blue-900 font-extrabold py-2 rounded-xl text-xs shadow-sm flex items-center justify-center space-x-1.5">
             <i class="fa-solid fa-arrows-rotate text-blue-600"></i>
             <span>Tarik Jam Presensi dari Sheet</span>
           </button>
@@ -673,16 +673,21 @@
       } else alert("Perangkat offline. Tersimpan di HP ini.");
     }
 
-    async function pullTimeSettingsFromSheet() {
-      if (!navigator.onLine) return alert("Koneksikan internet terlebih dahulu.");
+    async function pullTimeSettingsFromSheet(isManualClick) {
+      if (!navigator.onLine) {
+        if (isManualClick) alert("Koneksikan internet terlebih dahulu.");
+        return;
+      }
       try {
         const response = await fetch(`${GAS_WEB_APP_URL}?action=GET_TIME_SETTINGS`);
         const result = await response.json();
         if (result.success && result.time_settings) {
           applyTimeSettingsFromCloud(result.time_settings);
-          alert("Pengaturan waktu ditarik dari Sheet!");
+          if (isManualClick) alert("Pengaturan waktu ditarik dari Sheet!");
         }
-      } catch (err) { alert("Gagal menarik data."); }
+      } catch (err) { 
+        if (isManualClick) alert("Gagal menarik data."); 
+      }
     }
 
     function applyTimeSettingsFromCloud(timeObj) {
@@ -876,14 +881,9 @@
       const selectedSessionFilter = document.getElementById('monitoring-session-filter').value;
       
       const queueRecords = await getAllQueueFromDB();
+      const localHist = await getAllLocalHistoryFromDB();
       
-      let rawRecords = [];
-      if (navigator.onLine) {
-        rawRecords = [...fetchedTodayAttendance, ...fetchedAttendanceHistory, ...queueRecords].filter(r => r.tanggal === targetDate);
-      } else {
-        const localHist = await getAllLocalHistoryFromDB();
-        rawRecords = [...localHist, ...queueRecords].filter(r => r.tanggal === targetDate);
-      }
+      let rawRecords = [...fetchedTodayAttendance, ...fetchedAttendanceHistory, ...localHist, ...queueRecords].filter(r => r.tanggal === targetDate);
       
       if (selectedSessionFilter !== "ALL") {
         rawRecords = rawRecords.filter(r => String(r.sesi || "PAGI").toUpperCase() === selectedSessionFilter);
@@ -893,14 +893,15 @@
       let hadir = 0, terlambat = 0, alpa = 0, bolos = 0, sakit = 0, izin = 0, kegiatan = 0;
       const unabsentedStudents = [];
 
-      const dateObj = new Date(targetDate);
+      const dateObj = new Date(targetDate + "T00:00:00");
       const timeConfig = getTodayTimeConfig(dateObj);
       const now = new Date();
+      const todayFormatted = now.toISOString().split('T')[0];
       const nowStr = padZeroTime(now.toTimeString().split(' ')[0]);
       const siangLimitWithSec = timeConfig.sLimit + ":01";
       
-      const isPastSiangLimit = (targetDate < now.toISOString().split('T')[0]) || 
-                               (targetDate === now.toISOString().split('T')[0] && nowStr >= siangLimitWithSec);
+      const isPastSiangLimit = (targetDate < todayFormatted) || 
+                               (targetDate === todayFormatted && nowStr >= siangLimitWithSec);
 
       classStudents.forEach(std => {
         const stdRec = rawRecords.find(r => r.id_siswa === std.id_siswa);
@@ -1378,8 +1379,8 @@
       renderDaysConfigForm();
       
       if (navigator.onLine) {
-        await pullTimeSettingsFromSheet();
-        await autoDownloadMasterStudents();
+        pullTimeSettingsFromSheet(false);
+        autoDownloadMasterStudents();
       } else {
         loadLocalHistoryToMemory();
       }
