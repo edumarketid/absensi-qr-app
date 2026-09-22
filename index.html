@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0b3c5d">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Sistem Absensi Murid - v2.27</title>
+  <title>Sistem Absensi Murid - v2.28</title>
   <link rel="manifest" href='data:application/manifest+json,{"name":"Sistem Absensi Murid","short_name":"AbsensiQR","start_url":"./index.html","display":"standalone","background_color":"#0b3c5d","theme_color":"#0b3c5d","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/3135/3135715.png","sizes":"512x512","type":"image/png"}]}'>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -34,7 +34,7 @@
             <span id="status-dot" class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span>
             <span id="status-text" class="text-xs font-semibold">Memeriksa...</span>
           </div>
-          <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30 block mt-0.5">v2.27</span>
+          <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30 block mt-0.5">v2.28</span>
         </div>
       </div>
     </header>
@@ -427,6 +427,15 @@
       return "00:00";
     }
 
+    function parseBool(val, defaultVal = false) {
+      if (val === null || val === undefined || val === "") return defaultVal;
+      if (typeof val === "boolean") return val;
+      const str = String(val).trim().toLowerCase();
+      if (str === "true") return true;
+      if (str === "false") return false;
+      return defaultVal;
+    }
+
     function formatCleanDateLocal(val) {
       if (!val) return "";
       const str = String(val).trim();
@@ -460,7 +469,8 @@
       const dayKey = dayKeys[dateObj.getDay()];
       const def = DEFAULT_TIME_CONFIGS[dayKey];
 
-      const active = localStorage.getItem(`DAY_ACTIVE_${dayKey}`) !== null ? (localStorage.getItem(`DAY_ACTIVE_${dayKey}`) === "true") : def.active;
+      const rawActive = localStorage.getItem(`DAY_ACTIVE_${dayKey}`);
+      const active = parseBool(rawActive, def.active);
       
       const rawPStart = localStorage.getItem(`TIME_${dayKey}_PAGI_START`);
       const rawPLimit = localStorage.getItem(`TIME_${dayKey}_PAGI_LIMIT`);
@@ -576,7 +586,8 @@
       let html = "";
       DAYS_LIST.forEach(day => {
         const def = DEFAULT_TIME_CONFIGS[day.key];
-        const active = localStorage.getItem(`DAY_ACTIVE_${day.key}`) !== null ? (localStorage.getItem(`DAY_ACTIVE_${day.key}`) === "true") : def.active;
+        const rawActive = localStorage.getItem(`DAY_ACTIVE_${day.key}`);
+        const active = parseBool(rawActive, def.active);
         
         const rawPStart = localStorage.getItem(`TIME_${day.key}_PAGI_START`);
         const rawPLimit = localStorage.getItem(`TIME_${day.key}_PAGI_LIMIT`);
@@ -612,7 +623,8 @@
       let html = "";
       DAYS_LIST.forEach(day => {
         const def = DEFAULT_TIME_CONFIGS[day.key];
-        const active = localStorage.getItem(`DAY_ACTIVE_${day.key}`) !== null ? (localStorage.getItem(`DAY_ACTIVE_${day.key}`) === "true") : def.active;
+        const rawActive = localStorage.getItem(`DAY_ACTIVE_${day.key}`);
+        const active = parseBool(rawActive, def.active);
         
         const rawPStart = localStorage.getItem(`TIME_${day.key}_PAGI_START`);
         const rawPLimit = localStorage.getItem(`TIME_${day.key}_PAGI_LIMIT`);
@@ -672,13 +684,13 @@
         const sStart = padZeroTime(document.getElementById(`siang-start-${day.key}`).value || def.sStart);
         const sLimit = padZeroTime(document.getElementById(`siang-limit-${day.key}`).value || def.sLimit);
 
-        localStorage.setItem(`DAY_ACTIVE_${day.key}`, active);
+        localStorage.setItem(`DAY_ACTIVE_${day.key}`, String(active));
         localStorage.setItem(`TIME_${day.key}_PAGI_START`, pStart);
         localStorage.setItem(`TIME_${day.key}_PAGI_LIMIT`, pLimit);
         localStorage.setItem(`TIME_${day.key}_SIANG_START`, sStart);
         localStorage.setItem(`TIME_${day.key}_SIANG_LIMIT`, sLimit);
 
-        timeSettingsToSave[`DAY_ACTIVE_${day.key}`] = active;
+        timeSettingsToSave[`DAY_ACTIVE_${day.key}`] = String(active);
         timeSettingsToSave[`TIME_${day.key}_PAGI_START`] = pStart;
         timeSettingsToSave[`TIME_${day.key}_PAGI_LIMIT`] = pLimit;
         timeSettingsToSave[`TIME_${day.key}_SIANG_START`] = sStart;
@@ -702,8 +714,8 @@
       for (let key in timeObj) {
         if (timeObj.hasOwnProperty(key) && timeObj[key] !== "") {
           const valStr = String(timeObj[key]).trim();
-          if (valStr === "true" || valStr === "false") {
-            localStorage.setItem(key, valStr);
+          if (valStr.toLowerCase() === "true" || valStr.toLowerCase() === "false") {
+            localStorage.setItem(key, valStr.toLowerCase());
           } else if (valStr.includes(":")) {
             localStorage.setItem(key, padZeroTime(valStr));
           } else {
