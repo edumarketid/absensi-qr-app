@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0b3c5d">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Sistem Absensi Murid - v2.26</title>
+  <title>Sistem Absensi Murid - v2.27</title>
   <link rel="manifest" href='data:application/manifest+json,{"name":"Sistem Absensi Murid","short_name":"AbsensiQR","start_url":"./index.html","display":"standalone","background_color":"#0b3c5d","theme_color":"#0b3c5d","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/3135/3135715.png","sizes":"512x512","type":"image/png"}]}'>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -34,7 +34,7 @@
             <span id="status-dot" class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span>
             <span id="status-text" class="text-xs font-semibold">Memeriksa...</span>
           </div>
-          <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30 block mt-0.5">v2.26</span>
+          <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30 block mt-0.5">v2.27</span>
         </div>
       </div>
     </header>
@@ -921,7 +921,7 @@
                                (targetDate === todayFormatted && nowStr >= siangLimitWithSec);
 
       classStudents.forEach(std => {
-        const stdRec = rawRecords.find(r => String(r.id_siswa).trim() === String(std.id_siswa).trim());
+        const stdRec = rawRecords.find(r => String(r.id_siswa).trim().toUpperCase() === String(std.id_siswa).trim().toUpperCase());
         
         if (!stdRec) {
           if (isPastSiangLimit) {
@@ -982,7 +982,7 @@
         const studentsInCls = cachedStudents.filter(s => s.kelas === cls);
         let countHadirVal = 0;
         studentsInCls.forEach(std => {
-          const stdRec = attendanceRecords.find(r => String(r.id_siswa).trim() === String(std.id_siswa).trim());
+          const stdRec = attendanceRecords.find(r => String(r.id_siswa).trim().toUpperCase() === String(std.id_siswa).trim().toUpperCase());
           if (stdRec) {
             const st = String(stdRec.status_akhir || stdRec.status_presensi || "HADIR").toUpperCase();
             if (st === "HADIR" || st === "TERLAMBAT") countHadirVal++;
@@ -1087,7 +1087,7 @@
       await saveToAttendanceQueue(record);
       await saveToLocalHistoryDB(record);
       
-      fetchedTodayAttendance = fetchedTodayAttendance.filter(r => r.id_siswa !== idSiswa);
+      fetchedTodayAttendance = fetchedTodayAttendance.filter(r => String(r.id_siswa).trim().toUpperCase() !== String(idSiswa).trim().toUpperCase());
       fetchedTodayAttendance.push(record);
 
       const itemEl = document.getElementById(`action-item-${idSiswa}`);
