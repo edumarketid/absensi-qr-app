@@ -9,6 +9,7 @@ const STATIC_ASSETS = [
 ];
 
 self.addEventListener('install', (e) => {
+  self.skipWaiting();
   e.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       const cachePromises = STATIC_ASSETS.map(url => {
@@ -19,7 +20,7 @@ self.addEventListener('install', (e) => {
         }).catch(err => console.log('Fail caching: ', url));
       });
       return Promise.all(cachePromises);
-    }).then(() => self.skipWaiting())
+    })
   );
 });
 
