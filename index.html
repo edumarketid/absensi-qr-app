@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0b3c5d">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Sistem Absensi Murid - v2.23</title>
+  <title>Sistem Absensi Murid - v2.24</title>
   <link rel="manifest" href='data:application/manifest+json,{"name":"Sistem Absensi Murid","short_name":"AbsensiQR","start_url":"./index.html","display":"standalone","background_color":"#0b3c5d","theme_color":"#0b3c5d","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/3135/3135715.png","sizes":"512x512","type":"image/png"}]}'>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -34,7 +34,7 @@
             <span id="status-dot" class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span>
             <span id="status-text" class="text-xs font-semibold">Memeriksa...</span>
           </div>
-          <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30 block mt-0.5">v2.23</span>
+          <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30 block mt-0.5">v2.24</span>
         </div>
       </div>
     </header>
@@ -264,19 +264,6 @@
             <button onclick="renderTimeSettingsSummary()" class="text-[10px] text-blue-600 font-bold bg-blue-50 px-2 py-0.5 rounded-md"><i class="fa-solid fa-arrows-rotate"></i> Segarkan</button>
           </div>
           <div id="saved-time-summary-box" class="space-y-1.5 max-h-[160px] overflow-y-auto no-scrollbar pr-0.5"></div>
-        </div>
-        <div class="bg-blue-600 text-white p-3.5 rounded-2xl shadow-md space-y-2 mb-3">
-          <div class="flex items-center space-x-2">
-            <i class="fa-solid fa-cloud-arrow-down text-lg text-amber-300"></i>
-            <div>
-              <h3 class="font-bold text-xs">Sinkronkan Pengaturan Waktu</h3>
-              <p class="text-[10px] text-blue-100">Tarik data jam dari Sheet ke aplikasi.</p>
-            </div>
-          </div>
-          <button onclick="pullTimeSettingsFromSheet(true)" class="w-full bg-white text-blue-900 font-extrabold py-2 rounded-xl text-xs shadow-sm flex items-center justify-center space-x-1.5">
-            <i class="fa-solid fa-arrows-rotate text-blue-600"></i>
-            <span>Tarik Jam Presensi dari Sheet</span>
-          </button>
         </div>
         <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3 mb-3">
           <h3 class="font-bold text-xs text-blue-900 border-b border-gray-100 pb-2">Ubah Jam Presensi Per Hari</h3>
@@ -690,23 +677,6 @@
           alert("Pengaturan jam tersimpan & diunggah ke Sheet!");
         } catch (e) { alert("Pengaturan tersimpan lokal."); }
       } else alert("Perangkat offline. Tersimpan di HP ini.");
-    }
-
-    async function pullTimeSettingsFromSheet(isManualClick) {
-      if (!navigator.onLine) {
-        if (isManualClick) alert("Koneksikan internet terlebih dahulu.");
-        return;
-      }
-      try {
-        const response = await fetch(`${GAS_WEB_APP_URL}?action=GET_TIME_SETTINGS`);
-        const result = await response.json();
-        if (result.success && result.time_settings) {
-          applyTimeSettingsFromCloud(result.time_settings);
-          if (isManualClick) alert("Pengaturan waktu ditarik dari Sheet!");
-        }
-      } catch (err) { 
-        if (isManualClick) alert("Gagal menarik data."); 
-      }
     }
 
     function applyTimeSettingsFromCloud(timeObj) {
@@ -1406,7 +1376,6 @@
       renderDaysConfigForm();
       
       if (navigator.onLine) {
-        pullTimeSettingsFromSheet(false);
         autoDownloadMasterStudents();
       } else {
         loadLocalHistoryToMemory();
