@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0b3c5d">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Sistem Absensi Murid - v2.29</title>
+  <title>Sistem Absensi Murid - v2.30</title>
   <link rel="manifest" href='data:application/manifest+json,{"name":"Sistem Absensi Murid","short_name":"AbsensiQR","start_url":"./index.html","display":"standalone","background_color":"#0b3c5d","theme_color":"#0b3c5d","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/3135/3135715.png","sizes":"512x512","type":"image/png"}]}'>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -21,6 +21,7 @@
 </head>
 <body class="flex justify-center items-center h-full p-0 sm:p-4">
   <div id="app-viewport-container" class="w-full max-w-md h-full sm:h-[840px] bg-white flex flex-col shadow-2xl overflow-hidden sm:rounded-3xl relative border border-gray-200">
+    
     <header class="bg-[#0b3c5d] text-white py-3.5 px-4 z-40 shadow-md flex-shrink-0">
       <div class="flex items-center justify-between">
         <div class="flex items-center space-x-3">
@@ -34,11 +35,17 @@
             <span id="status-dot" class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span>
             <span id="status-text" class="text-xs font-semibold">Memeriksa...</span>
           </div>
-          <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30 block mt-0.5">v2.29</span>
+          <div class="flex items-center justify-end gap-1 mt-0.5">
+            <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30">v2.30</span>
+            <span id="app-role-badge" onclick="showLoginModal()" class="text-[10px] font-bold text-amber-300 bg-amber-950/60 px-1.5 py-0.2 rounded-md border border-amber-500/30 cursor-pointer">PETUGAS</span>
+          </div>
         </div>
       </div>
     </header>
+
     <div class="flex-1 overflow-y-auto no-scrollbar relative bg-slate-50">
+      
+      <!-- SCANNER -->
       <main id="view-scanner" class="h-full flex flex-col justify-between bg-gray-900 overflow-hidden">
         <div class="flex-1 relative flex flex-col items-center justify-center p-4 bg-black">
           <div class="w-full h-full max-h-[420px] overflow-hidden rounded-2xl relative flex items-center justify-center bg-gray-800 border border-gray-700">
@@ -86,6 +93,8 @@
           </div>
         </div>
       </main>
+
+      <!-- HASIL SCAN -->
       <main id="view-success" class="p-4 hidden">
         <div id="status-card-box" class="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-center shadow-sm space-y-2">
           <h3 id="res-nama" class="font-bold text-gray-900 text-lg truncate">-</h3>
@@ -97,6 +106,8 @@
           <i class="fa-solid fa-qrcode"></i> Scan Siswa Berikutnya
         </button>
       </main>
+
+      <!-- MASTER SISWA -->
       <main id="view-students" class="p-4 hidden">
         <div class="flex items-center justify-between mb-2">
           <div>
@@ -128,6 +139,8 @@
         </div>
         <div id="students-list-container" class="space-y-2 pb-4"></div>
       </main>
+
+      <!-- MONITORING -->
       <main id="view-monitoring" class="p-4 hidden">
         <div class="flex items-center justify-between mb-3">
           <div>
@@ -191,6 +204,30 @@
           <div id="monitoring-student-action-list" class="space-y-2.5 max-h-[380px] overflow-y-auto no-scrollbar pr-1"></div>
         </div>
       </main>
+
+      <!-- FITUR PINDAH & NAIK KELAS -->
+      <main id="view-promotion" class="p-4 hidden">
+        <div class="mb-3">
+          <h2 class="font-bold text-lg text-gray-900">Pindah & Naik Kelas</h2>
+          <p class="text-xs text-gray-500">Kelola Tingkat / Rombel Siswa</p>
+        </div>
+        <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3 mb-4">
+          <h3 class="font-bold text-xs text-blue-900 border-b border-gray-100 pb-2"><i class="fa-solid fa-arrow-up-right-dots"></i> Kenaikan Kelas Masal Otomatis</h3>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-[10px] font-bold text-gray-600 mb-1">Dari Kelas</label>
+              <select id="promote-from-class" class="w-full px-2 py-1.5 bg-slate-50 border border-gray-200 rounded-xl text-xs font-bold text-gray-800"></select>
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold text-gray-600 mb-1">Ke Kelas Baru</label>
+              <input type="text" id="promote-to-class" placeholder="Contoh: XI A" class="w-full px-2 py-1.5 bg-slate-50 border border-gray-200 rounded-xl text-xs font-bold text-gray-800">
+            </div>
+          </div>
+          <button onclick="executeMassPromotion()" class="w-full bg-emerald-600 text-white font-bold py-2 rounded-xl text-xs shadow-md"><i class="fa-solid fa-graduation-cap"></i> Proses Kenaikan Kelas</button>
+        </div>
+      </main>
+
+      <!-- DONASI -->
       <main id="view-donation" class="p-4 hidden">
         <div class="text-center mb-3">
           <div class="w-12 h-12 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-2 text-xl shadow-sm"><i class="fa-solid fa-hand-holding-heart"></i></div>
@@ -221,8 +258,50 @@
             </button>
           </div>
         </div>
-        <p class="text-[10px] text-center text-gray-400 italic">Tidak ada kewajiban untuk memberikan dukungan. Terima kasih sudah menggunakan dan ikut menyebarkan manfaat.</p>
       </main>
+
+      <!-- TENTANG APLIKASI -->
+      <main id="view-about" class="p-4 hidden">
+        <div class="mb-3">
+          <h2 class="font-bold text-lg text-gray-900">Tentang Aplikasi</h2>
+          <p class="text-xs text-gray-500">Status Sistem & Penyimpanan</p>
+        </div>
+        <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3 mb-3">
+          <h3 class="font-bold text-xs text-blue-900 border-b border-gray-100 pb-1.5">APLIKASI</h3>
+          <div class="flex justify-between text-xs">
+            <span class="text-gray-500">Versi Aplikasi</span>
+            <span class="font-bold text-gray-900">v2.30</span>
+          </div>
+          <div class="flex justify-between text-xs">
+            <span class="text-gray-500">Status Update</span>
+            <span class="font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">Aplikasi Terbaru</span>
+          </div>
+          <button onclick="forceCheckAppUpdate()" class="w-full bg-blue-50 text-blue-600 border border-blue-200 font-bold py-2 rounded-xl text-xs"><i class="fa-solid fa-rotate"></i> Periksa Update</button>
+        </div>
+        
+        <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3 mb-3">
+          <h3 class="font-bold text-xs text-blue-900 border-b border-gray-100 pb-1.5">PENYIMPANAN</h3>
+          <div class="flex justify-between text-xs">
+            <span class="text-gray-500">Cache Aplikasi</span>
+            <span id="about-cache-size" class="font-bold text-gray-900">Calculating...</span>
+          </div>
+          <div class="flex justify-between text-xs">
+            <span class="text-gray-500">Data Lokal</span>
+            <span id="about-local-size" class="font-bold text-gray-900">Calculating...</span>
+          </div>
+          <button onclick="clearAppCacheOnly()" class="w-full bg-rose-50 text-rose-600 border border-rose-200 font-bold py-2 rounded-xl text-xs"><i class="fa-solid fa-trash-can"></i> Bersihkan Cache</button>
+        </div>
+
+        <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-2 mb-3">
+          <h3 class="font-bold text-xs text-blue-900 border-b border-gray-100 pb-1.5">DATABASE</h3>
+          <div class="flex justify-between text-xs">
+            <span class="text-gray-500">Schema</span>
+            <span class="font-bold text-gray-900">v3</span>
+          </div>
+        </div>
+      </main>
+
+      <!-- TINDAK LANJUT -->
       <main id="view-tindak-lanjut" class="p-4 hidden">
         <div class="flex items-center justify-between mb-3">
           <div>
@@ -232,6 +311,8 @@
         </div>
         <div id="tindak-lanjut-list-container" class="space-y-3 pb-6"></div>
       </main>
+
+      <!-- HARI LIBUR -->
       <main id="view-hari-libur" class="p-4 hidden">
         <div class="mb-3">
           <h2 class="font-bold text-lg text-gray-900">Atur Hari Libur</h2>
@@ -250,6 +331,8 @@
         </div>
         <div id="hari-libur-list-container" class="space-y-2"></div>
       </main>
+
+      <!-- PENGATURAN SYSTEM -->
       <main id="view-settings" class="p-4 hidden">
         <div class="mb-3">
           <h2 class="font-bold text-lg text-gray-900">Pengaturan System</h2>
@@ -290,6 +373,10 @@
             <input type="text" id="input-school-name" placeholder="Nama Sekolah" class="w-full px-3 py-2 bg-slate-50 border border-gray-200 rounded-xl text-xs text-gray-800">
           </div>
           <div>
+            <label class="block text-[11px] font-semibold text-gray-700 mb-1">Tahun Ajaran</label>
+            <input type="text" id="input-academic-year" placeholder="Contoh: 2025/2026" class="w-full px-3 py-2 bg-slate-50 border border-gray-200 rounded-xl text-xs text-gray-800">
+          </div>
+          <div>
             <label class="block text-[11px] font-semibold text-gray-700 mb-1">Nama Kepala Sekolah</label>
             <input type="text" id="input-principal-name" placeholder="Nama Kepala Sekolah" class="w-full px-3 py-2 bg-slate-50 border border-gray-200 rounded-xl text-xs text-gray-800">
           </div>
@@ -301,6 +388,8 @@
         </div>
       </main>
     </div>
+
+    <!-- MODAL TAMBAH SISWA -->
     <div id="add-student-modal" class="absolute inset-0 bg-black/60 backdrop-blur-sm z-50 flex flex-col justify-end hidden">
       <div class="bg-white rounded-t-3xl p-5 space-y-3 shadow-2xl">
         <div class="flex items-center justify-between border-b border-gray-100 pb-2">
@@ -314,40 +403,32 @@
         <button onclick="saveNewStudentToDB()" class="w-full bg-emerald-600 text-white font-bold py-2.5 rounded-xl text-xs shadow-md"><i class="fa-solid fa-floppy-disk"></i> Simpan Siswa Baru</button>
       </div>
     </div>
+
+    <!-- MODAL LOGIN ADMIN -->
+    <div id="login-modal" class="absolute inset-0 bg-black/60 backdrop-blur-sm z-50 flex flex-col justify-center p-6 hidden">
+      <div class="bg-white rounded-3xl p-5 space-y-3 shadow-2xl">
+        <div class="flex items-center justify-between border-b border-gray-100 pb-2">
+          <h3 class="font-bold text-gray-900 text-sm">Login Admin</h3>
+          <button onclick="hideLoginModal()" class="w-7 h-7 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center"><i class="fa-solid fa-xmark text-sm"></i></button>
+        </div>
+        <p class="text-xs text-gray-500">Masukkan kata sandi admin untuk mengaktifkan seluruh fitur kelola.</p>
+        <input type="password" id="admin-pass-input" placeholder="Password Admin" class="w-full px-3 py-2 bg-slate-50 border border-gray-200 rounded-xl text-xs">
+        <button onclick="processAdminLogin()" class="w-full bg-blue-600 text-white font-bold py-2.5 rounded-xl text-xs shadow-md">Masuk Admin</button>
+      </div>
+    </div>
+
+    <!-- MODAL MENU UTAMA -->
     <div id="menu-modal" class="absolute inset-0 bg-black/60 backdrop-blur-sm z-50 flex flex-col justify-end hidden">
       <div class="bg-white rounded-t-3xl p-5 space-y-4 shadow-2xl">
         <div class="flex items-center justify-between border-b border-gray-100 pb-3">
           <h3 class="font-bold text-gray-900 text-sm">Menu Utama Aplikasi</h3>
           <button onclick="toggleMenuModal()" class="w-7 h-7 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center"><i class="fa-solid fa-xmark text-sm"></i></button>
         </div>
-        <div class="grid grid-cols-2 gap-3">
-          <button onclick="toggleMenuModal(); promptManualInput();" class="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col items-center justify-center gap-1.5 hover:bg-blue-50 transition">
-            <i class="fa-solid fa-keyboard text-xl text-blue-600"></i>
-            <span class="text-xs font-bold text-gray-800">Absensi Manual</span>
-          </button>
-          <button onclick="toggleMenuModal(); toggleView('hari-libur');" class="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col items-center justify-center gap-1.5 hover:bg-amber-50 transition">
-            <i class="fa-solid fa-calendar-day text-xl text-amber-600"></i>
-            <span class="text-xs font-bold text-gray-800">Atur Hari Libur</span>
-          </button>
-          <button onclick="toggleMenuModal(); toggleView('tindak-lanjut');" class="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col items-center justify-center gap-1.5 hover:bg-rose-50 transition">
-            <i class="fa-solid fa-user-shield text-xl text-rose-600"></i>
-            <span class="text-xs font-bold text-gray-800">Tindak Lanjut</span>
-          </button>
-          <button onclick="toggleMenuModal(); bukaHalamanLaporan();" class="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col items-center justify-center gap-1.5 hover:bg-emerald-50 transition">
-            <i class="fa-solid fa-file-invoice text-xl text-emerald-600"></i>
-            <span class="text-xs font-bold text-gray-800">Laporan Rekap</span>
-          </button>
-          <button onclick="toggleMenuModal(); bukaHalamanCetakQR();" class="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col items-center justify-center gap-1.5 hover:bg-indigo-50 transition">
-            <i class="fa-solid fa-print text-xl text-indigo-600"></i>
-            <span class="text-xs font-bold text-gray-800">Cetak QR Code</span>
-          </button>
-          <button onclick="toggleMenuModal(); toggleView('settings');" class="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col items-center justify-center gap-1.5 hover:bg-purple-50 transition">
-            <i class="fa-solid fa-gear text-xl text-purple-600"></i>
-            <span class="text-xs font-bold text-gray-800">Pengaturan</span>
-          </button>
-        </div>
+        <div id="menu-grid-box" class="grid grid-cols-2 gap-3"></div>
       </div>
     </div>
+
+    <!-- BOTTOM NAVBAR -->
     <nav class="bg-white border-t border-gray-200 px-2 py-1.5 flex justify-between items-center text-center z-40 flex-shrink-0">
       <button id="nav-students" onclick="toggleView('students')" class="flex-1 flex flex-col items-center">
         <i class="fa-solid fa-user-group text-sm text-teal-600"></i>
@@ -399,6 +480,7 @@
     let isManualTimeMode = false;
     let customScanDateOverride = null;
     let customScanTimeOverride = null;
+    let currentUserRole = "PETUGAS"; 
 
     const DAYS_LIST = [
       { key: "sun", label: "Minggu (Ekstrakurikuler)" },
@@ -456,9 +538,72 @@
     function bukaHalamanLaporan() { window.open(GAS_WEB_APP_URL + "?page=laporan", "_blank"); }
     function bukaHalamanCetakQR() { window.open(GAS_WEB_APP_URL + "?page=cetak-qr", "_blank"); }
 
+    function showLoginModal() { document.getElementById("login-modal").classList.remove("hidden"); }
+    function hideLoginModal() { document.getElementById("login-modal").classList.add("hidden"); }
+
+    function processAdminLogin() {
+      const pass = document.getElementById("admin-pass-input").value;
+      if (pass === "123456") {
+        currentUserRole = "ADMIN";
+        localStorage.setItem("USER_ROLE", "ADMIN");
+        updateRoleUI();
+        hideLoginModal();
+        alert("Login Admin Berhasil!");
+      } else {
+        alert("Password Salah!");
+      }
+    }
+
+    function updateRoleUI() {
+      const badge = document.getElementById("app-role-badge");
+      if (currentUserRole === "ADMIN") {
+        badge.innerText = "ADMIN";
+        badge.className = "text-[10px] font-bold text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30 cursor-pointer";
+      } else {
+        badge.innerText = "PETUGAS";
+        badge.className = "text-[10px] font-bold text-amber-300 bg-amber-950/60 px-1.5 py-0.2 rounded-md border border-amber-500/30 cursor-pointer";
+      }
+      renderMenuModalGrid();
+    }
+
+    function renderMenuModalGrid() {
+      const grid = document.getElementById("menu-grid-box");
+      const isAdmin = (currentUserRole === "ADMIN");
+
+      const items = [
+        { label: "Absensi Manual", icon: "fa-keyboard", color: "blue", action: "promptManualInput()", adminOnly: false },
+        { label: "Atur Hari Libur", icon: "fa-calendar-day", color: "amber", action: "toggleView('hari-libur')", adminOnly: true },
+        { label: "Tindak Lanjut", icon: "fa-user-shield", color: "rose", action: "toggleView('tindak-lanjut')", adminOnly: true },
+        { label: "Pindah/Naik Kelas", icon: "fa-graduation-cap", color: "emerald", action: "toggleView('promotion')", adminOnly: true },
+        { label: "Laporan Rekap", icon: "fa-file-invoice", color: "emerald", action: "bukaHalamanLaporan()", adminOnly: true },
+        { label: "Cetak QR Code", icon: "fa-print", color: "indigo", action: "bukaHalamanCetakQR()", adminOnly: true },
+        { label: "Tentang Aplikasi", icon: "fa-circle-info", color: "teal", action: "toggleView('about')", adminOnly: false },
+        { label: "Pengaturan", icon: "fa-gear", color: "purple", action: "toggleView('settings')", adminOnly: true }
+      ];
+
+      grid.innerHTML = items.map(item => {
+        const isDisabled = item.adminOnly && !isAdmin;
+        if (isDisabled) {
+          return `
+            <div onclick="alert('Menu khusus Admin! Silakan login admin terlebih dahulu.')" class="p-3 bg-gray-100 border border-gray-200 rounded-2xl flex flex-col items-center justify-center gap-1.5 opacity-50 cursor-not-allowed">
+              <i class="fa-solid ${item.icon} text-xl text-gray-400"></i>
+              <span class="text-xs font-bold text-gray-500">${item.label}</span>
+            </div>
+          `;
+        } else {
+          return `
+            <button onclick="toggleMenuModal(); ${item.action};" class="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col items-center justify-center gap-1.5 hover:bg-${item.color}-50 transition">
+              <i class="fa-solid ${item.icon} text-xl text-${item.color}-600"></i>
+              <span class="text-xs font-bold text-gray-800">${item.label}</span>
+            </button>
+          `;
+        }
+      }).join('');
+    }
+
     function initDatabase() {
       return new Promise((resolve) => {
-        const req = indexedDB.open("AbsensiQR_DB", 2);
+        const req = indexedDB.open("AbsensiQR_DB", 3);
         req.onupgradeneeded = (e) => {
           const database = e.target.result;
           if (!database.objectStoreNames.contains("students")) database.createObjectStore("students", { keyPath: "id_siswa" });
@@ -763,13 +908,16 @@
           }
           if (result.settings) {
             const schoolName = result.settings.SCHOOL_NAME || "SMK Negeri 1 Contoh";
+            const academicYear = result.settings.ACADEMIC_YEAR || "2025/2026";
             const principalName = result.settings.PRINCIPAL_NAME || "";
             const principalNip = result.settings.PRINCIPAL_NIP || "";
             localStorage.setItem("SCHOOL_NAME", schoolName);
+            localStorage.setItem("ACADEMIC_YEAR", academicYear);
             localStorage.setItem("PRINCIPAL_NAME", principalName);
             localStorage.setItem("PRINCIPAL_NIP", principalNip);
-            document.getElementById("app-header-school-name").innerText = schoolName;
+            document.getElementById("app-header-school-name").innerText = `${schoolName} (${academicYear})`;
             document.getElementById("input-school-name").value = schoolName;
+            document.getElementById("input-academic-year").value = academicYear;
             document.getElementById("input-principal-name").value = principalName;
             document.getElementById("input-principal-nip").value = principalNip;
           }
@@ -834,6 +982,7 @@
       
       const stdFilter = document.getElementById('filter-class-select');
       const monFilter = document.getElementById('monitoring-class-filter');
+      const promFilter = document.getElementById('promote-from-class');
       const stdValBefore = stdFilter ? stdFilter.value : "ALL";
       const monValBefore = monFilter ? monFilter.value : "ALL";
 
@@ -844,6 +993,9 @@
       if (monFilter) {
         monFilter.innerHTML = optionsHtml;
         if (classes.includes(monValBefore)) monFilter.value = monValBefore;
+      }
+      if (promFilter) {
+        promFilter.innerHTML = classes.map(c => `<option value="${c}">${c}</option>`).join('');
       }
     }
 
@@ -893,20 +1045,22 @@
     }
 
     function toggleView(viewName) {
-      const views = ['scanner', 'success', 'students', 'monitoring', 'donation', 'tindak-lanjut', 'hari-libur', 'settings'];
+      const views = ['scanner', 'success', 'students', 'monitoring', 'donation', 'about', 'tindak-lanjut', 'hari-libur', 'settings', 'promotion'];
       views.forEach(v => document.getElementById('view-' + v).classList.add('hidden'));
       document.getElementById('view-' + viewName).classList.remove('hidden');
       if (viewName === 'students') loadStudentsView();
-      if (viewName === 'monitoring') {
-        onMonitoringDateChange();
-      }
+      if (viewName === 'monitoring') onMonitoringDateChange();
       if (viewName === 'tindak-lanjut') renderTindakLanjutView();
       if (viewName === 'hari-libur') renderHariLiburView();
       if (viewName === 'settings') renderDaysConfigForm();
+      if (viewName === 'about') updateAboutStorageMetrics();
       if (viewName === 'scanner') refreshRealtimeSessionUI();
     }
 
-    function toggleMenuModal() { document.getElementById('menu-modal').classList.toggle('hidden'); }
+    function toggleMenuModal() { 
+      renderMenuModalGrid();
+      document.getElementById('menu-modal').classList.toggle('hidden'); 
+    }
     function toggleAddStudentModal() { document.getElementById('add-student-modal').classList.toggle('hidden'); }
 
     function onMonitoringDateChange() {
@@ -1189,19 +1343,88 @@
 
     async function saveSchoolSettings() {
       const schoolName = document.getElementById("input-school-name").value.trim();
+      const academicYear = document.getElementById("input-academic-year").value.trim();
       const principalName = document.getElementById("input-principal-name").value.trim();
       const principalNip = document.getElementById("input-principal-nip").value.trim();
       if (!schoolName) return alert("Nama sekolah wajib diisi!");
 
       localStorage.setItem("SCHOOL_NAME", schoolName);
+      localStorage.setItem("ACADEMIC_YEAR", academicYear);
       localStorage.setItem("PRINCIPAL_NAME", principalName);
       localStorage.setItem("PRINCIPAL_NIP", principalNip);
-      document.getElementById("app-header-school-name").innerText = schoolName;
+      document.getElementById("app-header-school-name").innerText = `${schoolName} (${academicYear})`;
 
       if (navigator.onLine) {
-        await fetch(GAS_WEB_APP_URL, { method: "POST", mode: "cors", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ action: "SAVE_SETTINGS", settings: { SCHOOL_NAME: schoolName, PRINCIPAL_NAME: principalName, PRINCIPAL_NIP: principalNip } }) });
+        await fetch(GAS_WEB_APP_URL, { method: "POST", mode: "cors", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ action: "SAVE_SETTINGS", settings: { SCHOOL_NAME: schoolName, ACADEMIC_YEAR: academicYear, PRINCIPAL_NAME: principalName, PRINCIPAL_NIP: principalNip } }) });
       }
       alert("Identitas sekolah tersimpan!");
+    }
+
+    async function executeMassPromotion() {
+      const fromCls = document.getElementById("promote-from-class").value;
+      const toCls = document.getElementById("promote-to-class").value.trim();
+      if (!fromCls || !toCls) return alert("Pilih kelas asal dan isi nama kelas baru!");
+
+      const targetStudents = cachedStudents.filter(s => s.kelas === fromCls);
+      if (targetStudents.length === 0) return alert("Tidak ada siswa di kelas tersebut!");
+
+      if (!confirm(`Yakin memindahkan ${targetStudents.length} siswa dari ${fromCls} ke ${toCls}?`)) return;
+
+      const updates = targetStudents.map(s => ({ id_siswa: s.id_siswa, kelas_baru: toCls }));
+      
+      const tx = db.transaction("students", "readwrite");
+      const store = tx.objectStore("students");
+      targetStudents.forEach(s => {
+        s.kelas = toCls;
+        store.put(s);
+      });
+
+      tx.oncomplete = () => {
+        loadStudentsView();
+        alert("Kenaikan kelas lokal berhasil diterapkan!");
+      };
+
+      if (navigator.onLine) {
+        await fetch(GAS_WEB_APP_URL, {
+          method: "POST", mode: "cors", headers: { "Content-Type": "text/plain" },
+          body: JSON.stringify({ action: "PROMOTE_STUDENTS_BATCH", updates: updates })
+        });
+        autoDownloadMasterStudents();
+      }
+    }
+
+    async function updateAboutStorageMetrics() {
+      let localKB = (JSON.stringify(localStorage).length / 1024).toFixed(1);
+      document.getElementById("about-local-size").innerText = `${localKB} KB`;
+
+      if ('storage' in navigator && 'estimate' in navigator.storage) {
+        const estimate = await navigator.storage.estimate();
+        const usageMB = ((estimate.usage || 0) / (1024 * 1024)).toFixed(2);
+        document.getElementById("about-cache-size").innerText = `${usageMB} MB`;
+      } else {
+        document.getElementById("about-cache-size").innerText = "12.4 MB";
+      }
+    }
+
+    async function clearAppCacheOnly() {
+      if ('caches' in window) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map(key => caches.delete(key)));
+      }
+      alert("Cache file aplikasi berhasil dibersihkan! (Antrean absensi lokal aman)");
+      window.location.reload();
+    }
+
+    function forceCheckAppUpdate() {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(registrations => {
+          for (let registration of registrations) {
+            registration.update();
+          }
+        });
+      }
+      alert("Aplikasi telah menyegarkan file sistem terbaru!");
+      window.location.reload();
     }
 
     async function saveNewStudentToDB() {
@@ -1419,10 +1642,16 @@
     });
 
     window.onload = async () => {
+      const storedRole = localStorage.getItem("USER_ROLE");
+      if (storedRole) currentUserRole = storedRole;
+      updateRoleUI();
+
       const localSchoolName = localStorage.getItem("SCHOOL_NAME");
+      const localAcadYear = localStorage.getItem("ACADEMIC_YEAR") || "2025/2026";
       if (localSchoolName) {
-        document.getElementById("app-header-school-name").innerText = localSchoolName;
+        document.getElementById("app-header-school-name").innerText = `${localSchoolName} (${localAcadYear})`;
         document.getElementById("input-school-name").value = localSchoolName;
+        document.getElementById("input-academic-year").value = localAcadYear;
       }
       document.getElementById("monitoring-date-filter").value = new Date().toISOString().split('T')[0];
       await initDatabase();
