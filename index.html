@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0b3c5d">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Sistem Absensi Murid - v2.22</title>
+  <title>Sistem Absensi Murid - v2.23</title>
   <link rel="manifest" href='data:application/manifest+json,{"name":"Sistem Absensi Murid","short_name":"AbsensiQR","start_url":"./index.html","display":"standalone","background_color":"#0b3c5d","theme_color":"#0b3c5d","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/3135/3135715.png","sizes":"512x512","type":"image/png"}]}'>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -34,7 +34,7 @@
             <span id="status-dot" class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span>
             <span id="status-text" class="text-xs font-semibold">Memeriksa...</span>
           </div>
-          <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30 block mt-0.5">v2.22</span>
+          <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30 block mt-0.5">v2.23</span>
         </div>
       </div>
     </header>
@@ -407,7 +407,16 @@
       { key: "fri", label: "Jumat" },
       { key: "sat", label: "Sabtu" }
     ];
-    const DEFAULT_TIME_SETTINGS = { pagiStart: "06:00", pagiLimit: "07:15", siangStart: "12:00", siangLimit: "16:00" };
+
+    const DEFAULT_TIME_CONFIGS = {
+      sun: { active: false, pStart: "06:00", pLimit: "07:25", sStart: "12:00", sLimit: "13:45" },
+      mon: { active: true,  pStart: "06:00", pLimit: "07:25", sStart: "12:00", sLimit: "13:45" },
+      tue: { active: true,  pStart: "06:00", pLimit: "07:25", sStart: "12:00", sLimit: "13:45" },
+      wed: { active: true,  pStart: "06:00", pLimit: "07:25", sStart: "12:00", sLimit: "13:45" },
+      thu: { active: true,  pStart: "06:00", pLimit: "07:25", sStart: "12:00", sLimit: "13:45" },
+      fri: { active: true,  pStart: "06:00", pLimit: "07:25", sStart: "10:00", sLimit: "11:45" },
+      sat: { active: true,  pStart: "06:00", pLimit: "07:25", sStart: "12:00", sLimit: "13:45" }
+    };
 
     function padZeroTime(timeStr) {
       if (!timeStr || typeof timeStr !== "string") return "00:00";
@@ -456,17 +465,19 @@
     function getTodayTimeConfig(dateObj) {
       const dayKeys = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
       const dayKey = dayKeys[dateObj.getDay()];
-      const active = localStorage.getItem(`DAY_ACTIVE_${dayKey}`) !== null ? (localStorage.getItem(`DAY_ACTIVE_${dayKey}`) === "true") : (dayKey !== "sun");
+      const def = DEFAULT_TIME_CONFIGS[dayKey];
+
+      const active = localStorage.getItem(`DAY_ACTIVE_${dayKey}`) !== null ? (localStorage.getItem(`DAY_ACTIVE_${dayKey}`) === "true") : def.active;
       
       const rawPStart = localStorage.getItem(`TIME_${dayKey}_PAGI_START`);
       const rawPLimit = localStorage.getItem(`TIME_${dayKey}_PAGI_LIMIT`);
       const rawSStart = localStorage.getItem(`TIME_${dayKey}_SIANG_START`);
       const rawSLimit = localStorage.getItem(`TIME_${dayKey}_SIANG_LIMIT`);
 
-      const pStart = padZeroTime(rawPStart && rawPStart.includes(":") ? rawPStart : DEFAULT_TIME_SETTINGS.pagiStart);
-      const pLimit = padZeroTime(rawPLimit && rawPLimit.includes(":") ? rawPLimit : DEFAULT_TIME_SETTINGS.pagiLimit);
-      const sStart = padZeroTime(rawSStart && rawSStart.includes(":") ? rawSStart : DEFAULT_TIME_SETTINGS.siangStart);
-      const sLimit = padZeroTime(rawSLimit && rawSLimit.includes(":") ? rawSLimit : DEFAULT_TIME_SETTINGS.siangLimit);
+      const pStart = padZeroTime(rawPStart && rawPStart.includes(":") ? rawPStart : def.pStart);
+      const pLimit = padZeroTime(rawPLimit && rawPLimit.includes(":") ? rawPLimit : def.pLimit);
+      const sStart = padZeroTime(rawSStart && rawSStart.includes(":") ? rawSStart : def.sStart);
+      const sLimit = padZeroTime(rawSLimit && rawSLimit.includes(":") ? rawSLimit : def.sLimit);
 
       return { dayKey, active, pStart, pLimit, sStart, sLimit };
     }
@@ -558,18 +569,18 @@
       if (!container) return;
       let html = "";
       DAYS_LIST.forEach(day => {
-        const defaultActive = day.key !== "sun";
-        const active = localStorage.getItem(`DAY_ACTIVE_${day.key}`) !== null ? (localStorage.getItem(`DAY_ACTIVE_${day.key}`) === "true") : defaultActive;
+        const def = DEFAULT_TIME_CONFIGS[day.key];
+        const active = localStorage.getItem(`DAY_ACTIVE_${day.key}`) !== null ? (localStorage.getItem(`DAY_ACTIVE_${day.key}`) === "true") : def.active;
         
         const rawPStart = localStorage.getItem(`TIME_${day.key}_PAGI_START`);
         const rawPLimit = localStorage.getItem(`TIME_${day.key}_PAGI_LIMIT`);
         const rawSStart = localStorage.getItem(`TIME_${day.key}_SIANG_START`);
         const rawSLimit = localStorage.getItem(`TIME_${day.key}_SIANG_LIMIT`);
 
-        const pStart = padZeroTime(rawPStart && rawPStart.includes(":") ? rawPStart : DEFAULT_TIME_SETTINGS.pagiStart);
-        const pLimit = padZeroTime(rawPLimit && rawPLimit.includes(":") ? rawPLimit : DEFAULT_TIME_SETTINGS.pagiLimit);
-        const sStart = padZeroTime(rawSStart && rawSStart.includes(":") ? rawSStart : DEFAULT_TIME_SETTINGS.siangStart);
-        const sLimit = padZeroTime(rawSLimit && rawSLimit.includes(":") ? rawSLimit : DEFAULT_TIME_SETTINGS.siangLimit);
+        const pStart = padZeroTime(rawPStart && rawPStart.includes(":") ? rawPStart : def.pStart);
+        const pLimit = padZeroTime(rawPLimit && rawPLimit.includes(":") ? rawPLimit : def.pLimit);
+        const sStart = padZeroTime(rawSStart && rawSStart.includes(":") ? rawSStart : def.sStart);
+        const sLimit = padZeroTime(rawSLimit && rawSLimit.includes(":") ? rawSLimit : def.sLimit);
 
         html += `
           <div class="p-2 bg-slate-50 border border-gray-100 rounded-xl flex items-center justify-between text-[10px]">
@@ -594,18 +605,18 @@
       if (!container) return;
       let html = "";
       DAYS_LIST.forEach(day => {
-        const defaultActive = day.key !== "sun";
-        const active = localStorage.getItem(`DAY_ACTIVE_${day.key}`) !== null ? (localStorage.getItem(`DAY_ACTIVE_${day.key}`) === "true") : defaultActive;
+        const def = DEFAULT_TIME_CONFIGS[day.key];
+        const active = localStorage.getItem(`DAY_ACTIVE_${day.key}`) !== null ? (localStorage.getItem(`DAY_ACTIVE_${day.key}`) === "true") : def.active;
         
         const rawPStart = localStorage.getItem(`TIME_${day.key}_PAGI_START`);
         const rawPLimit = localStorage.getItem(`TIME_${day.key}_PAGI_LIMIT`);
         const rawSStart = localStorage.getItem(`TIME_${day.key}_SIANG_START`);
         const rawSLimit = localStorage.getItem(`TIME_${day.key}_SIANG_LIMIT`);
 
-        const pStart = padZeroTime(rawPStart && rawPStart.includes(":") ? rawPStart : DEFAULT_TIME_SETTINGS.pagiStart);
-        const pLimit = padZeroTime(rawPLimit && rawPLimit.includes(":") ? rawPLimit : DEFAULT_TIME_SETTINGS.pagiLimit);
-        const sStart = padZeroTime(rawSStart && rawSStart.includes(":") ? rawSStart : DEFAULT_TIME_SETTINGS.siangStart);
-        const sLimit = padZeroTime(rawSLimit && rawSLimit.includes(":") ? rawSLimit : DEFAULT_TIME_SETTINGS.siangLimit);
+        const pStart = padZeroTime(rawPStart && rawPStart.includes(":") ? rawPStart : def.pStart);
+        const pLimit = padZeroTime(rawPLimit && rawPLimit.includes(":") ? rawPLimit : def.pLimit);
+        const sStart = padZeroTime(rawSStart && rawSStart.includes(":") ? rawSStart : def.sStart);
+        const sLimit = padZeroTime(rawSLimit && rawSLimit.includes(":") ? rawSLimit : def.sLimit);
 
         html += `
           <div class="p-3 bg-slate-50 border border-gray-200 rounded-xl space-y-2">
@@ -648,11 +659,12 @@
     async function saveDaysTimeSettings() {
       const timeSettingsToSave = {};
       DAYS_LIST.forEach(day => {
+        const def = DEFAULT_TIME_CONFIGS[day.key];
         const active = document.getElementById(`toggle-${day.key}`).checked;
-        const pStart = padZeroTime(document.getElementById(`pagi-start-${day.key}`).value || DEFAULT_TIME_SETTINGS.pagiStart);
-        const pLimit = padZeroTime(document.getElementById(`pagi-limit-${day.key}`).value || DEFAULT_TIME_SETTINGS.pagiLimit);
-        const sStart = padZeroTime(document.getElementById(`siang-start-${day.key}`).value || DEFAULT_TIME_SETTINGS.siangStart);
-        const sLimit = padZeroTime(document.getElementById(`siang-limit-${day.key}`).value || DEFAULT_TIME_SETTINGS.siangLimit);
+        const pStart = padZeroTime(document.getElementById(`pagi-start-${day.key}`).value || def.pStart);
+        const pLimit = padZeroTime(document.getElementById(`pagi-limit-${day.key}`).value || def.pLimit);
+        const sStart = padZeroTime(document.getElementById(`siang-start-${day.key}`).value || def.sStart);
+        const sLimit = padZeroTime(document.getElementById(`siang-limit-${day.key}`).value || def.sLimit);
 
         localStorage.setItem(`DAY_ACTIVE_${day.key}`, active);
         localStorage.setItem(`TIME_${day.key}_PAGI_START`, pStart);
