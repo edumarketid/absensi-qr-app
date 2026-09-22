@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0b3c5d">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Sistem Absensi Murid - v2.21</title>
+  <title>Sistem Absensi Murid - v2.22</title>
   <link rel="manifest" href='data:application/manifest+json,{"name":"Sistem Absensi Murid","short_name":"AbsensiQR","start_url":"./index.html","display":"standalone","background_color":"#0b3c5d","theme_color":"#0b3c5d","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/3135/3135715.png","sizes":"512x512","type":"image/png"}]}'>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -34,7 +34,7 @@
             <span id="status-dot" class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span>
             <span id="status-text" class="text-xs font-semibold">Memeriksa...</span>
           </div>
-          <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30 block mt-0.5">v2.21</span>
+          <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30 block mt-0.5">v2.22</span>
         </div>
       </div>
     </header>
@@ -425,6 +425,13 @@
       return "00:00";
     }
 
+    function formatCleanDateLocal(val) {
+      if (!val) return "";
+      const str = String(val).trim();
+      const match = str.match(/\d{4}-\d{2}-\d{2}/);
+      return match ? match[0] : str;
+    }
+
     function bukaHalamanLaporan() { window.open(GAS_WEB_APP_URL + "?page=laporan", "_blank"); }
     function bukaHalamanCetakQR() { window.open(GAS_WEB_APP_URL + "?page=cetak-qr", "_blank"); }
 
@@ -511,7 +518,7 @@
         if (!inputTime || !inputTime.trim()) return;
 
         isManualTimeMode = true;
-        customScanDateOverride = inputDate.trim();
+        customScanDateOverride = formatCleanDateLocal(inputDate.trim());
         customScanTimeOverride = padZeroTime(inputTime.trim());
       } else {
         isManualTimeMode = false;
@@ -711,7 +718,7 @@
         return;
       }
       try {
-        const targetDateFilter = targetDateStr || document.getElementById('monitoring-date-filter').value || new Date().toISOString().split('T')[0];
+        const targetDateFilter = formatCleanDateLocal(targetDateStr) || document.getElementById('monitoring-date-filter').value || new Date().toISOString().split('T')[0];
         const response = await fetch(`${GAS_WEB_APP_URL}?action=GET_APP_DATA&tanggal=${targetDateFilter}`);
         const result = await response.json();
         if (result.success) {
@@ -745,10 +752,11 @@
             const storeHist = txHist.objectStore("attendance_history");
             
             combinedHist.forEach(rec => {
-              if (rec.id_siswa && rec.tanggal) {
+              var cleanRecTgl = formatCleanDateLocal(rec.tanggal);
+              if (rec.id_siswa && cleanRecTgl) {
                 storeHist.put({
-                  queue_id: `${rec.tanggal}_${rec.id_siswa}_${rec.sesi || 'PAGI'}`,
-                  tanggal: rec.tanggal, jam: padZeroTime(rec.jam || rec.jam_pagi || rec.jam_siang || ""),
+                  queue_id: `${cleanRecTgl}_${rec.id_siswa}_${rec.sesi || 'PAGI'}`,
+                  tanggal: cleanRecTgl, jam: padZeroTime(rec.jam || rec.jam_pagi || rec.jam_siang || ""),
                   jam_pagi: padZeroTime(rec.jam_pagi || ""), status_pagi: rec.status_pagi || "",
                   jam_siang: padZeroTime(rec.jam_siang || ""), status_siang: rec.status_siang || "",
                   id_siswa: rec.id_siswa, nama: rec.nama, kelas: rec.kelas,
@@ -787,6 +795,7 @@
         const tx = db.transaction("attendance_history", "readonly");
         tx.objectStore("attendance_history").getAll().onsuccess = (e) => {
           fetchedAttendanceHistory = e.target.result || [];
+          updateMonitoringDashboard();
         };
       }
     }
@@ -873,7 +882,7 @@
     function toggleAddStudentModal() { document.getElementById('add-student-modal').classList.toggle('hidden'); }
 
     function onMonitoringDateChange() {
-      const targetDate = document.getElementById('monitoring-date-filter').value || new Date().toISOString().split('T')[0];
+      const targetDate = formatCleanDateLocal(document.getElementById('monitoring-date-filter').value) || new Date().toISOString().split('T')[0];
       updateMonitoringDashboard();
       if (navigator.onLine) {
         autoDownloadMasterStudents(targetDate);
@@ -881,14 +890,14 @@
     }
 
     async function updateMonitoringDashboard() {
-      const targetDate = document.getElementById('monitoring-date-filter').value || new Date().toISOString().split('T')[0];
+      const targetDate = formatCleanDateLocal(document.getElementById('monitoring-date-filter').value) || new Date().toISOString().split('T')[0];
       const selectedClass = document.getElementById('monitoring-class-filter').value;
       const selectedSessionFilter = document.getElementById('monitoring-session-filter').value;
       
       const queueRecords = await getAllQueueFromDB();
       const localHist = await getAllLocalHistoryFromDB();
       
-      let rawRecords = [...fetchedTodayAttendance, ...fetchedAttendanceHistory, ...localHist, ...queueRecords].filter(r => r.tanggal === targetDate);
+      let rawRecords = [...fetchedTodayAttendance, ...fetchedAttendanceHistory, ...localHist, ...queueRecords].filter(r => formatCleanDateLocal(r.tanggal) === targetDate);
       
       if (selectedSessionFilter !== "ALL") {
         rawRecords = rawRecords.filter(r => String(r.sesi || "PAGI").toUpperCase() === selectedSessionFilter);
@@ -909,7 +918,7 @@
                                (targetDate === todayFormatted && nowStr >= siangLimitWithSec);
 
       classStudents.forEach(std => {
-        const stdRec = rawRecords.find(r => r.id_siswa === std.id_siswa);
+        const stdRec = rawRecords.find(r => String(r.id_siswa).trim() === String(std.id_siswa).trim());
         
         if (!stdRec) {
           if (isPastSiangLimit) {
@@ -970,7 +979,7 @@
         const studentsInCls = cachedStudents.filter(s => s.kelas === cls);
         let countHadirVal = 0;
         studentsInCls.forEach(std => {
-          const stdRec = attendanceRecords.find(r => r.id_siswa === std.id_siswa);
+          const stdRec = attendanceRecords.find(r => String(r.id_siswa).trim() === String(std.id_siswa).trim());
           if (stdRec) {
             const st = String(stdRec.status_akhir || stdRec.status_presensi || "HADIR").toUpperCase();
             if (st === "HADIR" || st === "TERLAMBAT") countHadirVal++;
@@ -1064,10 +1073,11 @@
       const student = cachedStudents.find(s => s.id_siswa === idSiswa);
       if (!student) return;
       
+      const cleanTargetDate = formatCleanDateLocal(targetDate);
       const timeStr = padZeroTime((isManualTimeMode && customScanTimeOverride) ? customScanTimeOverride : new Date().toTimeString().split(' ')[0].substring(0, 5));
       const record = {
-        queue_id: `${targetDate}_${idSiswa}_${currentScanSession}`,
-        tanggal: targetDate, jam: timeStr, id_siswa: idSiswa,
+        queue_id: `${cleanTargetDate}_${idSiswa}_${currentScanSession}`,
+        tanggal: cleanTargetDate, jam: timeStr, id_siswa: idSiswa,
         nama: student.nama, kelas: student.kelas, sesi: currentScanSession,
         status_presensi: status, status_manual: status, timestamp: Date.now()
       };
@@ -1139,7 +1149,7 @@
       const ket = document.getElementById("input-libur-ket").value.trim();
       if (!tgl || !ket) return alert("Tanggal & Keterangan wajib diisi!");
       
-      const newItem = { tanggal: tgl, keterangan: ket };
+      const newItem = { tanggal: formatCleanDateLocal(tgl), keterangan: ket };
       fetchedHariLiburList.push(newItem);
       localStorage.setItem("CACHE_HARI_LIBUR", JSON.stringify(fetchedHariLiburList));
       renderHariLiburView();
