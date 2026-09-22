@@ -406,20 +406,70 @@
     };
 
     function padZeroTime(timeStr) {
-  if (!timeStr || typeof timeStr !== "string" || timeStr.trim() === "" || timeStr === "undefined") return "00:00";
-  const clean = timeStr.trim();
-  const parts = clean.split(":");
+  if (!timeStr || typeof timeStr !== "string" || timeStr.trim() === "" || timeStr === "undefined" || timeStr === "null") return "00:00";
+  var clean = timeStr.trim();
+  var parts = clean.split(":");
   if (parts.length >= 2) {
-    let h = parseInt(parts[0].replace(/\D/g, ""), 10);
-    let m = parseInt(parts[1].replace(/\D/g, ""), 10);
-    if (isNaN(h) || h > 23) h = 0;
-    if (isNaN(m) || m > 59) m = 0;
+    var h = parseInt(parts[0].replace(/\D/g, ""), 10);
+    var m = parseInt(parts[1].replace(/\D/g, ""), 10);
+    if (isNaN(h) || h > 23 || h < 0) h = 0;
+    if (isNaN(m) || m > 59 || m < 0) m = 0;
     
-    let hStr = h < 10 ? "0" + h : "" + h;
-    let mStr = m < 10 ? "0" + m : "" + m;
+    var hStr = h < 10 ? "0" + h : "" + h;
+    var mStr = m < 10 ? "0" + m : "" + m;
     return hStr + ":" + mStr;
   }
   return "00:00";
+}
+
+async function renderTimeSettingsSummary() {
+  const container = document.getElementById("saved-time-summary-box");
+  if (!container) return;
+  
+  container.innerHTML = `<div class="text-center py-2 text-[10px] text-gray-400"><i class="fa-solid fa-spinner fa-spin"></i> Menyinkronkan dari Sheet...</div>`;
+
+  // Jika online, tarik data paling segar dari Google Sheets
+  if (navigator.onLine) {
+    try {
+      const res = await fetch(`${GAS_WEB_APP_URL}?action=GET_TIME_SETTINGS`);
+      const data = await res.json();
+      if (data.success && data.time_settings) {
+        applyTimeSettingsFromCloud(data.time_settings);
+      }
+    } catch(e) {}
+  }
+
+  let html = "";
+  DAYS_LIST.forEach(day => {
+    const def = DEFAULT_TIME_CONFIGS[day.key];
+    const active = localStorage.getItem(`DAY_ACTIVE_${day.key}`) !== null ? (localStorage.getItem(`DAY_ACTIVE_${day.key}`) === "true") : def.active;
+    
+    const rawPStart = localStorage.getItem(`TIME_${day.key}_PAGI_START`);
+    const rawPLimit = localStorage.getItem(`TIME_${day.key}_PAGI_LIMIT`);
+    const rawSStart = localStorage.getItem(`TIME_${day.key}_SIANG_START`);
+    const rawSLimit = localStorage.getItem(`TIME_${day.key}_SIANG_LIMIT`);
+
+    const pStart = padZeroTime(rawPStart && rawPStart.includes(":") ? rawPStart : def.pStart);
+    const pLimit = padZeroTime(rawPLimit && rawPLimit.includes(":") ? rawPLimit : def.pLimit);
+    const sStart = padZeroTime(rawSStart && rawSStart.includes(":") ? rawSStart : def.sStart);
+    const sLimit = padZeroTime(rawSLimit && rawSLimit.includes(":") ? rawSLimit : def.sLimit);
+
+    html += `
+      <div class="p-2 bg-slate-50 border border-gray-100 rounded-xl flex items-center justify-between text-[10px]">
+        <div>
+          <span class="font-bold text-gray-900">${day.label}</span>
+          ${active ? 
+            `<p class="text-gray-500">Pagi: <b class="text-emerald-700">${pStart} -${pLimit}</b> | Siang: <b class="text-blue-700">${sStart} -${sLimit}</b></p>` : 
+            `<p class="text-rose-500 font-semibold">Status: Libur / Non-Aktif</p>`
+          }
+        </div>
+        <span class="px-2 py-0.5 rounded-md font-bold text-[9px] ${active ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-100 text-gray-500'}">
+          ${active ? 'Aktif' : 'Libur'}
+        </span>
+      </div>
+    `;
+  });
+  container.innerHTML = html;
 }
 
     function formatCleanDateLocal(val) {
