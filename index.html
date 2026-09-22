@@ -112,11 +112,10 @@
         <div class="flex items-center justify-between mb-2">
           <div>
             <h2 class="font-bold text-lg text-gray-900">Data Master Siswa</h2>
-            <p class="text-xs text-gray-500">Kelola & Tambah Siswa Baru</p>
+            <p class="text-xs text-gray-500">Daftar & Pencarian Siswa Terdaftar</p>
           </div>
-          <div class="flex items-center space-x-1.5">
-            <button onclick="toggleAddStudentModal()" class="bg-emerald-600 text-white p-2.5 rounded-xl text-xs font-bold flex items-center gap-1 shadow-sm"><i class="fa-solid fa-plus"></i> Tambah</button>
-            <button onclick="autoDownloadMasterStudents()" class="bg-blue-50 text-blue-600 p-2.5 rounded-xl text-xs font-bold border border-blue-200"><i class="fa-solid fa-rotate"></i></button>
+          <div>
+            <button onclick="autoDownloadMasterStudents()" class="bg-blue-50 text-blue-600 px-3 py-2 rounded-xl text-xs font-bold border border-blue-200 flex items-center gap-1.5 shadow-sm"><i class="fa-solid fa-rotate"></i> Segarkan</button>
           </div>
         </div>
         <div class="grid grid-cols-2 gap-2 mb-2">
@@ -615,10 +614,11 @@
       const isAdmin = (currentUserRole === "ADMIN");
 
       const items = [
+        { label: "Tambah Siswa", icon: "fa-user-plus", color: "emerald", action: "toggleAddStudentModal()", adminOnly: true },
         { label: "Absensi Manual", icon: "fa-keyboard", color: "blue", action: "promptManualInput()", adminOnly: false },
         { label: "Atur Hari Libur", icon: "fa-calendar-day", color: "amber", action: "toggleView('hari-libur')", adminOnly: true },
         { label: "Tindak Lanjut", icon: "fa-user-shield", color: "rose", action: "toggleView('tindak-lanjut')", adminOnly: true },
-        { label: "Pindah/Naik Kelas", icon: "fa-graduation-cap", color: "emerald", action: "toggleView('promotion')", adminOnly: true },
+        { label: "Pindah/Naik Kelas", icon: "fa-graduation-cap", color: "indigo", action: "toggleView('promotion')", adminOnly: true },
         { label: "Laporan Rekap", icon: "fa-file-invoice", color: "emerald", action: "bukaHalamanLaporan()", adminOnly: true },
         { label: "Cetak QR Code", icon: "fa-print", color: "indigo", action: "bukaHalamanCetakQR()", adminOnly: true },
         { label: "Tentang Aplikasi", icon: "fa-circle-info", color: "teal", action: "toggleView('about')", adminOnly: false },
