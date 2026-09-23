@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0b3c5d">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Sistem Absensi Murid - v2.33</title>
+  <title>Sistem Absensi Murid - v2.34</title>
   <link rel="manifest" href='data:application/manifest+json,{"name":"Sistem Absensi Murid","short_name":"AbsensiQR","start_url":"./index.html","display":"standalone","background_color":"#0b3c5d","theme_color":"#0b3c5d","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/3135/3135715.png","sizes":"512x512","type":"image/png"}]}'>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -37,7 +37,7 @@
             <span id="status-text" class="text-xs font-semibold">Memeriksa...</span>
           </div>
           <div class="flex items-center justify-end gap-1 mt-0.5">
-            <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30">v2.33</span>
+            <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30">v2.34</span>
             <span id="app-role-badge" onclick="handleRoleBadgeClick()" class="text-[10px] font-bold text-amber-300 bg-amber-950/60 px-1.5 py-0.2 rounded-md border border-amber-500/30 cursor-pointer select-none">PETUGAS</span>
           </div>
         </div>
@@ -108,7 +108,7 @@
         </button>
       </main>
 
-      <!-- DASHBOARD BARU -->
+      <!-- DASHBOARD BARU (6 KARTU RINGKASAN REVISI) -->
       <main id="view-dashboard" class="p-4 space-y-3.5 hidden pb-8">
         <div class="flex items-center justify-between">
           <div>
@@ -118,29 +118,40 @@
           <input type="date" id="dashboard-date-filter" onchange="renderDashboardView()" class="px-2 py-1 bg-white border border-gray-200 rounded-xl text-xs font-bold text-blue-900 shadow-sm">
         </div>
 
-        <!-- KPI SUMMARY -->
-        <div class="grid grid-cols-2 gap-2">
-          <div class="bg-gradient-to-br from-blue-600 to-indigo-700 text-white p-3 rounded-2xl shadow-sm">
+        <!-- KPI SUMMARY (PROPORSI PERSENTASE & 6 KARTU REKAP) -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          <div class="bg-gradient-to-br from-blue-600 to-indigo-700 text-white p-3.5 rounded-2xl shadow-sm flex flex-col justify-center">
             <span class="block text-[10px] font-medium opacity-80">Tingkat Kehadiran (Status Akhir)</span>
-            <span id="dash-pct-total" class="text-2xl font-black">0%</span>
-            <span id="dash-pct-sub" class="block text-[9px] opacity-80 mt-1">0 dari 0 Siswa</span>
+            <span id="dash-pct-total" class="text-3xl font-black mt-1">0%</span>
+            <span id="dash-pct-sub" class="block text-[10px] opacity-80 mt-1">0 dari 0 Siswa</span>
           </div>
-          <div class="bg-white border border-gray-200 p-3 rounded-2xl shadow-sm grid grid-cols-2 gap-1 text-center">
-            <div class="bg-emerald-50 rounded-lg p-1"><span class="block text-[8px] font-bold text-emerald-700">HADIR</span><span id="dash-count-hadir" class="text-sm font-black text-emerald-800">0</span></div>
-            <div class="bg-amber-50 rounded-lg p-1"><span class="block text-[8px] font-bold text-amber-700">TERLAMBAT</span><span id="dash-count-terlambat" class="text-sm font-black text-amber-800">0</span></div>
-            <div class="bg-rose-50 rounded-lg p-1"><span class="block text-[8px] font-bold text-rose-700">ALPA</span><span id="dash-count-alpa" class="text-sm font-black text-rose-800">0</span></div>
-            <div class="bg-indigo-50 rounded-lg p-1"><span class="block text-[8px] font-bold text-indigo-700">IZIN/SAKIT</span><span id="dash-count-izinsakit" class="text-sm font-black text-indigo-800">0</span></div>
-          </div>
-        </div>
 
-        <!-- GRAFIK PIE & REKAP KELAS -->
-        <div class="bg-white p-3.5 rounded-2xl border border-gray-200 shadow-sm space-y-3">
-          <h3 class="font-bold text-xs text-gray-800 border-b border-gray-100 pb-1.5 flex items-center justify-between">
-            <span>Proporsi Presensi Harian (Status Akhir)</span>
-            <i class="fa-solid fa-chart-pie text-blue-600"></i>
-          </h3>
-          <div class="w-36 h-36 mx-auto relative flex items-center justify-center">
-            <canvas id="dashboardPieChart"></canvas>
+          <!-- 6 KARTU STATUS AKHIR -->
+          <div class="sm:col-span-2 bg-white border border-gray-200 p-3 rounded-2xl shadow-sm grid grid-cols-3 gap-1.5 text-center">
+            <div class="bg-emerald-50 border border-emerald-100 rounded-xl p-2">
+              <span class="block text-[9px] font-extrabold text-emerald-700">HADIR</span>
+              <span id="dash-count-hadir" class="text-base font-black text-emerald-800">0</span>
+            </div>
+            <div class="bg-amber-50 border border-amber-100 rounded-xl p-2">
+              <span class="block text-[9px] font-extrabold text-amber-700">TERLAMBAT</span>
+              <span id="dash-count-terlambat" class="text-base font-black text-amber-800">0</span>
+            </div>
+            <div class="bg-red-50 border border-red-100 rounded-xl p-2">
+              <span class="block text-[9px] font-extrabold text-red-700">ALPA</span>
+              <span id="dash-count-alpa" class="text-base font-black text-red-800">0</span>
+            </div>
+            <div class="bg-rose-50 border border-rose-100 rounded-xl p-2">
+              <span class="block text-[9px] font-extrabold text-rose-700">BOLOS</span>
+              <span id="dash-count-bolos" class="text-base font-black text-rose-800">0</span>
+            </div>
+            <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-2">
+              <span class="block text-[9px] font-extrabold text-indigo-700">IZIN/SAKIT</span>
+              <span id="dash-count-izinsakit" class="text-base font-black text-indigo-800">0</span>
+            </div>
+            <div class="bg-purple-50 border border-purple-100 rounded-xl p-2">
+              <span class="block text-[9px] font-extrabold text-purple-700">KEGIATAN</span>
+              <span id="dash-count-kegiatan" class="text-base font-black text-purple-800">0</span>
+            </div>
           </div>
         </div>
 
@@ -164,6 +175,7 @@
               <option value="ALPA">Alpa</option>
               <option value="IZIN">Izin</option>
               <option value="SAKIT">Sakit</option>
+              <option value="KEGIATAN">Kegiatan</option>
               <option value="BOLOS">Bolos</option>
             </select>
           </div>
@@ -251,14 +263,15 @@
             <canvas id="classBarChart"></canvas>
           </div>
         </div>
-        <div class="grid grid-cols-4 gap-1.5 mb-3">
+
+        <!-- KARTU RINGKASAN MONITORING (TANPA KARTU BOLOS) -->
+        <div class="grid grid-cols-3 gap-1.5 mb-3">
           <div class="bg-emerald-50 border border-emerald-100 p-2 rounded-xl text-center"><span class="block text-[9px] text-emerald-600 font-bold">Hadir</span><span id="stat-hadir" class="text-xs font-extrabold text-emerald-800">0</span></div>
           <div class="bg-amber-50 border border-amber-100 p-2 rounded-xl text-center"><span class="block text-[9px] text-amber-600 font-bold">Terlambat</span><span id="stat-terlambat" class="text-xs font-extrabold text-amber-800">0</span></div>
           <div class="bg-red-50 border border-red-100 p-2 rounded-xl text-center"><span class="block text-[9px] text-red-600 font-bold">Alpa</span><span id="stat-alpa" class="text-xs font-extrabold text-red-800">0</span></div>
-          <div class="bg-rose-50 border border-rose-100 p-2 rounded-xl text-center"><span class="block text-[9px] text-rose-600 font-bold">Bolos</span><span id="stat-bolos" class="text-xs font-extrabold text-rose-800">0</span></div>
           <div class="bg-blue-50 border border-blue-100 p-2 rounded-xl text-center"><span class="block text-[9px] text-blue-600 font-bold">Sakit</span><span id="stat-sakit" class="text-xs font-extrabold text-blue-800">0</span></div>
           <div class="bg-indigo-50 border border-indigo-100 p-2 rounded-xl text-center"><span class="block text-[9px] text-indigo-600 font-bold">Izin</span><span id="stat-izin" class="text-xs font-extrabold text-indigo-800">0</span></div>
-          <div class="bg-purple-50 border border-purple-100 p-2 rounded-xl text-center col-span-2"><span class="block text-[9px] text-purple-600 font-bold">Kegiatan</span><span id="stat-kegiatan" class="text-xs font-extrabold text-purple-800">0</span></div>
+          <div class="bg-purple-50 border border-purple-100 p-2 rounded-xl text-center"><span class="block text-[9px] text-purple-600 font-bold">Kegiatan</span><span id="stat-kegiatan" class="text-xs font-extrabold text-purple-800">0</span></div>
         </div>
         <div class="bg-white p-3 rounded-2xl border border-gray-200 shadow-sm mb-4">
           <h3 class="font-bold text-xs text-gray-800 mb-2 border-b border-gray-100 pb-1.5 flex items-center justify-between">
@@ -291,7 +304,7 @@
         </div>
       </main>
 
-      <!-- DONASI (SEKARANG DIPINDAH KE MODAL MENU UTAMA) -->
+      <!-- DONASI -->
       <main id="view-donation" class="p-4 hidden">
         <div class="text-center mb-3">
           <div class="w-12 h-12 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-2 text-xl shadow-sm"><i class="fa-solid fa-hand-holding-heart"></i></div>
@@ -334,7 +347,7 @@
           <h3 class="font-bold text-xs text-blue-900 border-b border-gray-100 pb-1.5">APLIKASI</h3>
           <div class="flex justify-between text-xs">
             <span class="text-gray-500">Versi Aplikasi</span>
-            <span class="font-bold text-gray-900">v2.33</span>
+            <span class="font-bold text-gray-900">v2.34</span>
           </div>
           <div class="flex justify-between text-xs">
             <span class="text-gray-500">Status Update</span>
@@ -572,7 +585,7 @@
 
     let html5QrCode = null, isCameraActive = false, db = null, cachedStudents = [];
     let fetchedTodayAttendance = [], fetchedAttendanceHistory = [], fetchedTindakLanjutHistory = [], fetchedHariLiburList = [];
-    let currentScanSession = "PAGI", myPieChart = null, myBarChart = null, dashboardPieChart = null;
+    let currentScanSession = "PAGI", myPieChart = null, myBarChart = null;
     let isManualTimeMode = false;
     let customScanDateOverride = null;
     let customScanTimeOverride = null;
@@ -1230,7 +1243,7 @@
       modal.classList.toggle('hidden'); 
     }
 
-    /* FITUR APLIKASI DASHBOARD */
+    /* FITUR APLIKASI DASHBOARD (REVISI 6 KARTU & STATUS AKHIR) */
     async function renderDashboardView() {
       const targetDate = formatCleanDateLocal(document.getElementById('dashboard-date-filter').value) || new Date().toISOString().split('T')[0];
       document.getElementById('dashboard-date-filter').value = targetDate;
@@ -1241,7 +1254,7 @@
       const rawRecords = [...fetchedTodayAttendance, ...fetchedAttendanceHistory, ...localHist, ...queueRecords].filter(r => formatCleanDateLocal(r.tanggal) === targetDate);
 
       let totalStd = cachedStudents.length;
-      let countHadir = 0, countTerlambat = 0, countAlpa = 0, countIzin = 0, countSakit = 0, countBolos = 0;
+      let countHadir = 0, countTerlambat = 0, countAlpa = 0, countIzin = 0, countSakit = 0, countKegiatan = 0, countBolos = 0;
 
       cachedStudents.forEach(std => {
         const rec = rawRecords.find(r => String(r.id_siswa).trim().toUpperCase() === String(std.id_siswa).trim().toUpperCase());
@@ -1254,6 +1267,7 @@
           else if (st === "ALPA") countAlpa++;
           else if (st === "IZIN") countIzin++;
           else if (st === "SAKIT") countSakit++;
+          else if (st === "KEGIATAN") countKegiatan++;
           else if (st === "BOLOS") countBolos++;
           else countHadir++;
         }
@@ -1264,36 +1278,16 @@
 
       document.getElementById('dash-pct-total').innerText = `${pctHadir}%`;
       document.getElementById('dash-pct-sub').innerText = `${totalKehadiranVal} dari ${totalStd} Siswa Hadir`;
+      
       document.getElementById('dash-count-hadir').innerText = countHadir;
       document.getElementById('dash-count-terlambat').innerText = countTerlambat;
       document.getElementById('dash-count-alpa').innerText = countAlpa;
+      document.getElementById('dash-count-bolos').innerText = countBolos;
       document.getElementById('dash-count-izinsakit').innerText = countIzin + countSakit;
+      document.getElementById('dash-count-kegiatan').innerText = countKegiatan;
 
-      renderDashboardPieChart(countHadir, countTerlambat, countAlpa, countIzin + countSakit, countBolos);
       renderDashboardClassSummary(rawRecords);
       renderDashboardStudentTable();
-    }
-
-    function renderDashboardPieChart(hadir, terlambat, alpa, izinsakit, bolos) {
-      const ctx = document.getElementById('dashboardPieChart').getContext('2d');
-      if (dashboardPieChart) dashboardPieChart.destroy();
-
-      dashboardPieChart = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-          labels: ['Hadir', 'Terlambat', 'Alpa', 'Izin/Sakit', 'Bolos'],
-          datasets: [{
-            data: [hadir, terlambat, alpa, izinsakit, bolos],
-            backgroundColor: ['#10b981', '#f59e0b', '#ef4444', '#6366f1', '#f43f5e']
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          cutout: '65%',
-          plugins: { legend: { display: false } }
-        }
-      });
     }
 
     function renderDashboardClassSummary(rawRecords) {
@@ -1364,8 +1358,10 @@
         let badgeStyle = "bg-gray-100 text-gray-700";
         if (status === "HADIR") badgeStyle = "bg-emerald-100 text-emerald-800";
         else if (status === "TERLAMBAT") badgeStyle = "bg-amber-100 text-amber-800";
-        else if (status === "ALPA") badgeStyle = "bg-rose-100 text-rose-800";
+        else if (status === "ALPA") badgeStyle = "bg-red-100 text-red-800";
+        else if (status === "BOLOS") badgeStyle = "bg-rose-100 text-rose-800";
         else if (status === "IZIN" || status === "SAKIT") badgeStyle = "bg-indigo-100 text-indigo-800";
+        else if (status === "KEGIATAN") badgeStyle = "bg-purple-100 text-purple-800";
 
         return `
           <div onclick="showStudentDetailModal('${std.id_siswa}')" class="p-2.5 bg-slate-50 border border-gray-100 rounded-xl flex items-center justify-between cursor-pointer hover:bg-slate-100 transition">
@@ -1394,7 +1390,8 @@
         contentEl.innerHTML = `
           <p>Tanggal: <b>${rec.tanggal}</b></p>
           <p>Jam Scan: <b>${rec.jam || rec.jam_pagi || '-'}</b></p>
-          <p>Status Presensi (Akhir): <b class="text-blue-700">${rec.status_akhir || rec.status_presensi || 'HADIR'}</b></p>
+          <p>Status Pagi: <b>${rec.status_pagi || '-'}</b> | Status Siang: <b>${rec.status_siang || '-'}</b></p>
+          <p>Status Akhir Presensi: <b class="text-blue-700">${rec.status_akhir || rec.status_presensi || 'HADIR'}</b></p>
         `;
       } else {
         contentEl.innerHTML = `<p class="text-rose-600 font-bold">Belum Melakukan Absensi / Tanpa Keterangan (Alpa)</p>`;
@@ -1424,7 +1421,7 @@
       let rawRecords = [...fetchedTodayAttendance, ...fetchedAttendanceHistory, ...localHist, ...queueRecords].filter(r => formatCleanDateLocal(r.tanggal) === targetDate);
 
       const classStudents = cachedStudents.filter(s => selectedClass === "ALL" || s.kelas === selectedClass);
-      let hadir = 0, terlambat = 0, alpa = 0, bolos = 0, sakit = 0, izin = 0, kegiatan = 0;
+      let hadir = 0, terlambat = 0, alpa = 0, sakit = 0, izin = 0, kegiatan = 0;
       const unabsentedStudents = [];
 
       const dateObj = new Date(targetDate + "T00:00:00");
@@ -1456,8 +1453,7 @@
           if (targetStatus === "ALPA") {
             alpa++;
             unabsentedStudents.push(std);
-          } else if (targetStatus === "BOLOS") bolos++;
-          else if (targetStatus === "IZIN") izin++;
+          } else if (targetStatus === "IZIN") izin++;
           else if (targetStatus === "SAKIT") sakit++;
           else if (targetStatus === "KEGIATAN") kegiatan++;
           else if (targetStatus === "TERLAMBAT") terlambat++;
@@ -1469,12 +1465,11 @@
       document.getElementById('stat-hadir').innerText = hadir;
       document.getElementById('stat-terlambat').innerText = terlambat;
       document.getElementById('stat-alpa').innerText = alpa;
-      document.getElementById('stat-bolos').innerText = bolos;
       document.getElementById('stat-sakit').innerText = sakit;
       document.getElementById('stat-izin').innerText = izin;
       document.getElementById('stat-kegiatan').innerText = kegiatan;
 
-      renderPieChart(hadir, terlambat, alpa, bolos, sakit, izin, kegiatan, classStudents.length);
+      renderPieChart(hadir, terlambat, alpa, sakit, izin, kegiatan, classStudents.length);
       renderClassBarChartHorizontal(rawRecords, selectedSessionFilter);
       renderMonitoringActionListOnlyUnabsented(targetDate, unabsentedStudents, isPastLimit, selectedSessionFilter);
     }
@@ -1621,12 +1616,12 @@
       if (navigator.onLine) syncQueueToGAS();
     }
 
-    function renderPieChart(hadir, terlambat, alpa, bolos, sakit, izin, kegiatan, totalStudentsCount) {
+    function renderPieChart(hadir, terlambat, alpa, sakit, izin, kegiatan, totalStudentsCount) {
       const ctx = document.getElementById('attendancePieChart').getContext('2d');
       if (myPieChart) myPieChart.destroy();
 
       const totalHadirVal = hadir + terlambat;
-      const effectiveTotal = totalStudentsCount || (hadir + terlambat + alpa + bolos + sakit + izin + kegiatan);
+      const effectiveTotal = totalStudentsCount || (hadir + terlambat + alpa + sakit + izin + kegiatan);
       const percentVal = effectiveTotal > 0 ? Math.round((totalHadirVal / effectiveTotal) * 100) : 0;
       
       document.getElementById('chart-center-percent').innerText = `${percentVal}%`;
@@ -1634,8 +1629,8 @@
       myPieChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
-          labels: ['Hadir', 'Terlambat', 'Alpa', 'Bolos', 'Sakit', 'Izin', 'Kegiatan'],
-          datasets: [{ data: [hadir, terlambat, alpa, bolos, sakit, izin, kegiatan], backgroundColor: ['#10b981', '#f59e0b', '#ef4444', '#f43f5e', '#3b82f6', '#6366f1', '#a855f7'] }]
+          labels: ['Hadir', 'Terlambat', 'Alpa', 'Sakit', 'Izin', 'Kegiatan'],
+          datasets: [{ data: [hadir, terlambat, alpa, sakit, izin, kegiatan], backgroundColor: ['#10b981', '#f59e0b', '#ef4444', '#3b82f6', '#6366f1', '#a855f7'] }]
         },
         options: { responsive: true, maintainAspectRatio: false, cutout: '72%', plugins: { legend: { display: false } } }
       });
@@ -1870,7 +1865,9 @@
           setTimeout(() => { isProcessingScan = false; }, 1500);
           return;
         } else if (timeStr > timeConfig.sLimit) {
-          computedStatus = "TERLAMBAT";
+          alert(`Presensi Siang Ditolak! Jam scan (${timeStr}) telah melewati batas waktu siang (${timeConfig.sLimit}).`);
+          setTimeout(() => { isProcessingScan = false; }, 1500);
+          return;
         }
       }
 
