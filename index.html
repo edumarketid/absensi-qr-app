@@ -1793,13 +1793,23 @@
       document.getElementById('camera-off-placeholder').classList.add('hidden');
       document.getElementById('scan-frame-box').classList.remove('hidden');
       isProcessingScan = false;
-      await html5QrCode.start({ facingMode: "environment" }, { fps: 15, qrbox: 250 }, onScanSuccess);
-      isCameraActive = true;
-      document.getElementById('btn-camera-text').innerText = "Matikan Kamera";
+      if (!isCameraActive) {
+        try {
+          await html5QrCode.start({ facingMode: "environment" }, { fps: 15, qrbox: 250 }, onScanSuccess);
+          isCameraActive = true;
+          document.getElementById('btn-camera-text').innerText = "Matikan Kamera";
+        } catch (err) {
+          console.error("Gagal memulai kamera:", err);
+        }
+      }
     }
 
     async function stopCamera() {
-      if (html5QrCode && isCameraActive) await html5QrCode.stop();
+      if (html5QrCode && isCameraActive) {
+        try {
+          await html5QrCode.stop();
+        } catch(e) {}
+      }
       isCameraActive = false;
       document.getElementById('btn-camera-text').innerText = "Nyalakan Kamera";
       document.getElementById('camera-off-placeholder').classList.remove('hidden');
@@ -1809,6 +1819,7 @@
     function toggleCameraState() { isCameraActive ? stopCamera() : initScanner(); }
 
     async function nextScanAndAutoStartCamera() {
+      isProcessingScan = false;
       toggleView('scanner');
       if (!isCameraActive) {
         await initScanner();
@@ -1833,7 +1844,7 @@
 
       if (!timeConfig.active) {
         alert(`Presensi Ditolak! Hari ${timeConfig.dayKey.toUpperCase()} diatur sebagai Hari Libur / Non-Aktif.`);
-        isProcessingScan = false;
+        setTimeout(() => { isProcessingScan = false; }, 1500);
         return;
       }
 
@@ -1844,7 +1855,7 @@
       if (currentScanSession === "PAGI") {
         if (timeStr < timeConfig.pStart) {
           alert(`Presensi Pagi Ditolak! Belum memasuki jam mulai pagi (${timeConfig.pStart}).`);
-          isProcessingScan = false;
+          setTimeout(() => { isProcessingScan = false; }, 1500);
           return;
         } else if (timeStr > timeConfig.pLimit) {
           computedStatus = "TERLAMBAT";
@@ -1852,7 +1863,7 @@
       } else if (currentScanSession === "SIANG") {
         if (timeStr < timeConfig.sStart) {
           alert(`Presensi Siang Ditolak! Belum memasuki jam mulai siang (${timeConfig.sStart}).`);
-          isProcessingScan = false;
+          setTimeout(() => { isProcessingScan = false; }, 1500);
           return;
         } else if (timeStr > timeConfig.sLimit) {
           computedStatus = "TERLAMBAT";
@@ -1907,7 +1918,7 @@
 
         } else {
           alert("Siswa tidak ditemukan!");
-          isProcessingScan = false;
+          setTimeout(() => { isProcessingScan = false; }, 1500);
         }
       };
     }
