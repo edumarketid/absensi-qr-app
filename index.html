@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0b3c5d">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Sistem Absensi Murid - v2.34</title>
+  <title>Sistem Absensi Murid - v2.35</title>
   <link rel="manifest" href='data:application/manifest+json,{"name":"Sistem Absensi Murid","short_name":"AbsensiQR","start_url":"./index.html","display":"standalone","background_color":"#0b3c5d","theme_color":"#0b3c5d","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/3135/3135715.png","sizes":"512x512","type":"image/png"}]}'>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -37,7 +37,7 @@
             <span id="status-text" class="text-xs font-semibold">Memeriksa...</span>
           </div>
           <div class="flex items-center justify-end gap-1 mt-0.5">
-            <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30">v2.34</span>
+            <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30">v2.35</span>
             <span id="app-role-badge" onclick="handleRoleBadgeClick()" class="text-[10px] font-bold text-amber-300 bg-amber-950/60 px-1.5 py-0.2 rounded-md border border-amber-500/30 cursor-pointer select-none">PETUGAS</span>
           </div>
         </div>
@@ -108,7 +108,7 @@
         </button>
       </main>
 
-      <!-- DASHBOARD BARU (6 KARTU RINGKASAN REVISI) -->
+      <!-- DASHBOARD UTAMA -->
       <main id="view-dashboard" class="p-4 space-y-3.5 hidden pb-8">
         <div class="flex items-center justify-between">
           <div>
@@ -118,7 +118,6 @@
           <input type="date" id="dashboard-date-filter" onchange="renderDashboardView()" class="px-2 py-1 bg-white border border-gray-200 rounded-xl text-xs font-bold text-blue-900 shadow-sm">
         </div>
 
-        <!-- KPI SUMMARY (PROPORSI PERSENTASE & 6 KARTU REKAP) -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
           <div class="bg-gradient-to-br from-blue-600 to-indigo-700 text-white p-3.5 rounded-2xl shadow-sm flex flex-col justify-center">
             <span class="block text-[10px] font-medium opacity-80">Tingkat Kehadiran (Status Akhir)</span>
@@ -126,7 +125,6 @@
             <span id="dash-pct-sub" class="block text-[10px] opacity-80 mt-1">0 dari 0 Siswa</span>
           </div>
 
-          <!-- 6 KARTU STATUS AKHIR -->
           <div class="sm:col-span-2 bg-white border border-gray-200 p-3 rounded-2xl shadow-sm grid grid-cols-3 gap-1.5 text-center">
             <div class="bg-emerald-50 border border-emerald-100 rounded-xl p-2">
               <span class="block text-[9px] font-extrabold text-emerald-700">HADIR</span>
@@ -155,13 +153,11 @@
           </div>
         </div>
 
-        <!-- REKAP PER KELAS RINGKAS -->
         <div class="bg-white p-3.5 rounded-2xl border border-gray-200 shadow-sm space-y-2">
           <h3 class="font-bold text-xs text-gray-800 border-b border-gray-100 pb-1.5"><i class="fa-solid fa-school text-indigo-600"></i> Ringkasan Per Kelas</h3>
           <div id="dashboard-class-summary" class="space-y-1.5 max-h-48 overflow-y-auto no-scrollbar pr-0.5"></div>
         </div>
 
-        <!-- FILTER TABEL STATUS SISWA -->
         <div class="bg-white p-3.5 rounded-2xl border border-gray-200 shadow-sm space-y-2.5">
           <h3 class="font-bold text-xs text-gray-800 border-b border-gray-100 pb-1.5"><i class="fa-solid fa-filter text-emerald-600"></i> Daftar Siswa Berdasarkan Status</h3>
           <div class="grid grid-cols-2 gap-2">
@@ -217,7 +213,7 @@
         <div id="students-list-container" class="space-y-2 pb-4"></div>
       </main>
 
-      <!-- MONITORING -->
+      <!-- MONITORING REVISI (ADDED FILTER STATUS DI SAMPING FILTER MODE SESI) -->
       <main id="view-monitoring" class="p-4 hidden">
         <div class="flex items-center justify-between mb-3">
           <div>
@@ -235,11 +231,24 @@
               <label class="block text-[9px] font-bold text-gray-600 mb-1">Kelas</label>
               <select id="monitoring-class-filter" onchange="updateMonitoringDashboard()" class="w-full py-1.5 px-1.5 bg-slate-50 border border-gray-200 rounded-xl text-[11px] font-bold text-blue-900"><option value="ALL">Semua</option></select>
             </div>
-            <div class="col-span-2">
+            <div>
               <label class="block text-[9px] font-bold text-gray-600 mb-1">Filter Mode Sesi</label>
               <select id="monitoring-session-filter" onchange="updateMonitoringDashboard()" class="w-full py-1.5 px-2 bg-slate-50 border border-gray-200 rounded-xl text-[11px] font-bold text-blue-900">
-                <option value="PAGI">Mode Pagi (Membaca Status Pagi)</option>
-                <option value="SIANG">Mode Siang (Membaca Status Siang)</option>
+                <option value="PAGI">Mode Pagi</option>
+                <option value="SIANG">Mode Siang</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[9px] font-bold text-gray-600 mb-1">Filter Status</label>
+              <select id="monitoring-status-filter" onchange="updateMonitoringDashboard()" class="w-full py-1.5 px-2 bg-slate-50 border border-gray-200 rounded-xl text-[11px] font-bold text-blue-900">
+                <option value="ALL">Semua Status</option>
+                <option value="BELUM">Belum Absen</option>
+                <option value="HADIR">Hadir</option>
+                <option value="TERLAMBAT">Terlambat</option>
+                <option value="ALPA">Alpa</option>
+                <option value="IZIN">Izin</option>
+                <option value="SAKIT">Sakit</option>
+                <option value="KEGIATAN">Kegiatan</option>
               </select>
             </div>
           </div>
@@ -264,7 +273,6 @@
           </div>
         </div>
 
-        <!-- KARTU RINGKASAN MONITORING (TANPA KARTU BOLOS) -->
         <div class="grid grid-cols-3 gap-1.5 mb-3">
           <div class="bg-emerald-50 border border-emerald-100 p-2 rounded-xl text-center"><span class="block text-[9px] text-emerald-600 font-bold">Hadir</span><span id="stat-hadir" class="text-xs font-extrabold text-emerald-800">0</span></div>
           <div class="bg-amber-50 border border-amber-100 p-2 rounded-xl text-center"><span class="block text-[9px] text-amber-600 font-bold">Terlambat</span><span id="stat-terlambat" class="text-xs font-extrabold text-amber-800">0</span></div>
@@ -275,8 +283,8 @@
         </div>
         <div class="bg-white p-3 rounded-2xl border border-gray-200 shadow-sm mb-4">
           <h3 class="font-bold text-xs text-gray-800 mb-2 border-b border-gray-100 pb-1.5 flex items-center justify-between">
-            <span id="monitoring-action-header-title">Siswa Belum Absen & Aksi Presensi</span>
-            <span id="monitoring-count-badge" class="text-[10px] text-rose-600 font-bold bg-rose-50 px-2 py-0.5 rounded-md">0 Siswa Belum</span>
+            <span id="monitoring-action-header-title">Daftar Siswa & Aksi Presensi</span>
+            <span id="monitoring-count-badge" class="text-[10px] text-rose-600 font-bold bg-rose-50 px-2 py-0.5 rounded-md">0 Siswa</span>
           </h3>
           <div id="monitoring-student-action-list" class="space-y-2.5 max-h-[380px] overflow-y-auto no-scrollbar pr-1"></div>
         </div>
@@ -347,7 +355,7 @@
           <h3 class="font-bold text-xs text-blue-900 border-b border-gray-100 pb-1.5">APLIKASI</h3>
           <div class="flex justify-between text-xs">
             <span class="text-gray-500">Versi Aplikasi</span>
-            <span class="font-bold text-gray-900">v2.34</span>
+            <span class="font-bold text-gray-900">v2.35</span>
           </div>
           <div class="flex justify-between text-xs">
             <span class="text-gray-500">Status Update</span>
@@ -1243,7 +1251,7 @@
       modal.classList.toggle('hidden'); 
     }
 
-    /* FITUR APLIKASI DASHBOARD (REVISI 6 KARTU & STATUS AKHIR) */
+    /* DASHBOARD UTAMA LOGIC */
     async function renderDashboardView() {
       const targetDate = formatCleanDateLocal(document.getElementById('dashboard-date-filter').value) || new Date().toISOString().split('T')[0];
       document.getElementById('dashboard-date-filter').value = targetDate;
@@ -1410,10 +1418,12 @@
       if (navigator.onLine) autoDownloadMasterStudents(targetDate);
     }
 
+    /* MONITORING LOGIC (LOGIKA DENGAN FILTER STATUS SISI MONITORING) */
     async function updateMonitoringDashboard() {
       const targetDate = formatCleanDateLocal(document.getElementById('monitoring-date-filter').value) || new Date().toISOString().split('T')[0];
       const selectedClass = document.getElementById('monitoring-class-filter').value;
       const selectedSessionFilter = document.getElementById('monitoring-session-filter').value;
+      const selectedStatusFilter = document.getElementById('monitoring-status-filter').value || "ALL";
       
       const queueRecords = await getAllQueueFromDB();
       const localHist = await getAllLocalHistoryFromDB();
@@ -1422,7 +1432,7 @@
 
       const classStudents = cachedStudents.filter(s => selectedClass === "ALL" || s.kelas === selectedClass);
       let hadir = 0, terlambat = 0, alpa = 0, sakit = 0, izin = 0, kegiatan = 0;
-      const unabsentedStudents = [];
+      const filteredActionStudents = [];
 
       const dateObj = new Date(targetDate + "T00:00:00");
       const timeConfig = getTodayTimeConfig(dateObj);
@@ -1446,19 +1456,34 @@
           }
         }
 
+        let evalStatus = targetStatus;
         if (!targetStatus || targetStatus === "") {
-          if (isPastLimit) alpa++;
-          unabsentedStudents.push(std);
+          evalStatus = isPastLimit ? "ALPA" : "BELUM";
+        }
+
+        if (evalStatus === "HADIR") hadir++;
+        else if (evalStatus === "TERLAMBAT") terlambat++;
+        else if (evalStatus === "ALPA") alpa++;
+        else if (evalStatus === "SAKIT") sakit++;
+        else if (evalStatus === "IZIN") izin++;
+        else if (evalStatus === "KEGIATAN") kegiatan++;
+
+        // Filter daftar aksi berdasarkan kriteria Filter Status
+        let matchStatus = false;
+        if (selectedStatusFilter === "ALL") {
+          matchStatus = true;
+        } else if (selectedStatusFilter === "BELUM") {
+          matchStatus = (!targetStatus || targetStatus === "");
         } else {
-          if (targetStatus === "ALPA") {
-            alpa++;
-            unabsentedStudents.push(std);
-          } else if (targetStatus === "IZIN") izin++;
-          else if (targetStatus === "SAKIT") sakit++;
-          else if (targetStatus === "KEGIATAN") kegiatan++;
-          else if (targetStatus === "TERLAMBAT") terlambat++;
-          else if (targetStatus === "HADIR") hadir++;
-          else hadir++;
+          matchStatus = (evalStatus === selectedStatusFilter);
+        }
+
+        if (matchStatus) {
+          filteredActionStudents.push({
+            student: std,
+            status: targetStatus || (isPastLimit ? "ALPA" : "BELUM"),
+            isAbsented: !!targetStatus
+          });
         }
       });
 
@@ -1471,7 +1496,7 @@
 
       renderPieChart(hadir, terlambat, alpa, sakit, izin, kegiatan, classStudents.length);
       renderClassBarChartHorizontal(rawRecords, selectedSessionFilter);
-      renderMonitoringActionListOnlyUnabsented(targetDate, unabsentedStudents, isPastLimit, selectedSessionFilter);
+      renderMonitoringActionListFiltered(targetDate, filteredActionStudents, isPastLimit, selectedSessionFilter, selectedStatusFilter);
     }
 
     function renderClassBarChartHorizontal(attendanceRecords, selectedSessionFilter) {
@@ -1537,29 +1562,34 @@
       });
     }
 
-    function renderMonitoringActionListOnlyUnabsented(targetDate, unabsentedStudents, isPastLimit, selectedSessionFilter) {
+    function renderMonitoringActionListFiltered(targetDate, studentItems, isPastLimit, selectedSessionFilter, selectedStatusFilter) {
       const container = document.getElementById('monitoring-student-action-list');
       const badgeEl = document.getElementById('monitoring-count-badge');
       const headerTitleEl = document.getElementById('monitoring-action-header-title');
 
       const modeText = selectedSessionFilter === "PAGI" ? "Pagi" : "Siang";
+      
+      headerTitleEl.innerText = `Daftar Siswa (${modeText})`;
+      badgeEl.innerText = `${studentItems.length} Siswa Filtered`;
+      badgeEl.className = "text-[10px] text-indigo-700 font-bold bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-200";
 
-      if (!isPastLimit) {
-        headerTitleEl.innerText = `Siswa Belum Melakukan Absen ${modeText}`;
-        badgeEl.innerText = `${unabsentedStudents.length} Belum Absen ${modeText}`;
-        badgeEl.className = "text-[10px] text-amber-700 font-bold bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200";
-      } else {
-        headerTitleEl.innerText = `Siswa Belum Absen ${modeText} & Aksi Presensi`;
-        badgeEl.innerText = `${unabsentedStudents.length} Siswa Belum Absen ${modeText}`;
-        badgeEl.className = "text-[10px] text-rose-600 font-bold bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200";
-      }
-
-      if (unabsentedStudents.length === 0) {
-        container.innerHTML = `<div class="bg-emerald-50 border border-emerald-200 p-4 rounded-xl text-center text-xs text-emerald-800 font-bold"><i class="fa-solid fa-circle-check"></i> Semua siswa pada kelas ini sudah presensi (${modeText})!</div>`;
+      if (studentItems.length === 0) {
+        container.innerHTML = `<div class="bg-gray-50 border border-gray-200 p-4 rounded-xl text-center text-xs text-gray-500 font-bold"><i class="fa-solid fa-circle-info"></i> Tidak ada siswa yang sesuai kriteria filter.</div>`;
         return;
       }
 
-      container.innerHTML = unabsentedStudents.map(std => {
+      container.innerHTML = studentItems.map(item => {
+        const std = item.student;
+        const st = item.status;
+        
+        let badgeStyle = "bg-gray-100 text-gray-700";
+        if (st === "HADIR") badgeStyle = "bg-emerald-100 text-emerald-800";
+        else if (st === "TERLAMBAT") badgeStyle = "bg-amber-100 text-amber-800";
+        else if (st === "ALPA") badgeStyle = "bg-red-100 text-red-800";
+        else if (st === "IZIN" || st === "SAKIT") badgeStyle = "bg-indigo-100 text-indigo-800";
+        else if (st === "KEGIATAN") badgeStyle = "bg-purple-100 text-purple-800";
+        else if (st === "BELUM") badgeStyle = "bg-amber-50 text-amber-700 border border-amber-200";
+
         return `
           <div id="action-item-${std.id_siswa}" class="p-2.5 bg-slate-50 border border-gray-200 rounded-xl space-y-1.5 transition-all duration-300">
             <div class="flex items-center justify-between">
@@ -1567,8 +1597,8 @@
                 <h5 class="font-bold text-xs text-gray-900 truncate">${std.nama}</h5>
                 <p class="text-[10px] text-gray-500">${std.kelas} | ID: ${std.id_siswa}</p>
               </div>
-              <span class="text-[9px] font-extrabold px-2 py-0.5 rounded-full ${!isPastLimit ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800'}">
-                ${!isPastLimit ? 'BELUM ABSEN' : 'BELUM SCAN'}
+              <span class="text-[9px] font-extrabold px-2 py-0.5 rounded-full ${badgeStyle}">
+                ${st}
               </span>
             </div>
             <div class="grid grid-cols-4 gap-1.5 pt-1">
