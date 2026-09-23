@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0b3c5d">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Sistem Absensi Murid - v2.30</title>
+  <title>Sistem Absensi Murid - v2.31</title>
   <link rel="manifest" href='data:application/manifest+json,{"name":"Sistem Absensi Murid","short_name":"AbsensiQR","start_url":"./index.html","display":"standalone","background_color":"#0b3c5d","theme_color":"#0b3c5d","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/3135/3135715.png","sizes":"512x512","type":"image/png"}]}'>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -36,7 +36,7 @@
             <span id="status-text" class="text-xs font-semibold">Memeriksa...</span>
           </div>
           <div class="flex items-center justify-end gap-1 mt-0.5">
-            <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30">v2.30</span>
+            <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30">v2.31</span>
             <span id="app-role-badge" onclick="handleRoleBadgeClick()" class="text-[10px] font-bold text-amber-300 bg-amber-950/60 px-1.5 py-0.2 rounded-md border border-amber-500/30 cursor-pointer select-none">PETUGAS</span>
           </div>
         </div>
@@ -269,7 +269,7 @@
           <h3 class="font-bold text-xs text-blue-900 border-b border-gray-100 pb-1.5">APLIKASI</h3>
           <div class="flex justify-between text-xs">
             <span class="text-gray-500">Versi Aplikasi</span>
-            <span class="font-bold text-gray-900">v2.30</span>
+            <span class="font-bold text-gray-900">v2.31</span>
           </div>
           <div class="flex justify-between text-xs">
             <span class="text-gray-500">Status Update</span>
@@ -495,6 +495,7 @@
     let customScanDateOverride = null;
     let customScanTimeOverride = null;
     let currentUserRole = "PETUGAS"; 
+    let isProcessingScan = false;
 
     const DAYS_LIST = [
       { key: "sun", label: "Minggu (Ekstrakurikuler)" },
@@ -1559,6 +1560,7 @@
       if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
       document.getElementById('camera-off-placeholder').classList.add('hidden');
       document.getElementById('scan-frame-box').classList.remove('hidden');
+      isProcessingScan = false;
       await html5QrCode.start({ facingMode: "environment" }, { fps: 15, qrbox: 250 }, onScanSuccess);
       isCameraActive = true;
       document.getElementById('btn-camera-text').innerText = "Matikan Kamera";
@@ -1582,8 +1584,9 @@
     }
 
     async function onScanSuccess(text) {
-      await stopCamera();
-      
+      if (isProcessingScan) return; 
+      isProcessingScan = true;
+
       let nowDateObj = new Date();
       let dateStr = nowDateObj.toISOString().split('T')[0];
       let timeStr = padZeroTime(nowDateObj.toTimeString().split(' ')[0].substring(0, 5));
@@ -1598,7 +1601,8 @@
 
       if (!timeConfig.active) {
         alert(`Presensi Ditolak! Hari ${timeConfig.dayKey.toUpperCase()} diatur sebagai Hari Libur / Non-Aktif.`);
-        return initScanner();
+        isProcessingScan = false;
+        return;
       }
 
       autoDetectOrSyncSessionMode(timeStr, nowDateObj);
@@ -1608,14 +1612,16 @@
       if (currentScanSession === "PAGI") {
         if (timeStr < timeConfig.pStart) {
           alert(`Presensi Pagi Ditolak! Belum memasuki jam mulai pagi (${timeConfig.pStart}).`);
-          return initScanner();
+          isProcessingScan = false;
+          return;
         } else if (timeStr > timeConfig.pLimit) {
           computedStatus = "TERLAMBAT";
         }
       } else if (currentScanSession === "SIANG") {
         if (timeStr < timeConfig.sStart) {
           alert(`Presensi Siang Ditolak! Belum memasuki jam mulai siang (${timeConfig.sStart}).`);
-          return initScanner();
+          isProcessingScan = false;
+          return;
         } else if (timeStr > timeConfig.sLimit) {
           computedStatus = "TERLAMBAT";
         }
@@ -1660,10 +1666,16 @@
             statusCardBox.className = "bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-center shadow-sm space-y-2";
             badgeBox.className = "text-emerald-600 font-extrabold text-xl";
           }
+          
           toggleView('success');
+
+          setTimeout(async () => {
+            await nextScanAndAutoStartCamera();
+          }, 1800);
+
         } else {
           alert("Siswa tidak ditemukan!");
-          initScanner();
+          isProcessingScan = false;
         }
       };
     }
