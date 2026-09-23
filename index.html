@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0b3c5d">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Sistem Absensi Murid - v2.35</title>
+  <title>Sistem Absensi Murid - v2.36</title>
   <link rel="manifest" href='data:application/manifest+json,{"name":"Sistem Absensi Murid","short_name":"AbsensiQR","start_url":"./index.html","display":"standalone","background_color":"#0b3c5d","theme_color":"#0b3c5d","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/3135/3135715.png","sizes":"512x512","type":"image/png"}]}'>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -37,7 +37,7 @@
             <span id="status-text" class="text-xs font-semibold">Memeriksa...</span>
           </div>
           <div class="flex items-center justify-end gap-1 mt-0.5">
-            <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30">v2.35</span>
+            <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30">v2.36</span>
             <span id="app-role-badge" onclick="handleRoleBadgeClick()" class="text-[10px] font-bold text-amber-300 bg-amber-950/60 px-1.5 py-0.2 rounded-md border border-amber-500/30 cursor-pointer select-none">PETUGAS</span>
           </div>
         </div>
@@ -213,7 +213,7 @@
         <div id="students-list-container" class="space-y-2 pb-4"></div>
       </main>
 
-      <!-- MONITORING REVISI (ADDED FILTER STATUS DI SAMPING FILTER MODE SESI) -->
+      <!-- MONITORING REVISI -->
       <main id="view-monitoring" class="p-4 hidden">
         <div class="flex items-center justify-between mb-3">
           <div>
@@ -355,7 +355,7 @@
           <h3 class="font-bold text-xs text-blue-900 border-b border-gray-100 pb-1.5">APLIKASI</h3>
           <div class="flex justify-between text-xs">
             <span class="text-gray-500">Versi Aplikasi</span>
-            <span class="font-bold text-gray-900">v2.35</span>
+            <span class="font-bold text-gray-900">v2.36</span>
           </div>
           <div class="flex justify-between text-xs">
             <span class="text-gray-500">Status Update</span>
@@ -1251,7 +1251,7 @@
       modal.classList.toggle('hidden'); 
     }
 
-    /* DASHBOARD UTAMA LOGIC */
+    /* DASHBOARD UTAMA LOGIC (SINKRONISASI KARTU TERLAMBAT DENGAN MONITORING) */
     async function renderDashboardView() {
       const targetDate = formatCleanDateLocal(document.getElementById('dashboard-date-filter').value) || new Date().toISOString().split('T')[0];
       document.getElementById('dashboard-date-filter').value = targetDate;
@@ -1266,12 +1266,18 @@
 
       cachedStudents.forEach(std => {
         const rec = rawRecords.find(r => String(r.id_siswa).trim().toUpperCase() === String(std.id_siswa).trim().toUpperCase());
+        
+        // 1. Hitung Terlambat khusus dari Status Pagi (Sinkron dengan Monitoring Mode Pagi)
+        if (rec && String(rec.status_pagi || "").toUpperCase() === "TERLAMBAT") {
+          countTerlambat++;
+        }
+
+        // 2. Hitung Status Lainnya dari Status Akhir
         if (!rec) {
           countAlpa++;
         } else {
           const st = String(rec.status_akhir || rec.status_presensi || "HADIR").toUpperCase();
           if (st === "HADIR") countHadir++;
-          else if (st === "TERLAMBAT") countTerlambat++;
           else if (st === "ALPA") countAlpa++;
           else if (st === "IZIN") countIzin++;
           else if (st === "SAKIT") countSakit++;
@@ -1288,7 +1294,7 @@
       document.getElementById('dash-pct-sub').innerText = `${totalKehadiranVal} dari ${totalStd} Siswa Hadir`;
       
       document.getElementById('dash-count-hadir').innerText = countHadir;
-      document.getElementById('dash-count-terlambat').innerText = countTerlambat;
+      document.getElementById('dash-count-terlambat').innerText = countTerlambat; // Sinkron dengan Monitoring Pagi
       document.getElementById('dash-count-alpa').innerText = countAlpa;
       document.getElementById('dash-count-bolos').innerText = countBolos;
       document.getElementById('dash-count-izinsakit').innerText = countIzin + countSakit;
@@ -1418,7 +1424,7 @@
       if (navigator.onLine) autoDownloadMasterStudents(targetDate);
     }
 
-    /* MONITORING LOGIC (LOGIKA DENGAN FILTER STATUS SISI MONITORING) */
+    /* MONITORING LOGIC */
     async function updateMonitoringDashboard() {
       const targetDate = formatCleanDateLocal(document.getElementById('monitoring-date-filter').value) || new Date().toISOString().split('T')[0];
       const selectedClass = document.getElementById('monitoring-class-filter').value;
@@ -1468,7 +1474,6 @@
         else if (evalStatus === "IZIN") izin++;
         else if (evalStatus === "KEGIATAN") kegiatan++;
 
-        // Filter daftar aksi berdasarkan kriteria Filter Status
         let matchStatus = false;
         if (selectedStatusFilter === "ALL") {
           matchStatus = true;
