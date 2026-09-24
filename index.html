@@ -1290,16 +1290,25 @@
           countAlpa++;
         } else {
           // DIAMBIL DARI STATUS AKHIR DENGAN KETERANGAN "HADIR" SAJA
-          const st = String(rec.status_akhir || rec.status_presensi || "HADIR").trim().toUpperCase();
+          const stAkhir = String(rec.status_akhir || rec.status_presensi || "HADIR").trim().toUpperCase();
 
-          if (st === "HADIR") countHadir++;
-          else if (st === "TERLAMBAT") countTerlambat++;
-          else if (st === "ALPA") countAlpa++;
-          else if (st === "IZIN") countIzin++;
-          else if (st === "SAKIT") countSakit++;
-          else if (st === "KEGIATAN") countKegiatan++;
-          else if (st === "BOLOS") countBolos++;
-          else countHadir++; // Fallback default
+          if (stAkhir === "HADIR") countHadir++;
+          else if (stAkhir === "ALPA") countAlpa++;
+          else if (stAkhir === "IZIN") countIzin++;
+          else if (stAkhir === "SAKIT") countSakit++;
+          else if (stAkhir === "KEGIATAN") countKegiatan++;
+          else if (stAkhir === "BOLOS") countBolos++;
+          else if (stAkhir === "TERLAMBAT") {
+            // Tetap dipetakan jika status akhir tertera TERLAMBAT
+          } else {
+            countHadir++;
+          }
+
+          // KARTU TERLAMBAT: Mengambil khusus dari status_pagi atau status_presensi untuk Mode Pagi (sama seperti nilai kartu TERLAMBAT di menu monitoring)
+          const stPagi = String(rec.status_pagi || (rec.sesi === "PAGI" ? rec.status_presensi : "") || "").trim().toUpperCase();
+          if (stPagi === "TERLAMBAT") {
+            countTerlambat++;
+          }
         }
       });
 
@@ -1310,7 +1319,7 @@
       document.getElementById('dash-pct-total').innerText = `${pctHadir}%`;
       document.getElementById('dash-pct-sub').innerText = `${totalKehadiranVal} dari ${totalStd} Siswa Hadir`;
       
-      // KARTU HADIR DENGAN KETERANGAN HADIR SAJA DARI STATUS AKHIR
+      // KARTU HADIR & TERLAMBAT
       document.getElementById('dash-count-hadir').innerText = countHadir;
       document.getElementById('dash-count-terlambat').innerText = countTerlambat;
       document.getElementById('dash-count-alpa').innerText = countAlpa;
