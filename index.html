@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0b3c5d">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Sistem Absensi Murid - v2.42</title>
+  <title>Sistem Absensi Murid - v2.43</title>
   <link rel="manifest" href='data:application/manifest+json,{"name":"Sistem Absensi Murid","short_name":"AbsensiQR","start_url":"./index.html","display":"standalone","background_color":"#0b3c5d","theme_color":"#0b3c5d","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/3135/3135715.png","sizes":"512x512","type":"image/png"}]}'>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -37,7 +37,7 @@
             <span id="status-text" class="text-xs font-semibold">Memeriksa...</span>
           </div>
           <div class="flex items-center justify-end gap-1 mt-0.5">
-            <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30">v2.42</span>
+            <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30">v2.43</span>
             <span id="app-role-badge" onclick="handleRoleBadgeClick()" class="text-[10px] font-bold text-amber-300 bg-amber-950/60 px-1.5 py-0.2 rounded-md border border-amber-500/30 cursor-pointer select-none">PETUGAS</span>
           </div>
         </div>
@@ -282,7 +282,7 @@
         </div>
         <div class="bg-white p-3 rounded-2xl border border-gray-200 shadow-sm mb-4">
           <h3 class="font-bold text-xs text-gray-800 mb-2 border-b border-gray-100 pb-1.5 flex items-center justify-between">
-            <span id="monitoring-action-header-title">Daftar Siswa & Aksi Presensi</span>
+            <span id="monitoring-action-header-title">Belum Absen & Aksi Presensi</span>
             <span id="monitoring-count-badge" class="text-[10px] text-rose-600 font-bold bg-rose-50 px-2 py-0.5 rounded-md">0 Siswa</span>
           </h3>
           <div id="monitoring-student-action-list" class="space-y-2.5 max-h-[380px] overflow-y-auto no-scrollbar pr-1"></div>
@@ -354,7 +354,7 @@
           <h3 class="font-bold text-xs text-blue-900 border-b border-gray-100 pb-1.5">APLIKASI</h3>
           <div class="flex justify-between text-xs">
             <span class="text-gray-500">Versi Aplikasi</span>
-            <span class="font-bold text-gray-900">v2.42</span>
+            <span class="font-bold text-gray-900">v2.43</span>
           </div>
           <div class="flex justify-between text-xs">
             <span class="text-gray-500">Status Update</span>
@@ -1504,7 +1504,8 @@
 
         let matchStatus = false;
         if (selectedStatusFilter === "ALL") {
-          matchStatus = (!targetStatus || targetStatus === "");
+          // PERBAIKAN: Menampilkan siswa yang BELUM absen ATAU yang berstatus ALPA di daftar aksi
+          matchStatus = (!targetStatus || targetStatus === "" || evalStatus === "ALPA" || evalStatus === "BELUM");
         } else {
           matchStatus = (evalStatus === selectedStatusFilter);
         }
@@ -1605,9 +1606,8 @@
       const badgeEl = document.getElementById('monitoring-count-badge');
       const headerTitleEl = document.getElementById('monitoring-action-header-title');
 
-      const modeText = selectedSessionFilter === "PAGI" ? "Pagi" : "Siang";
-      
-      headerTitleEl.innerText = `Daftar Siswa (${modeText})`;
+      // PERBAIKAN: Judul header diubah sesuai permintaan
+      headerTitleEl.innerText = "Belum Absen & Aksi Presensi";
       badgeEl.innerText = `${studentItems.length} Siswa Filtered`;
       badgeEl.className = "text-[10px] text-indigo-700 font-bold bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-200";
 
