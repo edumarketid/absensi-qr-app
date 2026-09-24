@@ -1312,12 +1312,11 @@
         }
       });
 
-      // Total Kehadiran untuk Persentase Tetap Mengakomodasi Hadir + Terlambat
-      const totalKehadiranVal = countHadir + countTerlambat;
-      const pctHadir = totalStd > 0 ? Math.round((totalKehadiranVal / totalStd) * 100) : 0;
+      // Total Kehadiran MURNI MENGHITUNG HADIR SAJA
+      const pctHadir = totalStd > 0 ? Math.round((countHadir / totalStd) * 100) : 0;
 
       document.getElementById('dash-pct-total').innerText = `${pctHadir}%`;
-      document.getElementById('dash-pct-sub').innerText = `${totalKehadiranVal} dari ${totalStd} Siswa Hadir`;
+      document.getElementById('dash-pct-sub').innerText = `${countHadir} dari ${totalStd} Siswa Hadir`;
       
       // KARTU HADIR & TERLAMBAT
       document.getElementById('dash-count-hadir').innerText = countHadir;
@@ -1347,7 +1346,7 @@
           const rec = rawRecords.find(r => String(r.id_siswa).trim().toUpperCase() === String(std.id_siswa).trim().toUpperCase());
           if (rec) {
             const st = String(rec.status_akhir || rec.status_presensi || "HADIR").toUpperCase();
-            if (st === "HADIR" || st === "TERLAMBAT") hadirVal++;
+            if (st === "HADIR") hadirVal++;
           }
         });
         const pct = stds.length > 0 ? Math.round((hadirVal / stds.length) * 100) : 0;
