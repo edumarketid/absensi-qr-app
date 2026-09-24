@@ -1286,6 +1286,7 @@
       cachedStudents.forEach(std => {
         const rec = rawRecords.find(r => String(r.id_siswa).trim().toUpperCase() === String(std.id_siswa).trim().toUpperCase());
         
+        // PERBAIKAN: Pengecekan status terlambat pada presensi pagi
         if (rec && String(rec.status_pagi || "").toUpperCase() === "TERLAMBAT") {
           countTerlambat++;
         }
@@ -1294,23 +1295,32 @@
           countAlpa++;
         } else {
           const st = String(rec.status_akhir || rec.status_presensi || "HADIR").toUpperCase();
-          if (st === "HADIR") countHadir++;
-          else if (st === "ALPA") countAlpa++;
+          
+          // PERBAIKAN: Jika status pagi terlambat, jangan masukkan lagi ke countHadir murni
+          const isTerlambatPagi = String(rec.status_pagi || "").toUpperCase() === "TERLAMBAT";
+
+          if (st === "HADIR") {
+            if (!isTerlambatPagi) countHadir++; // Hanya hitung Hadir Murni
+          } else if (st === "ALPA") countAlpa++;
           else if (st === "IZIN") countIzin++;
           else if (st === "SAKIT") countSakit++;
           else if (st === "KEGIATAN") countKegiatan++;
           else if (st === "BOLOS") countBolos++;
-          else countHadir++;
+          else {
+            if (!isTerlambatPagi) countHadir++;
+          }
         }
       });
 
+      // Total kehadiran untuk persentase tetap mencakup Hadir + Terlambat
       const totalKehadiranVal = countHadir + countTerlambat;
       const pctHadir = totalStd > 0 ? Math.round((totalKehadiranVal / totalStd) * 100) : 0;
 
       document.getElementById('dash-pct-total').innerText = `${pctHadir}%`;
       document.getElementById('dash-pct-sub').innerText = `${totalKehadiranVal} dari ${totalStd} Siswa Hadir`;
       
-      document.getElementById('dash-count-hadir').innerText = countHadir + countTerlambat;
+      // PERBAIKAN: Kartu HADIR hanya menampilkan countHadir Murni
+      document.getElementById('dash-count-hadir').innerText = countHadir;
       document.getElementById('dash-count-terlambat').innerText = countTerlambat;
       document.getElementById('dash-count-alpa').innerText = countAlpa;
       document.getElementById('dash-count-bolos').innerText = countBolos;
