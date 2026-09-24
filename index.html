@@ -1308,7 +1308,8 @@
       document.getElementById('dash-pct-total').innerText = `${pctHadir}%`;
       document.getElementById('dash-pct-sub').innerText = `${totalKehadiranVal} dari ${totalStd} Siswa Hadir`;
       
-      document.getElementById('dash-count-hadir').innerText = countHadir;
+      // Menggabungkan total Hadir + Terlambat ke dalam Kartu HADIR
+      document.getElementById('dash-count-hadir').innerText = countHadir + countTerlambat;
       document.getElementById('dash-count-terlambat').innerText = countTerlambat;
       document.getElementById('dash-count-alpa').innerText = countAlpa;
       document.getElementById('dash-count-bolos').innerText = countBolos;
@@ -1517,7 +1518,8 @@
         }
       });
 
-      document.getElementById('stat-hadir').innerText = hadir;
+      // Menggabungkan total Hadir + Terlambat ke dalam Kartu HADIR
+      document.getElementById('stat-hadir').innerText = hadir + terlambat;
       document.getElementById('stat-terlambat').innerText = terlambat;
       document.getElementById('stat-alpa').innerText = alpa;
       document.getElementById('stat-sakit').innerText = sakit;
