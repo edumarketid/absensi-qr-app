@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0b3c5d">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Sistem Absensi Murid - v2.38</title>
+  <title>Sistem Absensi Murid - v2.39</title>
   <link rel="manifest" href='data:application/manifest+json,{"name":"Sistem Absensi Murid","short_name":"AbsensiQR","start_url":"./index.html","display":"standalone","background_color":"#0b3c5d","theme_color":"#0b3c5d","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/3135/3135715.png","sizes":"512x512","type":"image/png"}]}'>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -37,7 +37,7 @@
             <span id="status-text" class="text-xs font-semibold">Memeriksa...</span>
           </div>
           <div class="flex items-center justify-end gap-1 mt-0.5">
-            <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30">v2.38</span>
+            <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30">v2.39</span>
             <span id="app-role-badge" onclick="handleRoleBadgeClick()" class="text-[10px] font-bold text-amber-300 bg-amber-950/60 px-1.5 py-0.2 rounded-md border border-amber-500/30 cursor-pointer select-none">PETUGAS</span>
           </div>
         </div>
@@ -241,8 +241,8 @@
             <div>
               <label class="block text-[9px] font-bold text-gray-600 mb-1">Filter Status</label>
               <select id="monitoring-status-filter" onchange="updateMonitoringDashboard()" class="w-full py-1.5 px-2 bg-slate-50 border border-gray-200 rounded-xl text-[11px] font-bold text-blue-900">
-                <option value="ALL">Semua Status</option>
                 <option value="BELUM">Belum Absen</option>
+                <option value="ALL">Semua Status</option>
                 <option value="HADIR">Hadir</option>
                 <option value="TERLAMBAT">Terlambat</option>
                 <option value="ALPA">Alpa</option>
@@ -355,7 +355,7 @@
           <h3 class="font-bold text-xs text-blue-900 border-b border-gray-100 pb-1.5">APLIKASI</h3>
           <div class="flex justify-between text-xs">
             <span class="text-gray-500">Versi Aplikasi</span>
-            <span class="font-bold text-gray-900">v2.38</span>
+            <span class="font-bold text-gray-900">v2.39</span>
           </div>
           <div class="flex justify-between text-xs">
             <span class="text-gray-500">Status Update</span>
@@ -1452,7 +1452,7 @@
       const targetDate = formatCleanDateLocal(document.getElementById('monitoring-date-filter').value) || realTodayStr;
       const selectedClass = document.getElementById('monitoring-class-filter').value;
       const selectedSessionFilter = document.getElementById('monitoring-session-filter').value;
-      const selectedStatusFilter = document.getElementById('monitoring-status-filter').value || "ALL";
+      const selectedStatusFilter = document.getElementById('monitoring-status-filter').value || "BELUM";
       
       const queueRecords = await getAllQueueFromDB();
       const localHist = await getAllLocalHistoryFromDB();
@@ -1479,9 +1479,9 @@
         var targetStatus = "";
         if (stdRec) {
           if (selectedSessionFilter === "PAGI") {
-            targetStatus = String(stdRec.status_pagi || "").toUpperCase();
+            targetStatus = String(stdRec.status_pagi || stdRec.status_presensi || "").toUpperCase();
           } else if (selectedSessionFilter === "SIANG") {
-            targetStatus = String(stdRec.status_siang || "").toUpperCase();
+            targetStatus = String(stdRec.status_siang || stdRec.status_presensi || "").toUpperCase();
           }
         }
 
@@ -1543,8 +1543,8 @@
           const stdRec = attendanceRecords.find(r => String(r.id_siswa).trim().toUpperCase() === String(std.id_siswa).trim().toUpperCase());
           if (stdRec) {
             var st = "";
-            if (selectedSessionFilter === "PAGI") st = String(stdRec.status_pagi || "").toUpperCase();
-            else if (selectedSessionFilter === "SIANG") st = String(stdRec.status_siang || "").toUpperCase();
+            if (selectedSessionFilter === "PAGI") st = String(stdRec.status_pagi || stdRec.status_presensi || "").toUpperCase();
+            else if (selectedSessionFilter === "SIANG") st = String(stdRec.status_siang || stdRec.status_presensi || "").toUpperCase();
             
             if (st === "HADIR" || st === "TERLAMBAT") countHadirVal++;
           }
@@ -1637,10 +1637,10 @@
               </span>
             </div>
             <div class="grid grid-cols-4 gap-1.5 pt-1">
-              <button onclick="handleActionBtnClick('${std.id_siswa}', 'HADIR')" class="py-1 bg-emerald-600 text-white font-bold text-[9px] rounded-lg shadow-sm">Hadir</button>
-              <button onclick="handleActionBtnClick('${std.id_siswa}', 'IZIN')" class="py-1 bg-indigo-600 text-white font-bold text-[9px] rounded-lg shadow-sm">Izin</button>
-              <button onclick="handleActionBtnClick('${std.id_siswa}', 'SAKIT')" class="py-1 bg-blue-600 text-white font-bold text-[9px] rounded-lg shadow-sm">Sakit</button>
-              <button onclick="handleActionBtnClick('${std.id_siswa}', 'KEGIATAN')" class="py-1 bg-purple-600 text-white font-bold text-[9px] rounded-lg shadow-sm">Keg.</button>
+              <button onclick="handleActionBtnClick('${std.id_siswa}', 'HADIR')" class="py-1 bg-emerald-600 text-white font-bold text-[9px] rounded-lg shadow-sm hover:opacity-90 active:scale-95 transition">Hadir</button>
+              <button onclick="handleActionBtnClick('${std.id_siswa}', 'IZIN')" class="py-1 bg-indigo-600 text-white font-bold text-[9px] rounded-lg shadow-sm hover:opacity-90 active:scale-95 transition">Izin</button>
+              <button onclick="handleActionBtnClick('${std.id_siswa}', 'SAKIT')" class="py-1 bg-blue-600 text-white font-bold text-[9px] rounded-lg shadow-sm hover:opacity-90 active:scale-95 transition">Sakit</button>
+              <button onclick="handleActionBtnClick('${std.id_siswa}', 'KEGIATAN')" class="py-1 bg-purple-600 text-white font-bold text-[9px] rounded-lg shadow-sm hover:opacity-90 active:scale-95 transition">Keg.</button>
             </div>
           </div>
         `;
@@ -1650,33 +1650,41 @@
     async function setManualPresensiAction(idSiswa, status, targetDate) {
       const student = cachedStudents.find(s => s.id_siswa === idSiswa);
       if (!student) return;
-      
-      const selectedSessionFilter = document.getElementById('monitoring-session-filter').value || "PAGI";
-      const cleanTargetDate = formatCleanDateLocal(targetDate);
-      const timeStr = padZeroTime((isManualTimeMode && customScanTimeOverride) ? customScanTimeOverride : new Date().toTimeString().split(' ')[0].substring(0, 5));
-      const record = {
-        queue_id: `${cleanTargetDate}_${idSiswa}_${selectedSessionFilter}`,
-        tanggal: cleanTargetDate, jam: timeStr, id_siswa: idSiswa,
-        nama: student.nama, kelas: student.kelas, sesi: selectedSessionFilter,
-        status_presensi: status, status_manual: status, timestamp: Date.now()
-      };
-      await saveToAttendanceQueue(record);
-      await saveToLocalHistoryDB(record);
-      
-      fetchedTodayAttendance = fetchedTodayAttendance.filter(r => String(r.id_siswa).trim().toUpperCase() !== String(idSiswa).trim().toUpperCase());
-      fetchedTodayAttendance.push(record);
 
       const itemEl = document.getElementById(`action-item-${idSiswa}`);
       if (itemEl) {
         itemEl.classList.add('opacity-0', 'scale-95');
-        setTimeout(() => {
-          updateMonitoringDashboard();
-          renderDashboardView();
-        }, 200);
-      } else {
+      }
+
+      const selectedSessionFilter = document.getElementById('monitoring-session-filter').value || "PAGI";
+      const cleanTargetDate = formatCleanDateLocal(targetDate);
+      const timeStr = padZeroTime((isManualTimeMode && customScanTimeOverride) ? customScanTimeOverride : new Date().toTimeString().split(' ')[0].substring(0, 5));
+      
+      const record = {
+        queue_id: `${cleanTargetDate}_${idSiswa}_${selectedSessionFilter}`,
+        tanggal: cleanTargetDate,
+        jam: timeStr,
+        id_siswa: idSiswa,
+        nama: student.nama,
+        kelas: student.kelas,
+        sesi: selectedSessionFilter,
+        status_presensi: status,
+        status_manual: status,
+        status_pagi: selectedSessionFilter === "PAGI" ? status : "",
+        status_siang: selectedSessionFilter === "SIANG" ? status : "",
+        timestamp: Date.now()
+      };
+
+      await saveToAttendanceQueue(record);
+      await saveToLocalHistoryDB(record);
+      
+      fetchedTodayAttendance = fetchedTodayAttendance.filter(r => !(String(r.id_siswa).trim().toUpperCase() === String(idSiswa).trim().toUpperCase() && (r.sesi || "PAGI") === selectedSessionFilter));
+      fetchedTodayAttendance.push(record);
+
+      setTimeout(() => {
         updateMonitoringDashboard();
         renderDashboardView();
-      }
+      }, 200);
 
       if (navigator.onLine) syncQueueToGAS();
     }
