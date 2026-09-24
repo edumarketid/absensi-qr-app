@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0b3c5d">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Sistem Absensi Murid - v2.44</title>
+  <title>Sistem Absensi Murid - v2.45</title>
   <link rel="manifest" href='data:application/manifest+json,{"name":"Sistem Absensi Murid","short_name":"AbsensiQR","start_url":"./index.html","display":"standalone","background_color":"#0b3c5d","theme_color":"#0b3c5d","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/3135/3135715.png","sizes":"512x512","type":"image/png"}]}'>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -37,7 +37,7 @@
             <span id="status-text" class="text-xs font-semibold">Memeriksa...</span>
           </div>
           <div class="flex items-center justify-end gap-1 mt-0.5">
-            <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30">v2.44</span>
+            <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30">v2.45</span>
             <span id="app-role-badge" onclick="handleRoleBadgeClick()" class="text-[10px] font-bold text-amber-300 bg-amber-950/60 px-1.5 py-0.2 rounded-md border border-amber-500/30 cursor-pointer select-none">PETUGAS</span>
           </div>
         </div>
@@ -354,7 +354,7 @@
           <h3 class="font-bold text-xs text-blue-900 border-b border-gray-100 pb-1.5">APLIKASI</h3>
           <div class="flex justify-between text-xs">
             <span class="text-gray-500">Versi Aplikasi</span>
-            <span class="font-bold text-gray-900">v2.44</span>
+            <span class="font-bold text-gray-900">v2.45</span>
           </div>
           <div class="flex justify-between text-xs">
             <span class="text-gray-500">Status Update</span>
@@ -1459,7 +1459,6 @@
       const queueRecords = await getAllQueueFromDB();
       const localHist = await getAllLocalHistoryFromDB();
       
-      // PERBAIKAN STRICT FILTER TANGGAL: Memastikan semua record disaring tepat pada targetDate
       let rawRecords = [...fetchedTodayAttendance, ...fetchedAttendanceHistory, ...localHist, ...queueRecords].filter(r => formatCleanDateLocal(r.tanggal) === targetDate);
 
       const classStudents = cachedStudents.filter(s => selectedClass === "ALL" || s.kelas === selectedClass);
@@ -1472,12 +1471,10 @@
       const todayFormatted = realTodayStr;
       const nowStr = padZeroTime(now.toTimeString().split(' ')[0]);
       
-      const isPastLimit = (selectedSessionFilter === "PAGI") ? 
-        ((targetDate < todayFormatted) || (targetDate === todayFormatted && nowStr >= (timeConfig.pLimit + ":01"))) :
-        ((targetDate < todayFormatted) || (targetDate === todayFormatted && nowStr >= (timeConfig.sLimit + ":01")));
+      // PERBAIKAN: Status otomatis ALPA HANYA dipicu jika jam batas akhir SIANG telah terlampaui
+      const isPastSiangLimit = (targetDate < todayFormatted) || (targetDate === todayFormatted && nowStr >= (timeConfig.sLimit + ":01"));
 
       classStudents.forEach(std => {
-        // PERBAIKAN MODE SIANG & PAGI: Validasi pencocokan ID Siswa, Sesi, dan Tanggal Target
         const stdRec = rawRecords.find(r => 
           String(r.id_siswa).trim().toUpperCase() === String(std.id_siswa).trim().toUpperCase() &&
           formatCleanDateLocal(r.tanggal) === targetDate &&
@@ -1495,7 +1492,7 @@
 
         let evalStatus = targetStatus;
         if (!targetStatus || targetStatus === "") {
-          evalStatus = isPastLimit ? "ALPA" : "BELUM";
+          evalStatus = isPastSiangLimit ? "ALPA" : "BELUM";
         }
 
         if (evalStatus === "HADIR") hadir++;
@@ -1515,7 +1512,7 @@
         if (matchStatus) {
           filteredActionStudents.push({
             student: std,
-            status: targetStatus || (isPastLimit ? "ALPA" : "BELUM"),
+            status: targetStatus || (isPastSiangLimit ? "ALPA" : "BELUM"),
             isAbsented: !!targetStatus
           });
         }
@@ -1530,7 +1527,7 @@
 
       renderPieChart(hadir, terlambat, alpa, sakit, izin, kegiatan, classStudents.length);
       renderClassBarChartHorizontal(rawRecords, selectedSessionFilter);
-      renderMonitoringActionListFiltered(targetDate, filteredActionStudents, isPastLimit, selectedSessionFilter, selectedStatusFilter);
+      renderMonitoringActionListFiltered(targetDate, filteredActionStudents, isPastSiangLimit, selectedSessionFilter, selectedStatusFilter);
     }
 
     function renderClassBarChartHorizontal(attendanceRecords, selectedSessionFilter) {
@@ -1682,7 +1679,6 @@
       await saveToAttendanceQueue(record);
       await saveToLocalHistoryDB(record);
       
-      // PERBAIKAN: Menghapus cache lama siswa untuk tanggal & sesi spesifik ini sebelum menambahkan yang baru
       fetchedTodayAttendance = fetchedTodayAttendance.filter(r => !(
         String(r.id_siswa).trim().toUpperCase() === String(idSiswa).trim().toUpperCase() && 
         formatCleanDateLocal(r.tanggal) === cleanTargetDate &&
