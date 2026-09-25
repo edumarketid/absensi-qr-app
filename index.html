@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0b3c5d">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Sistem Absensi Murid - v2.57 Utuh Stabil</title>
+  <title>Sistem Absensi Murid - v2.56 Backup Stabil</title>
   <link rel="manifest" href='data:application/manifest+json,{"name":"Sistem Absensi Murid","short_name":"AbsensiQR","start_url":"./index.html","display":"standalone","background_color":"#0b3c5d","theme_color":"#0b3c5d","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/3135/3135715.png","sizes":"512x512","type":"image/png"}]}'>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -37,7 +37,7 @@
             <span id="status-text" class="text-xs font-semibold">Memeriksa...</span>
           </div>
           <div class="flex items-center justify-end gap-1 mt-0.5">
-            <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30">v2.57</span>
+            <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30">v2.56</span>
             <span id="app-role-badge" onclick="handleRoleBadgeClick()" class="text-[10px] font-bold text-amber-300 bg-amber-950/60 px-1.5 py-0.2 rounded-md border border-amber-500/30 cursor-pointer select-none">PETUGAS</span>
           </div>
         </div>
@@ -186,7 +186,7 @@
         </div>
       </main>
 
-      <!-- UNGGAH SISWA KOLEKTIF -->
+      <!-- UNGGAH SISWA KOLEKTIF (FITUR BARU) -->
       <main id="view-upload-batch" class="p-4 hidden">
         <div class="mb-3">
           <h2 class="font-bold text-lg text-gray-900">Unggah Siswa Kolektif</h2>
@@ -364,7 +364,7 @@
               <div class="space-y-1 text-[11px]">
                 <div class="flex justify-between">
                   <span class="text-gray-500">Versi</span>
-                  <span class="font-bold text-gray-900">v2.57</span>
+                  <span class="font-bold text-gray-900">v2.56</span>
                 </div>
                 <div class="flex justify-between items-center">
                   <span class="text-gray-500">Update</span>
@@ -1017,7 +1017,7 @@
       autoDetectOrSyncSessionMode(activeTimeStr, activeDateObj);
     }
 
-    /* FITUR UNGGAH SISWA KOLEKTIF */
+    /* FITUR UNGGAH SISWA KOLEKTIF (IMPORT CSV) */
     function downloadCSVTemplate() {
       const csvHeader = "ID_SISWA,NISN,NAMA_SISWA,KELAS,TTL\nS101,0081234567,Ahmad Fauzi,X TKR 1,Makassar 12 Jan 2008\nS102,0087654321,Siti Rahma,X TKR 1,Gowa 15 Feb 2008\nS103,0089988776,Budi Santoso,X TKR 2,Maros 20 Mar 2008";
       const blob = new Blob([csvHeader], { type: 'text/csv;charset=utf-8;' });
@@ -1516,7 +1516,7 @@
       modal.classList.toggle('hidden'); 
     }
 
-    /* KELOLA & EDIT DATA SISWA */
+    /* KELOLA & EDIT DATA SISWA LOGIC */
     function renderEditStudentsList() {
       const container = document.getElementById("edit-students-list-container");
       const q = document.getElementById("edit-std-search").value.toLowerCase();
@@ -1627,7 +1627,7 @@
       }
     }
 
-    /* DASHBOARD UTAMA LOGIC (FIXED) */
+    /* DASHBOARD UTAMA LOGIC */
     async function renderDashboardView() {
       const d = new Date();
       const realTodayStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -1649,19 +1649,22 @@
         if (!rec) {
           countAlpa++;
         } else {
-          // Status Akhir
-          const stAkhir = String(rec.status_akhir || rec.status_presensi || "ALPA").trim().toUpperCase();
+          const stAkhir = String(rec.status_akhir || rec.status_presensi || "HADIR").trim().toUpperCase();
 
           if (stAkhir === "HADIR") countHadir++;
           else if (stAkhir === "ALPA") countAlpa++;
-          else if (stAkhir === "BOLOS") countBolos++;
           else if (stAkhir === "IZIN") countIzin++;
           else if (stAkhir === "SAKIT") countSakit++;
           else if (stAkhir === "KEGIATAN") countKegiatan++;
+          else if (stAkhir === "BOLOS") countBolos++;
+          else {
+            countHadir++;
+          }
 
-          // Terlambat Murni Status Pagi
-          const stPagi = String(rec.status_pagi || "").trim().toUpperCase();
-          if (stPagi === "TERLAMBAT") countTerlambat++;
+          const stPagi = String(rec.status_pagi || (rec.sesi === "PAGI" ? rec.status_presensi : "") || "").trim().toUpperCase();
+          if (stPagi === "TERLAMBAT") {
+            countTerlambat++;
+          }
         }
       });
 
@@ -2087,7 +2090,7 @@
       });
     }
 
-    /* TINDAK LANJUT LOGIC (FIXED READOUT UTUH) */
+    /* LOGIKA FITUR TINDAK LANJUT OTOMATIS & WHATSAPP WALI KELAS PER KELAS */
     function switchTLTab(tabName) {
       currentTLTab = tabName;
       const btnPending = document.getElementById("tl-tab-btn-pending");
@@ -2104,7 +2107,9 @@
     }
 
     function getLocalTLStatusList() {
-      try { return JSON.parse(localStorage.getItem("TL_STATUS_STORE") || "{}"); } catch(e) { return {}; }
+      try {
+        return JSON.parse(localStorage.getItem("TL_STATUS_STORE") || "{}");
+      } catch(e) { return {}; }
     }
 
     function saveLocalTLStatus(idSiswa, dataObj) {
@@ -2124,14 +2129,16 @@
       const schoolName = localStorage.getItem("SCHOOL_NAME") || "Sekolah";
 
       if (selectedClass === "ALL") {
-        return alert("Pilih kelas tertentu terlebih dahulu pada filter kelas!");
+        return alert("Pilih kelas tertentu terlebih dahulu pada filter kelas untuk mengirim rekap ke Wali Kelas!");
       }
 
       const allHistory = [...fetchedTodayAttendance, ...fetchedAttendanceHistory, ...(await getAllLocalHistoryFromDB())];
       const tlStore = getLocalTLStatusList();
       const activeStudents = cachedStudents.filter(s => (s.active === undefined || s.active === true) && s.kelas === selectedClass);
 
-      if (activeStudents.length === 0) return alert(`Tidak ada siswa di kelas ${selectedClass}.`);
+      if (activeStudents.length === 0) {
+        return alert(`Tidak ada siswa di kelas ${selectedClass}.`);
+      }
 
       const detectedStudents = [];
 
@@ -2140,17 +2147,17 @@
         const stdRecords = allHistory.filter(r => String(r.id_siswa).trim().toUpperCase() === idS);
         stdRecords.sort((a,b) => String(a.tanggal).localeCompare(String(b.tanggal)));
 
-        // 1. Hitung Akumulasi ALPA (Murni dari status_akhir)
+        // 1. Hitung Akumulasi Alpa (MURNI DARI STATUS AKHIR)
         let totalAlpa = 0;
         stdRecords.forEach(r => {
           const stAkhir = String(r.status_akhir || r.status_presensi || "").trim().toUpperCase();
           if (stAkhir === "ALPA") totalAlpa++;
         });
 
-        // 2. Hitung TERLAMBAT Berturut-turut (Murni dari status_pagi)
+        // 2. Hitung Terlambat Berturut-turut (HANYA DARI STATUS PAGI)
         let maxSeqTerlambat = 0, currentSeqTerlambat = 0;
         stdRecords.forEach(r => {
-          const stPagi = String(r.status_pagi || "").trim().toUpperCase();
+          const stPagi = String(r.status_pagi || (r.sesi === "PAGI" ? r.status_presensi : "") || "").trim().toUpperCase();
           if (stPagi === "TERLAMBAT") {
             currentSeqTerlambat++;
             if (currentSeqTerlambat > maxSeqTerlambat) maxSeqTerlambat = currentSeqTerlambat;
@@ -2159,7 +2166,7 @@
           }
         });
 
-        // 3. Hitung BOLOS Berturut-turut (Murni dari status_akhir)
+        // 3. Hitung Bolos Berturut-turut (MURNI DARI STATUS AKHIR)
         let maxSeqBolos = 0, currentSeqBolos = 0;
         stdRecords.forEach(r => {
           const stAkhir = String(r.status_akhir || r.status_presensi || "").trim().toUpperCase();
@@ -2178,11 +2185,17 @@
 
         if (categories.length > 0) {
           const isDone = !!tlStore[std.id_siswa];
-          detectedStudents.push({ nama: std.nama, kategori: categories.join(", "), status: isDone ? "Sudah Ditindak" : "Perlu Penanganan" });
+          detectedStudents.push({
+            nama: std.nama,
+            kategori: categories.join(", "),
+            status: isDone ? "Sudah Ditindak" : "Perlu Penanganan"
+          });
         }
       });
 
-      if (detectedStudents.length === 0) return alert(`Selamat! Tidak ada siswa di kelas ${selectedClass} yang terdeteksi melanggar.`);
+      if (detectedStudents.length === 0) {
+        return alert(`Selamat! Tidak ada siswa di kelas ${selectedClass} yang terdeteksi memiliki catatan pelanggaran.`);
+      }
 
       let message = `Yth. Bapak/Ibu Wali Kelas *${selectedClass}*,\n\nBerikut daftar rekap tindak lanjut kedisiplinan siswa di kelas Anda:\n\n`;
       detectedStudents.forEach((item, index) => {
@@ -2190,7 +2203,8 @@
       });
       message += `Mohon untuk dapat dilakukan pembinaan atau koordinasi dengan orang tua siswa terkait. Terima kasih.\n\n_Salam Kedisiplinan ${schoolName}_`;
 
-      window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
+      const targetUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+      window.open(targetUrl, '_blank');
     }
 
     async function renderTindakLanjutView() {
@@ -2210,19 +2224,20 @@
       filteredByClassStudents.forEach(std => {
         const idS = String(std.id_siswa).trim().toUpperCase();
         const stdRecords = allHistory.filter(r => String(r.id_siswa).trim().toUpperCase() === idS);
+        
         stdRecords.sort((a,b) => String(a.tanggal).localeCompare(String(b.tanggal)));
 
-        // 1. Hitung Akumulasi ALPA (Murni dari status_akhir)
+        // 1. Hitung Akumulasi Alpa (MURNI DARI STATUS AKHIR)
         let totalAlpa = 0;
         stdRecords.forEach(r => {
           const stAkhir = String(r.status_akhir || r.status_presensi || "").trim().toUpperCase();
           if (stAkhir === "ALPA") totalAlpa++;
         });
 
-        // 2. Hitung TERLAMBAT Berturut-turut (Murni dari status_pagi)
+        // 2. Hitung Terlambat Berturut-turut (HANYA DARI STATUS PAGI)
         let maxSeqTerlambat = 0, currentSeqTerlambat = 0;
         stdRecords.forEach(r => {
-          const stPagi = String(r.status_pagi || "").trim().toUpperCase();
+          const stPagi = String(r.status_pagi || (r.sesi === "PAGI" ? r.status_presensi : "") || "").trim().toUpperCase();
           if (stPagi === "TERLAMBAT") {
             currentSeqTerlambat++;
             if (currentSeqTerlambat > maxSeqTerlambat) maxSeqTerlambat = currentSeqTerlambat;
@@ -2231,7 +2246,7 @@
           }
         });
 
-        // 3. Hitung BOLOS Berturut-turut (Murni dari status_akhir)
+        // 3. Hitung Bolos Berturut-turut (MURNI DARI STATUS AKHIR)
         let maxSeqBolos = 0, currentSeqBolos = 0;
         stdRecords.forEach(r => {
           const stAkhir = String(r.status_akhir || r.status_presensi || "").trim().toUpperCase();
