@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0b3c5d">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Sistem Absensi Murid - v2.54</title>
+  <title>Sistem Absensi Murid - v2.54 Backup Stabil</title>
   <link rel="manifest" href='data:application/manifest+json,{"name":"Sistem Absensi Murid","short_name":"AbsensiQR","start_url":"./index.html","display":"standalone","background_color":"#0b3c5d","theme_color":"#0b3c5d","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/3135/3135715.png","sizes":"512x512","type":"image/png"}]}'>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -316,14 +316,13 @@
         </div>
       </main>
 
-      <!-- TENTANG APLIKASI (DIPERBARUI: GRID 2 KOLOM INFORMASI & CACHE, PENGEMBANG DI BAWAH) -->
+      <!-- TENTANG APLIKASI -->
       <main id="view-about" class="p-4 hidden">
         <div class="mb-3">
           <h2 class="font-bold text-lg text-gray-900">Tentang Aplikasi</h2>
           <p class="text-xs text-gray-500">Status Sistem & Informasi Pengembang</p>
         </div>
         
-        <!-- DUA KARTU SEJAJAR MEMBELAH LAYAR -->
         <div class="grid grid-cols-2 gap-2.5 mb-3">
           <div class="bg-white p-3.5 rounded-2xl border border-gray-200 shadow-sm flex flex-col justify-between space-y-2">
             <div>
@@ -360,7 +359,6 @@
           </div>
         </div>
 
-        <!-- PENGEMBANG APLIKASI DI BAGIAN BAWAH -->
         <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3 mb-3">
           <h3 class="font-bold text-xs text-blue-900 border-b border-gray-100 pb-1.5"><i class="fa-solid fa-code text-indigo-600 mr-1"></i> PENGEMBANG APLIKASI</h3>
           <div class="text-xs space-y-1.5">
@@ -373,7 +371,7 @@
         </div>
       </main>
 
-      <!-- TINDAK LANJUT -->
+      <!-- TINDAK LANJUT (SUDAH DIPERBAIKI) -->
       <main id="view-tindak-lanjut" class="p-4 hidden">
         <div class="flex items-center justify-between mb-2">
           <div>
@@ -385,7 +383,6 @@
           </button>
         </div>
 
-        <!-- FILTER KELAS & TOMBOL WA WALI KELAS PER KELAS -->
         <div class="mb-3 space-y-1.5">
           <label class="block text-[10px] font-bold text-gray-600">Filter Kelas & Aksi Laporan:</label>
           <div class="flex items-center gap-2">
@@ -398,7 +395,6 @@
           </div>
         </div>
 
-        <!-- TAB NAVIGASI TINDAK LANJUT -->
         <div class="flex bg-gray-200/80 p-1 rounded-xl mb-3 text-xs font-bold">
           <button id="tl-tab-btn-pending" onclick="switchTLTab('pending')" class="flex-1 py-1.5 rounded-lg bg-white text-rose-700 shadow-sm transition">
             Perlu Penanganan <span id="tl-count-pending" class="ml-1 px-1.5 py-0.2 rounded-full bg-rose-100 text-rose-800 text-[10px]">0</span>
@@ -829,10 +825,10 @@
 
       const items = [
         { label: "Tambah Siswa", icon: "fa-user-plus", color: "emerald", action: "toggleAddStudentModal()", adminOnly: true },
-        { label: "Edit Data Siswa", icon: "fa-user-pen", color: "blue", action: "toggleView('edit-students')", adminOnly: true },
+        { label: "Edit Data Siswa", icon: "fa-user-pen", color: "indigo", action: "toggleView('edit-students')", adminOnly: true },
         { label: "Atur Hari Libur", icon: "fa-calendar-day", color: "amber", action: "toggleView('hari-libur')", adminOnly: true },
         { label: "Tindak Lanjut", icon: "fa-user-shield", color: "rose", action: "toggleView('tindak-lanjut')", adminOnly: true },
-        { label: "Pindah/Naik Kelas", icon: "fa-graduation-cap", color: "indigo", action: "toggleView('promotion')", adminOnly: true },
+        { label: "Pindah/Naik Kelas", icon: "fa-graduation-cap", color: "purple", action: "toggleView('promotion')", adminOnly: true },
         { label: "Laporan Rekap", icon: "fa-file-invoice", color: "emerald", action: "bukaHalamanLaporan()", adminOnly: true },
         { label: "Cetak QR Code", icon: "fa-print", color: "indigo", action: "bukaHalamanCetakQR()", adminOnly: true },
         { label: "Tentang Aplikasi", icon: "fa-circle-info", color: "teal", action: "toggleView('about')", adminOnly: false },
@@ -1256,7 +1252,8 @@
     function populateClassDropdowns() {
       const classes = [...new Set(cachedStudents.map(s => s.kelas))].filter(Boolean).sort();
       const optionsHtml = '<option value="ALL">Semua Kelas</option>' + classes.map(c => `<option value="${c}">${c}</option>`).join('');
-      
+      const optionsNoAllHtml = classes.map(c => `<option value="${c}">${c}</option>`).join('');
+
       const stdFilter = document.getElementById('filter-class-select');
       const monFilter = document.getElementById('monitoring-class-filter');
       const promFilter = document.getElementById('promote-from-class');
@@ -1267,7 +1264,7 @@
       if (monFilter) monFilter.innerHTML = optionsHtml;
       if (dashFilter) dashFilter.innerHTML = optionsHtml;
       if (tlFilter) tlFilter.innerHTML = optionsHtml;
-      if (promFilter) promFilter.innerHTML = classes.map(c => `<option value="${c}">${c}</option>`).join('');
+      if (promFilter) promFilter.innerHTML = optionsNoAllHtml;
     }
 
     async function loadStudentsView() {
@@ -1435,7 +1432,6 @@
       document.getElementById('edit-student-modal').classList.add('hidden');
     }
 
-    /* EDIT DATA SISWA DISIMPAN KE INDEXEDDB DAN DIPERBARUI DI GOOGLE SHEETS */
     async function saveEditStudentDetails() {
       const idSiswa = document.getElementById('edit-modal-id-siswa').value;
       const nama = document.getElementById('edit-modal-nama').value.trim();
@@ -1955,7 +1951,7 @@
       });
     }
 
-    /* LOGIKA FITUR TINDAK LANJUT OTOMATIS & WHATSAPP WALI KELAS PER KELAS */
+    /* LOGIKA FITUR TINDAK LANJUT OTOMATIS & WHATSAPP WALI KELAS PER KELAS (SUDAH DIPERBAIKI) */
     function switchTLTab(tabName) {
       currentTLTab = tabName;
       const btnPending = document.getElementById("tl-tab-btn-pending");
@@ -1989,7 +1985,6 @@
       localStorage.setItem("TL_STATUS_STORE", JSON.stringify(store));
     }
 
-    /* KIRIM REKAP WA TINDAK LANJUT WALI KELAS PER KELAS */
     async function sendTLClassSummaryWA() {
       const selectedClass = document.getElementById("tl-filter-class").value;
       const schoolName = localStorage.getItem("SCHOOL_NAME") || "Sekolah";
@@ -2013,14 +2008,14 @@
         const stdRecords = allHistory.filter(r => String(r.id_siswa).trim().toUpperCase() === idS);
         stdRecords.sort((a,b) => String(a.tanggal).localeCompare(String(b.tanggal)));
 
-        // 1. CEK 3x ALPA (AKUMULASI) - STATUS AKHIR
+        // 1. Hitung Akumulasi Alpa (Hanya dari Status Akhir)
         let totalAlpa = 0;
         stdRecords.forEach(r => {
           const stAkhir = String(r.status_akhir || r.status_presensi || "").trim().toUpperCase();
           if (stAkhir === "ALPA") totalAlpa++;
         });
 
-        // 2. CEK 3x TERLAMBAT (BERTURUT-TURUT) - STATUS PAGI
+        // 2. Hitung Terlambat Berturut-turut (Hanya dari Status Presensi Pagi)
         let maxSeqTerlambat = 0, currentSeqTerlambat = 0;
         stdRecords.forEach(r => {
           const stPagi = String(r.status_pagi || (r.sesi === "PAGI" ? r.status_presensi : "") || "").trim().toUpperCase();
@@ -2032,7 +2027,7 @@
           }
         });
 
-        // 3. CEK 3x BOLOS (BERTURUT-TURUT) - STATUS AKHIR
+        // 3. Hitung Bolos Berturut-turut (Dari Status Akhir)
         let maxSeqBolos = 0, currentSeqBolos = 0;
         stdRecords.forEach(r => {
           const stAkhir = String(r.status_akhir || r.status_presensi || "").trim().toUpperCase();
@@ -2093,12 +2088,14 @@
         
         stdRecords.sort((a,b) => String(a.tanggal).localeCompare(String(b.tanggal)));
 
+        // 1. Hitung Akumulasi Alpa (Hanya dari Status Akhir)
         let totalAlpa = 0;
         stdRecords.forEach(r => {
           const stAkhir = String(r.status_akhir || r.status_presensi || "").trim().toUpperCase();
           if (stAkhir === "ALPA") totalAlpa++;
         });
 
+        // 2. Hitung Terlambat Berturut-turut (Hanya dari Status Presensi Pagi)
         let maxSeqTerlambat = 0, currentSeqTerlambat = 0;
         stdRecords.forEach(r => {
           const stPagi = String(r.status_pagi || (r.sesi === "PAGI" ? r.status_presensi : "") || "").trim().toUpperCase();
@@ -2110,6 +2107,7 @@
           }
         });
 
+        // 3. Hitung Bolos Berturut-turut (Dari Status Akhir)
         let maxSeqBolos = 0, currentSeqBolos = 0;
         stdRecords.forEach(r => {
           const stAkhir = String(r.status_akhir || r.status_presensi || "").trim().toUpperCase();
@@ -2333,7 +2331,7 @@
         const keys = await caches.keys();
         await Promise.all(keys.map(key => caches.delete(key)));
       }
-      alert("Cache file aplikasi berhasil dibersihkan! (Antrean absensi lokal aman)");
+      alert("Cache file aplikasi berhasil dibersihkan!");
       window.location.reload();
     }
 
