@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0b3c5d">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Sistem Absensi Murid - v2.51</title>
+  <title>Sistem Absensi Murid - v2.52</title>
   <link rel="manifest" href='data:application/manifest+json,{"name":"Sistem Absensi Murid","short_name":"AbsensiQR","start_url":"./index.html","display":"standalone","background_color":"#0b3c5d","theme_color":"#0b3c5d","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/3135/3135715.png","sizes":"512x512","type":"image/png"}]}'>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -37,7 +37,7 @@
             <span id="status-text" class="text-xs font-semibold">Memeriksa...</span>
           </div>
           <div class="flex items-center justify-end gap-1 mt-0.5">
-            <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30">v2.51</span>
+            <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30">v2.52</span>
             <span id="app-role-badge" onclick="handleRoleBadgeClick()" class="text-[10px] font-bold text-amber-300 bg-amber-950/60 px-1.5 py-0.2 rounded-md border border-amber-500/30 cursor-pointer select-none">PETUGAS</span>
           </div>
         </div>
@@ -318,50 +318,17 @@
         </div>
       </main>
 
-      <!-- DONASI -->
-      <main id="view-donation" class="p-4 hidden">
-        <div class="text-center mb-3">
-          <div class="w-12 h-12 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-2 text-xl shadow-sm"><i class="fa-solid fa-hand-holding-heart"></i></div>
-          <h2 class="font-bold text-lg text-gray-900">Dukung Pengembangan</h2>
-          <p class="text-xs text-gray-500 leading-relaxed mt-1">
-            Aplikasi ini dibagikan secara gratis untuk mendukung digitalisasi sekolah. Jika aplikasi ini bermanfaat, dukungan sukarela Anda sangat berharga untuk kelanjutan pengembangannya.
-          </p>
-        </div>
-        <div class="space-y-2.5 mb-4">
-          <div class="bg-white p-3.5 rounded-2xl border border-gray-200 shadow-sm flex items-center justify-between">
-            <div>
-              <b class="text-xs text-blue-900 block font-extrabold">Bank BRI</b>
-              <span class="font-mono text-sm font-extrabold text-gray-800 block mt-0.5">488801018509539</span>
-              <small class="text-[10px] text-gray-500">a.n. Ajiardin</small>
-            </div>
-            <button onclick="navigator.clipboard.writeText('488801018509539'); alert('Nomor Rekening BRI Disalin!');" class="px-2.5 py-1.5 bg-blue-50 text-blue-700 border border-blue-200 font-bold text-[10px] rounded-lg">
-              <i class="fa-solid fa-copy"></i> Salin
-            </button>
-          </div>
-          <div class="bg-white p-3.5 rounded-2xl border border-gray-200 shadow-sm flex items-center justify-between">
-            <div>
-              <b class="text-xs text-emerald-800 block font-extrabold">E-Wallet (DANA / OVO / GoPay / ShopeePay / KasPro)</b>
-              <span class="font-mono text-sm font-extrabold text-gray-800 block mt-0.5">085298875399</span>
-              <small class="text-[10px] text-gray-500">a.n. Ajiardin</small>
-            </div>
-            <button onclick="navigator.clipboard.writeText('085298875399'); alert('Nomor E-Wallet Disalin!');" class="px-2.5 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-[10px] rounded-lg">
-              <i class="fa-solid fa-copy"></i> Salin
-            </button>
-          </div>
-        </div>
-      </main>
-
       <!-- TENTANG APLIKASI -->
       <main id="view-about" class="p-4 hidden">
         <div class="mb-3">
           <h2 class="font-bold text-lg text-gray-900">Tentang Aplikasi</h2>
-          <p class="text-xs text-gray-500">Status Sistem & Penyimpanan</p>
+          <p class="text-xs text-gray-500">Status Sistem & Informasi Pengembang</p>
         </div>
         <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3 mb-3">
-          <h3 class="font-bold text-xs text-blue-900 border-b border-gray-100 pb-1.5">APLIKASI</h3>
+          <h3 class="font-bold text-xs text-blue-900 border-b border-gray-100 pb-1.5">INFORMASI APLIKASI</h3>
           <div class="flex justify-between text-xs">
             <span class="text-gray-500">Versi Aplikasi</span>
-            <span class="font-bold text-gray-900">v2.51</span>
+            <span class="font-bold text-gray-900">v2.52</span>
           </div>
           <div class="flex justify-between text-xs">
             <span class="text-gray-500">Status Update</span>
@@ -369,9 +336,20 @@
           </div>
           <button onclick="forceCheckAppUpdate()" class="w-full bg-blue-50 text-blue-600 border border-blue-200 font-bold py-2 rounded-xl text-xs"><i class="fa-solid fa-rotate"></i> Periksa Update</button>
         </div>
+
+        <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3 mb-3">
+          <h3 class="font-bold text-xs text-blue-900 border-b border-gray-100 pb-1.5">PENGEMBANG APLIKASI</h3>
+          <div class="text-xs space-y-1.5">
+            <p class="text-gray-600">Pengembang: <b class="text-gray-900">Ajiardin, S.T.</b></p>
+            <p class="text-gray-600">Kontak Pengembang: <b class="text-gray-900">085298875399</b></p>
+          </div>
+          <button onclick="window.open('https://wa.me/6285298875399?text=Halo%20Pengembang%20Aplikasi%20Absensi', '_blank')" class="w-full bg-emerald-600 text-white font-bold py-2 rounded-xl text-xs shadow-md flex items-center justify-center gap-2">
+            <i class="fa-brands fa-whatsapp text-sm"></i> Hubungi Pengembang
+          </button>
+        </div>
         
         <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3 mb-3">
-          <h3 class="font-bold text-xs text-blue-900 border-b border-gray-100 pb-1.5">PENYIMPANAN</h3>
+          <h3 class="font-bold text-xs text-blue-900 border-b border-gray-100 pb-1.5">PENYIMPANAN & CACHE</h3>
           <div class="flex justify-between text-xs">
             <span class="text-gray-500">Cache Aplikasi</span>
             <span id="about-cache-size" class="font-bold text-gray-900">Calculating...</span>
@@ -382,19 +360,11 @@
           </div>
           <button onclick="clearAppCacheOnly()" class="w-full bg-rose-50 text-rose-600 border border-rose-200 font-bold py-2 rounded-xl text-xs"><i class="fa-solid fa-trash-can"></i> Bersihkan Cache</button>
         </div>
-
-        <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-2 mb-3">
-          <h3 class="font-bold text-xs text-blue-900 border-b border-gray-100 pb-1.5">DATABASE</h3>
-          <div class="flex justify-between text-xs">
-            <span class="text-gray-500">Schema</span>
-            <span class="font-bold text-gray-900">v3</span>
-          </div>
-        </div>
       </main>
 
       <!-- TINDAK LANJUT -->
       <main id="view-tindak-lanjut" class="p-4 hidden">
-        <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center justify-between mb-2">
           <div>
             <h2 class="font-bold text-lg text-gray-900">Tindak Lanjut Siswa</h2>
             <p class="text-xs text-gray-500">Rekap Otomatis Pelanggaran & Penanganan</p>
@@ -402,6 +372,14 @@
           <button onclick="renderTindakLanjutView()" class="bg-rose-50 text-rose-600 px-2.5 py-1.5 rounded-xl text-xs font-bold border border-rose-200 flex items-center gap-1 shadow-sm">
             <i class="fa-solid fa-arrows-rotate"></i> Analisis
           </button>
+        </div>
+
+        <!-- FILTER KELAS TINDAK LANJUT -->
+        <div class="mb-3">
+          <label class="block text-[10px] font-bold text-gray-600 mb-1">Filter Kelas:</label>
+          <select id="tl-filter-class" onchange="renderTindakLanjutView()" class="w-full py-1.5 px-3 bg-white border border-gray-200 rounded-xl text-xs font-bold text-gray-800 shadow-sm">
+            <option value="ALL">Semua Kelas</option>
+          </select>
         </div>
 
         <!-- TAB NAVIGASI TINDAK LANJUT -->
@@ -415,6 +393,23 @@
         </div>
 
         <div id="tindak-lanjut-list-container" class="space-y-3 pb-6"></div>
+      </main>
+
+      <!-- EDIT DATA SISWA / MANAJEMEN SISWA -->
+      <main id="view-edit-students" class="p-4 hidden">
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <h2 class="font-bold text-lg text-gray-900">Kelola Data Siswa</h2>
+            <p class="text-xs text-gray-500">Edit Identitas & Saklar Aktif/Non-Aktif</p>
+          </div>
+          <button onclick="toggleAddStudentModal()" class="bg-emerald-600 text-white px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm flex items-center gap-1">
+            <i class="fa-solid fa-plus"></i> Tambah
+          </button>
+        </div>
+        <div class="space-y-2 mb-3">
+          <input type="text" id="edit-std-search" onkeyup="renderEditStudentsList()" placeholder="Cari nama, NISN..." class="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs text-gray-800">
+        </div>
+        <div id="edit-students-list-container" class="space-y-2 pb-6 max-h-[520px] overflow-y-auto no-scrollbar"></div>
       </main>
 
       <!-- HARI LIBUR -->
@@ -492,6 +487,41 @@
           <button onclick="saveSchoolSettings()" class="w-full bg-slate-800 text-white font-semibold py-2 rounded-xl text-xs shadow-sm"><i class="fa-solid fa-floppy-disk"></i> Simpan Identitas</button>
         </div>
       </main>
+    </div>
+
+    <!-- MODAL EDIT DATA SISWA -->
+    <div id="edit-student-modal" class="absolute inset-0 bg-black/60 backdrop-blur-sm z-50 flex flex-col justify-end hidden">
+      <div class="bg-white rounded-t-3xl p-5 space-y-3 shadow-2xl max-h-[85%] overflow-y-auto">
+        <div class="flex items-center justify-between border-b border-gray-100 pb-2">
+          <h3 class="font-bold text-gray-900 text-sm">Edit Data Siswa</h3>
+          <button onclick="closeEditStudentModal()" class="w-7 h-7 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center"><i class="fa-solid fa-xmark text-sm"></i></button>
+        </div>
+        <input type="hidden" id="edit-modal-id-siswa">
+        <div>
+          <label class="block text-[10px] font-bold text-gray-600 mb-1">Nama Lengkap</label>
+          <input type="text" id="edit-modal-nama" class="w-full px-3 py-2 bg-slate-50 border border-gray-200 rounded-xl text-xs text-gray-800">
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-gray-600 mb-1">NISN</label>
+          <input type="text" id="edit-modal-nisn" class="w-full px-3 py-2 bg-slate-50 border border-gray-200 rounded-xl text-xs text-gray-800">
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-gray-600 mb-1">Kelas</label>
+          <input type="text" id="edit-modal-kelas" class="w-full px-3 py-2 bg-slate-50 border border-gray-200 rounded-xl text-xs text-gray-800">
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-gray-600 mb-1">Tempat, Tanggal Lahir (TTL)</label>
+          <input type="text" id="edit-modal-ttl" placeholder="Contoh: Makassar, 12 Januari 2008" class="w-full px-3 py-2 bg-slate-50 border border-gray-200 rounded-xl text-xs text-gray-800">
+        </div>
+        <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-gray-200">
+          <span class="text-xs font-bold text-gray-800">Status Keaktifan Siswa:</span>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="edit-modal-status-toggle" class="sr-only peer">
+            <div class="w-9 h-5 bg-gray-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+          </label>
+        </div>
+        <button onclick="saveEditStudentDetails()" class="w-full bg-blue-600 text-white font-bold py-2.5 rounded-xl text-xs shadow-md"><i class="fa-solid fa-floppy-disk"></i> Simpan Perubahan</button>
+      </div>
     </div>
 
     <!-- MODAL POPUP FORM PROSES TINDAK LANJUT SISWA -->
@@ -645,7 +675,7 @@
     let currentUserRole = "PETUGAS"; 
     let isProcessingScan = false;
     let currentTLTab = "pending"; 
-    let activeCameraFacingMode = "environment"; // DEFAULT KAMERA BELAKANG
+    let activeCameraFacingMode = "environment";
 
     const DAYS_LIST = [
       { key: "sun", label: "Minggu (Ekstrakurikuler)" },
@@ -667,7 +697,6 @@
       sat: { active: true,  pStart: "06:00", pLimit: "07:25", sStart: "12:00", sLimit: "13:45" }
     };
 
-    /* AUDIOCONTEXT UNTUK BUNYI BEEP KAMERA */
     function playBeepSound() {
       try {
         const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -777,6 +806,7 @@
       renderMenuModalGrid();
     }
 
+    /* RENDER MENU UTAMA TERPERBARUI (TANPA DONASI & ABSENSI MANUAL) */
     function renderMenuModalGrid() {
       const grid = document.getElementById("menu-grid-box");
       if (!grid) return;
@@ -784,13 +814,12 @@
 
       const items = [
         { label: "Tambah Siswa", icon: "fa-user-plus", color: "emerald", action: "toggleAddStudentModal()", adminOnly: true },
-        { label: "Absensi Manual", icon: "fa-keyboard", color: "blue", action: "promptManualInput()", adminOnly: false },
+        { label: "Edit Data Siswa", icon: "fa-user-pen", color: "blue", action: "toggleView('edit-students')", adminOnly: true },
         { label: "Atur Hari Libur", icon: "fa-calendar-day", color: "amber", action: "toggleView('hari-libur')", adminOnly: true },
         { label: "Tindak Lanjut", icon: "fa-user-shield", color: "rose", action: "toggleView('tindak-lanjut')", adminOnly: true },
         { label: "Pindah/Naik Kelas", icon: "fa-graduation-cap", color: "indigo", action: "toggleView('promotion')", adminOnly: true },
         { label: "Laporan Rekap", icon: "fa-file-invoice", color: "emerald", action: "bukaHalamanLaporan()", adminOnly: true },
         { label: "Cetak QR Code", icon: "fa-print", color: "indigo", action: "bukaHalamanCetakQR()", adminOnly: true },
-        { label: "Dukung Donasi", icon: "fa-hand-holding-heart", color: "rose", action: "toggleView('donation')", adminOnly: false },
         { label: "Tentang Aplikasi", icon: "fa-circle-info", color: "teal", action: "toggleView('about')", adminOnly: false },
         { label: "Pengaturan", icon: "fa-gear", color: "purple", action: "toggleView('settings')", adminOnly: true }
       ];
@@ -1181,7 +1210,14 @@
             const tx = db.transaction("students", "readwrite");
             const store = tx.objectStore("students");
             store.clear();
-            result.students.forEach(s => store.put({ id_siswa: String(s.qr_key || s.id_siswa).trim(), nisn: String(s.nisn).trim(), nama: String(s.nama).trim(), kelas: String(s.kelas).trim() }));
+            result.students.forEach(s => store.put({ 
+              id_siswa: String(s.qr_key || s.id_siswa).trim(), 
+              nisn: String(s.nisn || "").trim(), 
+              nama: String(s.nama || "").trim(), 
+              kelas: String(s.kelas || "").trim(),
+              ttl: String(s.ttl || "").trim(),
+              active: (s.active !== undefined) ? parseBool(s.active, true) : true
+            }));
             tx.oncomplete = () => {
               loadStudentsView();
               updateMonitoringDashboard();
@@ -1219,10 +1255,12 @@
       const monFilter = document.getElementById('monitoring-class-filter');
       const promFilter = document.getElementById('promote-from-class');
       const dashFilter = document.getElementById('dash-filter-class');
+      const tlFilter = document.getElementById('tl-filter-class');
 
       if (stdFilter) stdFilter.innerHTML = optionsHtml;
       if (monFilter) monFilter.innerHTML = optionsHtml;
       if (dashFilter) dashFilter.innerHTML = optionsHtml;
+      if (tlFilter) tlFilter.innerHTML = optionsHtml;
       if (promFilter) promFilter.innerHTML = classes.map(c => `<option value="${c}">${c}</option>`).join('');
     }
 
@@ -1247,7 +1285,7 @@
       const classes = [...new Set(cachedStudents.map(s => s.kelas))].filter(Boolean).sort();
       
       badgeContainer.innerHTML = classes.map(cls => {
-        const count = cachedStudents.filter(s => s.kelas === cls).length;
+        const count = cachedStudents.filter(s => s.kelas === cls && (s.active === undefined || s.active === true)).length;
         return `
           <button onclick="document.getElementById('filter-class-select').value='${cls}'; filterStudentsList();" class="flex-shrink-0 px-2.5 py-1 bg-white border border-gray-200 rounded-lg text-[10px] font-bold text-gray-700 shadow-sm hover:border-blue-400">
             ${cls}: <span class="text-blue-600 font-extrabold">${count}</span>
@@ -1259,8 +1297,10 @@
     function filterStudentsList() {
       const q = document.getElementById('search-student-input').value.toLowerCase();
       const cls = document.getElementById('filter-class-select').value;
-      document.getElementById('std-count-total').innerText = cachedStudents.length;
-      const filtered = cachedStudents.filter(s => {
+      const activeStudents = cachedStudents.filter(s => s.active === undefined || s.active === true);
+      document.getElementById('std-count-total').innerText = activeStudents.length;
+      
+      const filtered = activeStudents.filter(s => {
         const matchQ = s.nama.toLowerCase().includes(q) || s.id_siswa.toLowerCase().includes(q) || (s.nisn && s.nisn.includes(q));
         const matchC = cls === "ALL" || s.kelas === cls;
         return matchQ && matchC;
@@ -1269,7 +1309,7 @@
       const container = document.getElementById('students-list-container');
       container.innerHTML = filtered.map(s => `
         <div class="bg-white p-3 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
-          <div><h4 class="font-bold text-xs text-gray-900">${s.nama}</h4><p class="text-[10px] text-gray-500">ID: ${s.id_siswa} | NISN: ${s.nisn}</p></div>
+          <div><h4 class="font-bold text-xs text-gray-900">${s.nama}</h4><p class="text-[10px] text-gray-500">ID: ${s.id_siswa} | NISN: ${s.nisn || '-'}</p></div>
           <span class="px-2 py-1 bg-emerald-50 text-emerald-700 font-bold text-[10px] rounded-lg">${s.kelas}</span>
         </div>
       `).join('');
@@ -1296,9 +1336,14 @@
     }
 
     function toggleView(viewName) {
-      const views = ['scanner', 'success', 'students', 'monitoring', 'dashboard', 'donation', 'about', 'tindak-lanjut', 'hari-libur', 'settings', 'promotion'];
-      views.forEach(v => document.getElementById('view-' + v).classList.add('hidden'));
-      document.getElementById('view-' + viewName).classList.remove('hidden');
+      const views = ['scanner', 'success', 'students', 'monitoring', 'dashboard', 'about', 'tindak-lanjut', 'hari-libur', 'settings', 'promotion', 'edit-students'];
+      views.forEach(v => {
+        const el = document.getElementById('view-' + v);
+        if (el) el.classList.add('hidden');
+      });
+      const targetView = document.getElementById('view-' + viewName);
+      if (targetView) targetView.classList.remove('hidden');
+
       if (viewName === 'students') loadStudentsView();
       if (viewName === 'monitoring') onMonitoringDateChange();
       if (viewName === 'dashboard') renderDashboardView();
@@ -1307,6 +1352,7 @@
       if (viewName === 'settings') renderDaysConfigForm();
       if (viewName === 'about') updateAboutStorageMetrics();
       if (viewName === 'scanner') refreshRealtimeSessionUI();
+      if (viewName === 'edit-students') renderEditStudentsList();
     }
 
     function toggleMenuModal() { 
@@ -1328,14 +1374,101 @@
       modal.classList.toggle('hidden'); 
     }
 
+    /* KELOLA & EDIT DATA SISWA LOGIC */
+    function renderEditStudentsList() {
+      const container = document.getElementById("edit-students-list-container");
+      const q = document.getElementById("edit-std-search").value.toLowerCase();
+      
+      const filtered = cachedStudents.filter(s => 
+        s.nama.toLowerCase().includes(q) || 
+        s.id_siswa.toLowerCase().includes(q) || 
+        (s.nisn && s.nisn.includes(q))
+      );
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="text-xs text-gray-400 text-center py-4">Siswa tidak ditemukan.</div>`;
+        return;
+      }
+
+      container.innerHTML = filtered.map(s => {
+        const isActive = (s.active === undefined || s.active === true);
+        return `
+          <div class="bg-white p-3 rounded-2xl border ${isActive ? 'border-gray-200' : 'border-rose-200 bg-rose-50/20'} shadow-sm flex items-center justify-between">
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center space-x-1.5">
+                <h4 class="font-bold text-xs text-gray-900 truncate">${s.nama}</h4>
+                <span class="px-1.5 py-0.2 rounded text-[8px] font-extrabold ${isActive ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
+                  ${isActive ? 'Aktif' : 'Non-Aktif'}
+                </span>
+              </div>
+              <p class="text-[10px] text-gray-500">ID: ${s.id_siswa} | NISN: ${s.nisn || '-'} | Kelas: <b>${s.kelas}</b></p>
+            </div>
+            <button onclick="openEditStudentModal('${s.id_siswa}')" class="px-3 py-1.5 bg-blue-50 text-blue-600 border border-blue-200 rounded-xl text-xs font-bold hover:bg-blue-100">
+              <i class="fa-solid fa-pen"></i> Edit
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openEditStudentModal(idSiswa) {
+      const std = cachedStudents.find(s => s.id_siswa === idSiswa);
+      if (!std) return;
+
+      document.getElementById('edit-modal-id-siswa').value = std.id_siswa;
+      document.getElementById('edit-modal-nama').value = std.nama || "";
+      document.getElementById('edit-modal-nisn').value = std.nisn || "";
+      document.getElementById('edit-modal-kelas').value = std.kelas || "";
+      document.getElementById('edit-modal-ttl').value = std.ttl || "";
+      document.getElementById('edit-modal-status-toggle').checked = (std.active === undefined || std.active === true);
+
+      document.getElementById('edit-student-modal').classList.remove('hidden');
+    }
+
+    function closeEditStudentModal() {
+      document.getElementById('edit-student-modal').classList.add('hidden');
+    }
+
+    async function saveEditStudentDetails() {
+      const idSiswa = document.getElementById('edit-modal-id-siswa').value;
+      const nama = document.getElementById('edit-modal-nama').value.trim();
+      const nisn = document.getElementById('edit-modal-nisn').value.trim();
+      const kelas = document.getElementById('edit-modal-kelas').value.trim();
+      const ttl = document.getElementById('edit-modal-ttl').value.trim();
+      const isActive = document.getElementById('edit-modal-status-toggle').checked;
+
+      if (!nama || !kelas) return alert("Nama dan Kelas wajib diisi!");
+
+      const std = cachedStudents.find(s => s.id_siswa === idSiswa);
+      if (std) {
+        std.nama = nama;
+        std.nisn = nisn;
+        std.kelas = kelas;
+        std.ttl = ttl;
+        std.active = isActive;
+
+        const tx = db.transaction("students", "readwrite");
+        tx.objectStore("students").put(std);
+        tx.oncomplete = () => {
+          renderEditStudentsList();
+          loadStudentsView();
+          closeEditStudentModal();
+          alert("Data siswa berhasil diperbarui!");
+        };
+
+        if (navigator.onLine) {
+          await fetch(GAS_WEB_APP_URL, {
+            method: "POST", mode: "cors", headers: { "Content-Type": "text/plain" },
+            body: JSON.stringify({ action: "UPDATE_STUDENT_DETAILS", student: std })
+          });
+        }
+      }
+    }
+
     /* DASHBOARD UTAMA LOGIC */
     async function renderDashboardView() {
       const d = new Date();
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
-      const realTodayStr = `${year}-${month}-${day}`;
-
+      const realTodayStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
       const targetDate = formatCleanDateLocal(document.getElementById('dashboard-date-filter').value) || realTodayStr;
       document.getElementById('dashboard-date-filter').value = targetDate;
       
@@ -1343,17 +1476,17 @@
       const localHist = await getAllLocalHistoryFromDB();
       
       const rawRecords = [...fetchedTodayAttendance, ...fetchedAttendanceHistory, ...localHist, ...queueRecords].filter(r => formatCleanDateLocal(r.tanggal) === targetDate);
+      const activeStudents = cachedStudents.filter(s => s.active === undefined || s.active === true);
 
-      let totalStd = cachedStudents.length;
+      let totalStd = activeStudents.length;
       let countHadir = 0, countTerlambat = 0, countAlpa = 0, countIzin = 0, countSakit = 0, countKegiatan = 0, countBolos = 0;
 
-      cachedStudents.forEach(std => {
+      activeStudents.forEach(std => {
         const rec = rawRecords.find(r => String(r.id_siswa).trim().toUpperCase() === String(std.id_siswa).trim().toUpperCase());
         
         if (!rec) {
           countAlpa++;
         } else {
-          // DIAMBIL DARI STATUS AKHIR DENGAN KETERANGAN "HADIR" SAJA
           const stAkhir = String(rec.status_akhir || rec.status_presensi || "HADIR").trim().toUpperCase();
 
           if (stAkhir === "HADIR") countHadir++;
@@ -1362,13 +1495,10 @@
           else if (stAkhir === "SAKIT") countSakit++;
           else if (stAkhir === "KEGIATAN") countKegiatan++;
           else if (stAkhir === "BOLOS") countBolos++;
-          else if (stAkhir === "TERLAMBAT") {
-            // Tetap dipetakan jika status akhir tertera TERLAMBAT
-          } else {
+          else {
             countHadir++;
           }
 
-          // KARTU TERLAMBAT: Mengambil khusus dari status_pagi atau status_presensi untuk Mode Pagi (sama seperti nilai kartu TERLAMBAT di menu monitoring)
           const stPagi = String(rec.status_pagi || (rec.sesi === "PAGI" ? rec.status_presensi : "") || "").trim().toUpperCase();
           if (stPagi === "TERLAMBAT") {
             countTerlambat++;
@@ -1376,13 +1506,11 @@
         }
       });
 
-      // Total Kehadiran MURNI MENGHITUNG HADIR SAJA
       const pctHadir = totalStd > 0 ? Math.round((countHadir / totalStd) * 100) : 0;
 
       document.getElementById('dash-pct-total').innerText = `${pctHadir}%`;
       document.getElementById('dash-pct-sub').innerText = `${countHadir} dari ${totalStd} Siswa Hadir`;
       
-      // KARTU HADIR & TERLAMBAT
       document.getElementById('dash-count-hadir').innerText = countHadir;
       document.getElementById('dash-count-terlambat').innerText = countTerlambat;
       document.getElementById('dash-count-alpa').innerText = countAlpa;
@@ -1396,7 +1524,8 @@
 
     function renderDashboardClassSummary(rawRecords) {
       const container = document.getElementById('dashboard-class-summary');
-      const classes = [...new Set(cachedStudents.map(s => s.kelas))].filter(Boolean).sort();
+      const activeStudents = cachedStudents.filter(s => s.active === undefined || s.active === true);
+      const classes = [...new Set(activeStudents.map(s => s.kelas))].filter(Boolean).sort();
 
       if (classes.length === 0) {
         container.innerHTML = `<div class="text-[10px] text-gray-400 text-center py-2">Belum ada data kelas.</div>`;
@@ -1404,7 +1533,7 @@
       }
 
       container.innerHTML = classes.map(cls => {
-        const stds = cachedStudents.filter(s => s.kelas === cls);
+        const stds = activeStudents.filter(s => s.kelas === cls);
         let hadirVal = 0;
         stds.forEach(std => {
           const rec = rawRecords.find(r => String(r.id_siswa).trim().toUpperCase() === String(std.id_siswa).trim().toUpperCase());
@@ -1439,8 +1568,9 @@
       const rawRecords = [...fetchedTodayAttendance, ...fetchedAttendanceHistory, ...localHist, ...queueRecords].filter(r => formatCleanDateLocal(r.tanggal) === targetDate);
 
       const container = document.getElementById('dash-student-table-container');
+      const activeStudents = cachedStudents.filter(s => s.active === undefined || s.active === true);
 
-      const filtered = cachedStudents.filter(std => {
+      const filtered = activeStudents.filter(std => {
         const matchClass = (selectedClass === "ALL" || std.kelas === selectedClass);
         const matchQ = std.nama.toLowerCase().includes(searchQ) || std.id_siswa.toLowerCase().includes(searchQ);
         
@@ -1534,7 +1664,8 @@
       
       let rawRecords = [...fetchedTodayAttendance, ...fetchedAttendanceHistory, ...localHist, ...queueRecords].filter(r => formatCleanDateLocal(r.tanggal) === targetDate);
 
-      const classStudents = cachedStudents.filter(s => selectedClass === "ALL" || s.kelas === selectedClass);
+      const activeStudents = cachedStudents.filter(s => s.active === undefined || s.active === true);
+      const classStudents = activeStudents.filter(s => selectedClass === "ALL" || s.kelas === selectedClass);
       let hadir = 0, terlambat = 0, alpa = 0, sakit = 0, izin = 0, kegiatan = 0;
       const filteredActionStudents = [];
 
@@ -1608,12 +1739,13 @@
       const ctx = document.getElementById('classBarChart').getContext('2d');
       if (myBarChart) myBarChart.destroy();
 
-      const classes = [...new Set(cachedStudents.map(s => s.kelas))].filter(Boolean).sort();
+      const activeStudents = cachedStudents.filter(s => s.active === undefined || s.active === true);
+      const classes = [...new Set(activeStudents.map(s => s.kelas))].filter(Boolean).sort();
       const labels = [];
       const percentages = [];
 
       classes.forEach(cls => {
-        const studentsInCls = cachedStudents.filter(s => s.kelas === cls);
+        const studentsInCls = activeStudents.filter(s => s.kelas === cls);
         let countHadirVal = 0;
         
         studentsInCls.forEach(std => {
@@ -1796,7 +1928,7 @@
       });
     }
 
-    /* LOGIKA FITUR TINDAK LANJUT OTOMATIS & SAKLAR PENANGANAN (MURNI STATUS AKHIR & STATUS PAGI) */
+    /* LOGIKA FITUR TINDAK LANJUT OTOMATIS & WHATSAPP WALI KELAS */
     function switchTLTab(tabName) {
       currentTLTab = tabName;
       const btnPending = document.getElementById("tl-tab-btn-pending");
@@ -1830,30 +1962,42 @@
       localStorage.setItem("TL_STATUS_STORE", JSON.stringify(store));
     }
 
+    function sendTLToWaliKelasWA(namaSiswa, kelas, kategoriText) {
+      const schoolName = localStorage.getItem("SCHOOL_NAME") || "Sekolah";
+      const message = `Yth. Bapak/Ibu Wali Kelas ${kelas},\n\nMemberitahukan bahwa siswa berikut memerlukan tindak lanjut penanganan kedisiplinan:\n\n*Nama Siswa:* ${namaSiswa}\n*Kelas:* ${kelas}\n*Catatan Pelanggaran:* ${kategoriText}\n\nMohon untuk dapat dilakukan pembinaan atau komunikasi lebih lanjut dengan orang tua siswa. Terima kasih.\n\n_Salam Kedisiplinan ${schoolName}_`;
+      
+      const targetUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+      window.open(targetUrl, '_blank');
+    }
+
     async function renderTindakLanjutView() {
       const container = document.getElementById('tindak-lanjut-list-container');
+      const selectedClassFilter = document.getElementById('tl-filter-class').value;
+
       container.innerHTML = `<div class="text-center py-6 text-xs text-gray-400 font-bold"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Menganalisis riwayat absensi siswa...</div>`;
 
       const allHistory = [...fetchedTodayAttendance, ...fetchedAttendanceHistory, ...(await getAllLocalHistoryFromDB())];
       const tlStore = getLocalTLStatusList();
 
+      const activeStudents = cachedStudents.filter(s => s.active === undefined || s.active === true);
+      const filteredByClassStudents = activeStudents.filter(s => selectedClassFilter === "ALL" || s.kelas === selectedClassFilter);
+
       const detectedList = [];
 
-      cachedStudents.forEach(std => {
+      filteredByClassStudents.forEach(std => {
         const idS = String(std.id_siswa).trim().toUpperCase();
         const stdRecords = allHistory.filter(r => String(r.id_siswa).trim().toUpperCase() === idS);
         
-        // SORTING BERDASARKAN TANGGAL
         stdRecords.sort((a,b) => String(a.tanggal).localeCompare(String(b.tanggal)));
 
-        // 1. CEK 3x ALPA (AKUMULASI) - HANYA DARI KOLOM STATUS AKHIR
+        // 1. CEK 3x ALPA (AKUMULASI) - HANYA DARI STATUS AKHIR
         let totalAlpa = 0;
         stdRecords.forEach(r => {
           const stAkhir = String(r.status_akhir || r.status_presensi || "").trim().toUpperCase();
           if (stAkhir === "ALPA") totalAlpa++;
         });
 
-        // 2. CEK 3x TERLAMBAT (BERTURUT-TURUT) - HANYA DARI KOLOM STATUS PAGI
+        // 2. CEK 3x TERLAMBAT (BERTURUT-TURUT) - HANYA DARI STATUS PAGI
         let maxSeqTerlambat = 0, currentSeqTerlambat = 0;
         stdRecords.forEach(r => {
           const stPagi = String(r.status_pagi || (r.sesi === "PAGI" ? r.status_presensi : "") || "").trim().toUpperCase();
@@ -1865,7 +2009,7 @@
           }
         });
 
-        // 3. CEK 3x BOLOS (BERTURUT-TURUT) - HANYA DARI KOLOM STATUS AKHIR
+        // 3. CEK 3x BOLOS (BERTURUT-TURUT) - HANYA DARI STATUS AKHIR
         let maxSeqBolos = 0, currentSeqBolos = 0;
         stdRecords.forEach(r => {
           const stAkhir = String(r.status_akhir || r.status_presensi || "").trim().toUpperCase();
@@ -1941,13 +2085,17 @@
             ` : ''}
 
             <div class="pt-1 flex justify-end items-center gap-2 border-t border-gray-100">
+              <button onclick="sendTLToWaliKelasWA('${std.nama}', '${std.kelas}', '${item.categoryText}')" class="px-2.5 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-xs rounded-xl hover:bg-emerald-100 active:scale-95 transition flex items-center gap-1 shadow-sm">
+                <i class="fa-brands fa-whatsapp text-sm text-emerald-600"></i> WA Wali Kelas
+              </button>
+              
               ${!isDone ? `
                 <button onclick="openTLActionModal('${std.id_siswa}', '${std.nama}', '${item.categoryText}')" class="px-3 py-1.5 bg-rose-600 text-white font-bold text-xs rounded-xl shadow-sm hover:bg-rose-700 active:scale-95 transition flex items-center gap-1.5">
                   <i class="fa-solid fa-user-shield"></i> Tindak Lanjut
                 </button>
               ` : `
                 <button onclick="reopenTLStatus('${std.id_siswa}')" class="px-3 py-1 bg-amber-50 text-amber-700 border border-amber-200 font-bold text-[10px] rounded-lg hover:bg-amber-100 transition flex items-center gap-1">
-                  <i class="fa-solid fa-arrow-rotate-left"></i> Buka Kembali Status
+                  <i class="fa-solid fa-arrow-rotate-left"></i> Buka Kembali
                 </button>
               `}
             </div>
@@ -2112,7 +2260,7 @@
       const kelas = document.getElementById('new-std-kelas').value.trim();
       if (!idSiswa || !nama || !kelas) return alert("ID, Nama, dan Kelas Wajib diisi!");
 
-      const newStudent = { id_siswa: idSiswa, nisn: nisn || "-", nama: nama, kelas: kelas };
+      const newStudent = { id_siswa: idSiswa, nisn: nisn || "-", nama: nama, kelas: kelas, active: true };
       const tx = db.transaction("students", "readwrite");
       tx.objectStore("students").put(newStudent);
       tx.oncomplete = () => {
@@ -2131,7 +2279,6 @@
       refreshRealtimeSessionUI();
     }
 
-    /* SISTEM GANTI KAMERA DEPAN / BELAKANG */
     function changeCameraFacing(facingMode) {
       activeCameraFacingMode = facingMode;
       const btnBack = document.getElementById("cam-facing-back");
@@ -2194,7 +2341,7 @@
       if (isProcessingScan) return; 
       isProcessingScan = true;
 
-      playBeepSound(); // BUNYI BEEP SAAT SCAN BERHASIL
+      playBeepSound();
 
       let nowDateObj = new Date();
       const year = nowDateObj.getFullYear();
@@ -2245,6 +2392,13 @@
       tx.objectStore("students").get(text.trim()).onsuccess = async (e) => {
         const student = e.target.result;
         if (student) {
+
+          if (student.active !== undefined && student.active === false) {
+            alert(`Presensi Gagal! Siswa (${student.nama}) berstatus NON-AKTIF.`);
+            setTimeout(() => { isProcessingScan = false; }, 1500);
+            return;
+          }
+
           const record = {
             queue_id: `${dateStr}_${student.id_siswa}_${currentScanSession}`,
             tanggal: dateStr, 
@@ -2347,11 +2501,6 @@
           tx.oncomplete = () => updateQueueCountUI();
         }
       } catch (e) {}
-    }
-
-    function promptManualInput() {
-      const qrInput = prompt("Masukkan ID_SISWA atau Kode QR:");
-      if (qrInput) onScanSuccess(qrInput.trim());
     }
 
     function triggerManualSync() { if (navigator.onLine) syncQueueToGAS(); }
