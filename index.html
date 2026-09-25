@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0b3c5d">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Sistem Absensi Murid - v2.52</title>
+  <title>Sistem Absensi Murid - v2.53</title>
   <link rel="manifest" href='data:application/manifest+json,{"name":"Sistem Absensi Murid","short_name":"AbsensiQR","start_url":"./index.html","display":"standalone","background_color":"#0b3c5d","theme_color":"#0b3c5d","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/3135/3135715.png","sizes":"512x512","type":"image/png"}]}'>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -37,7 +37,7 @@
             <span id="status-text" class="text-xs font-semibold">Memeriksa...</span>
           </div>
           <div class="flex items-center justify-end gap-1 mt-0.5">
-            <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30">v2.52</span>
+            <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30">v2.53</span>
             <span id="app-role-badge" onclick="handleRoleBadgeClick()" class="text-[10px] font-bold text-amber-300 bg-amber-950/60 px-1.5 py-0.2 rounded-md border border-amber-500/30 cursor-pointer select-none">PETUGAS</span>
           </div>
         </div>
@@ -328,7 +328,7 @@
           <h3 class="font-bold text-xs text-blue-900 border-b border-gray-100 pb-1.5">INFORMASI APLIKASI</h3>
           <div class="flex justify-between text-xs">
             <span class="text-gray-500">Versi Aplikasi</span>
-            <span class="font-bold text-gray-900">v2.52</span>
+            <span class="font-bold text-gray-900">v2.53</span>
           </div>
           <div class="flex justify-between text-xs">
             <span class="text-gray-500">Status Update</span>
@@ -374,12 +374,17 @@
           </button>
         </div>
 
-        <!-- FILTER KELAS TINDAK LANJUT -->
-        <div class="mb-3">
-          <label class="block text-[10px] font-bold text-gray-600 mb-1">Filter Kelas:</label>
-          <select id="tl-filter-class" onchange="renderTindakLanjutView()" class="w-full py-1.5 px-3 bg-white border border-gray-200 rounded-xl text-xs font-bold text-gray-800 shadow-sm">
-            <option value="ALL">Semua Kelas</option>
-          </select>
+        <!-- FILTER KELAS & TOMBOL WA WALI KELAS PER KELAS -->
+        <div class="mb-3 space-y-1.5">
+          <label class="block text-[10px] font-bold text-gray-600">Filter Kelas & Aksi Laporan:</label>
+          <div class="flex items-center gap-2">
+            <select id="tl-filter-class" onchange="renderTindakLanjutView()" class="flex-1 py-2 px-3 bg-white border border-gray-200 rounded-xl text-xs font-bold text-gray-800 shadow-sm">
+              <option value="ALL">Semua Kelas</option>
+            </select>
+            <button onclick="sendTLClassSummaryWA()" class="px-3 py-2 bg-emerald-600 text-white font-bold text-xs rounded-xl shadow-sm hover:bg-emerald-700 active:scale-95 transition flex items-center gap-1.5 flex-shrink-0">
+              <i class="fa-brands fa-whatsapp text-sm"></i> WA Wali Kelas
+            </button>
+          </div>
         </div>
 
         <!-- TAB NAVIGASI TINDAK LANJUT -->
@@ -520,7 +525,7 @@
             <div class="w-9 h-5 bg-gray-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
           </label>
         </div>
-        <button onclick="saveEditStudentDetails()" class="w-full bg-blue-600 text-white font-bold py-2.5 rounded-xl text-xs shadow-md"><i class="fa-solid fa-floppy-disk"></i> Simpan Perubahan</button>
+        <button id="btn-save-edit-student" onclick="saveEditStudentDetails()" class="w-full bg-blue-600 text-white font-bold py-2.5 rounded-xl text-xs shadow-md"><i class="fa-solid fa-floppy-disk"></i> Simpan Perubahan</button>
       </div>
     </div>
 
@@ -806,7 +811,7 @@
       renderMenuModalGrid();
     }
 
-    /* RENDER MENU UTAMA TERPERBARUI (TANPA DONASI & ABSENSI MANUAL) */
+    /* RENDER MENU UTAMA TERPERBARUI (TANPA TOMBOL LOGOUT DI BAGIAN BWAH) */
     function renderMenuModalGrid() {
       const grid = document.getElementById("menu-grid-box");
       if (!grid) return;
@@ -842,15 +847,6 @@
           `;
         }
       }).join('');
-
-      if (isAdmin) {
-        htmlContent += `
-          <button onclick="toggleMenuModal(); switchToPetugasRole();" class="p-3 bg-amber-50 border border-amber-200 rounded-2xl flex flex-col items-center justify-center gap-1.5 col-span-2 hover:bg-amber-100 transition">
-            <i class="fa-solid fa-right-from-bracket text-xl text-amber-700"></i>
-            <span class="text-xs font-bold text-amber-900">Kembali Ke Mode Petugas (Logout Admin)</span>
-          </button>
-        `;
-      }
 
       grid.innerHTML = htmlContent;
     }
@@ -1429,6 +1425,7 @@
       document.getElementById('edit-student-modal').classList.add('hidden');
     }
 
+    /* EDIT DATA SISWA DISIMPAN KE INDEXEDDB DAN DIPERBARUI DI GOOGLE SHEETS */
     async function saveEditStudentDetails() {
       const idSiswa = document.getElementById('edit-modal-id-siswa').value;
       const nama = document.getElementById('edit-modal-nama').value.trim();
@@ -1436,6 +1433,7 @@
       const kelas = document.getElementById('edit-modal-kelas').value.trim();
       const ttl = document.getElementById('edit-modal-ttl').value.trim();
       const isActive = document.getElementById('edit-modal-status-toggle').checked;
+      const btnSave = document.getElementById('btn-save-edit-student');
 
       if (!nama || !kelas) return alert("Nama dan Kelas wajib diisi!");
 
@@ -1447,21 +1445,40 @@
         std.ttl = ttl;
         std.active = isActive;
 
+        btnSave.disabled = true;
+        btnSave.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan Perubahan...`;
+
         const tx = db.transaction("students", "readwrite");
         tx.objectStore("students").put(std);
-        tx.oncomplete = () => {
+        
+        tx.oncomplete = async () => {
           renderEditStudentsList();
           loadStudentsView();
-          closeEditStudentModal();
-          alert("Data siswa berhasil diperbarui!");
-        };
+          populateClassDropdowns();
 
-        if (navigator.onLine) {
-          await fetch(GAS_WEB_APP_URL, {
-            method: "POST", mode: "cors", headers: { "Content-Type": "text/plain" },
-            body: JSON.stringify({ action: "UPDATE_STUDENT_DETAILS", student: std })
-          });
-        }
+          if (navigator.onLine) {
+            try {
+              const res = await fetch(GAS_WEB_APP_URL, {
+                method: "POST", mode: "cors", headers: { "Content-Type": "text/plain" },
+                body: JSON.stringify({ action: "UPDATE_STUDENT_DETAILS", student: std })
+              });
+              const result = await res.json();
+              if (result.success) {
+                alert("Perubahan data siswa berhasil disimpan ke Sheet!");
+              } else {
+                alert("Data siswa tersimpan di HP, namun gagal memperbarui Sheet: " + (result.message || ""));
+              }
+            } catch (e) {
+              alert("Data siswa tersimpan di HP. (Gagal terhubung ke Google Sheet)");
+            }
+          } else {
+            alert("Data siswa tersimpan di HP secara offline.");
+          }
+
+          btnSave.disabled = false;
+          btnSave.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Simpan Perubahan`;
+          closeEditStudentModal();
+        };
       }
     }
 
@@ -1928,7 +1945,7 @@
       });
     }
 
-    /* LOGIKA FITUR TINDAK LANJUT OTOMATIS & WHATSAPP WALI KELAS */
+    /* LOGIKA FITUR TINDAK LANJUT OTOMATIS & WHATSAPP WALI KELAS PER KELAS */
     function switchTLTab(tabName) {
       currentTLTab = tabName;
       const btnPending = document.getElementById("tl-tab-btn-pending");
@@ -1962,10 +1979,86 @@
       localStorage.setItem("TL_STATUS_STORE", JSON.stringify(store));
     }
 
-    function sendTLToWaliKelasWA(namaSiswa, kelas, kategoriText) {
+    /* KIRIM REKAP WA TINDAK LANJUT WALI KELAS PER KELAS */
+    async function sendTLClassSummaryWA() {
+      const selectedClass = document.getElementById("tl-filter-class").value;
       const schoolName = localStorage.getItem("SCHOOL_NAME") || "Sekolah";
-      const message = `Yth. Bapak/Ibu Wali Kelas ${kelas},\n\nMemberitahukan bahwa siswa berikut memerlukan tindak lanjut penanganan kedisiplinan:\n\n*Nama Siswa:* ${namaSiswa}\n*Kelas:* ${kelas}\n*Catatan Pelanggaran:* ${kategoriText}\n\nMohon untuk dapat dilakukan pembinaan atau komunikasi lebih lanjut dengan orang tua siswa. Terima kasih.\n\n_Salam Kedisiplinan ${schoolName}_`;
-      
+
+      if (selectedClass === "ALL") {
+        return alert("Pilih kelas tertentu terlebih dahulu pada filter kelas untuk mengirim rekap ke Wali Kelas!");
+      }
+
+      const allHistory = [...fetchedTodayAttendance, ...fetchedAttendanceHistory, ...(await getAllLocalHistoryFromDB())];
+      const tlStore = getLocalTLStatusList();
+      const activeStudents = cachedStudents.filter(s => (s.active === undefined || s.active === true) && s.kelas === selectedClass);
+
+      if (activeStudents.length === 0) {
+        return alert(`Tidak ada siswa di kelas ${selectedClass}.`);
+      }
+
+      const detectedStudents = [];
+
+      activeStudents.forEach(std => {
+        const idS = String(std.id_siswa).trim().toUpperCase();
+        const stdRecords = allHistory.filter(r => String(r.id_siswa).trim().toUpperCase() === idS);
+        stdRecords.sort((a,b) => String(a.tanggal).localeCompare(String(b.tanggal)));
+
+        // 1. CEK 3x ALPA (AKUMULASI) - STATUS AKHIR
+        let totalAlpa = 0;
+        stdRecords.forEach(r => {
+          const stAkhir = String(r.status_akhir || r.status_presensi || "").trim().toUpperCase();
+          if (stAkhir === "ALPA") totalAlpa++;
+        });
+
+        // 2. CEK 3x TERLAMBAT (BERTURUT-TURUT) - STATUS PAGI
+        let maxSeqTerlambat = 0, currentSeqTerlambat = 0;
+        stdRecords.forEach(r => {
+          const stPagi = String(r.status_pagi || (r.sesi === "PAGI" ? r.status_presensi : "") || "").trim().toUpperCase();
+          if (stPagi === "TERLAMBAT") {
+            currentSeqTerlambat++;
+            if (currentSeqTerlambat > maxSeqTerlambat) maxSeqTerlambat = currentSeqTerlambat;
+          } else if (stPagi !== "") {
+            currentSeqTerlambat = 0;
+          }
+        });
+
+        // 3. CEK 3x BOLOS (BERTURUT-TURUT) - STATUS AKHIR
+        let maxSeqBolos = 0, currentSeqBolos = 0;
+        stdRecords.forEach(r => {
+          const stAkhir = String(r.status_akhir || r.status_presensi || "").trim().toUpperCase();
+          if (stAkhir === "BOLOS") {
+            currentSeqBolos++;
+            if (currentSeqBolos > maxSeqBolos) maxSeqBolos = currentSeqBolos;
+          } else if (stAkhir !== "") {
+            currentSeqBolos = 0;
+          }
+        });
+
+        const categories = [];
+        if (totalAlpa >= 3) categories.push(`Akumulasi ${totalAlpa}x Alpa`);
+        if (maxSeqTerlambat >= 3) categories.push(`3x Terlambat Berturut-turut`);
+        if (maxSeqBolos >= 3) categories.push(`3x Bolos Berturut-turut`);
+
+        if (categories.length > 0) {
+          const isDone = !!tlStore[std.id_siswa];
+          detectedStudents.push({
+            nama: std.nama,
+            kategori: categories.join(", "),
+            status: isDone ? "Sudah Ditindak" : "Perlu Penanganan"
+          });
+        }
+      });
+
+      if (detectedStudents.length === 0) {
+        return alert(`Selamat! Tidak ada siswa di kelas ${selectedClass} yang terdeteksi memiliki catatan pelanggaran.`);
+      }
+
+      let message = `Yth. Bapak/Ibu Wali Kelas *${selectedClass}*,\n\nBerikut daftar rekap tindak lanjut kedisiplinan siswa di kelas Anda:\n\n`;
+      detectedStudents.forEach((item, index) => {
+        message += `${index + 1}. *${item.nama}*\n   - Catatan: ${item.kategori}\n   - Status: ${item.status}\n\n`;
+      });
+      message += `Mohon untuk dapat dilakukan pembinaan atau koordinasi dengan orang tua siswa terkait. Terima kasih.\n\n_Salam Kedisiplinan ${schoolName}_`;
+
       const targetUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
       window.open(targetUrl, '_blank');
     }
@@ -2085,10 +2178,6 @@
             ` : ''}
 
             <div class="pt-1 flex justify-end items-center gap-2 border-t border-gray-100">
-              <button onclick="sendTLToWaliKelasWA('${std.nama}', '${std.kelas}', '${item.categoryText}')" class="px-2.5 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-xs rounded-xl hover:bg-emerald-100 active:scale-95 transition flex items-center gap-1 shadow-sm">
-                <i class="fa-brands fa-whatsapp text-sm text-emerald-600"></i> WA Wali Kelas
-              </button>
-              
               ${!isDone ? `
                 <button onclick="openTLActionModal('${std.id_siswa}', '${std.nama}', '${item.categoryText}')" class="px-3 py-1.5 bg-rose-600 text-white font-bold text-xs rounded-xl shadow-sm hover:bg-rose-700 active:scale-95 transition flex items-center gap-1.5">
                   <i class="fa-solid fa-user-shield"></i> Tindak Lanjut
