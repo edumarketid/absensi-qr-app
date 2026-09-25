@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0b3c5d">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Sistem Absensi Murid - v2.53</title>
+  <title>Sistem Absensi Murid - v2.54</title>
   <link rel="manifest" href='data:application/manifest+json,{"name":"Sistem Absensi Murid","short_name":"AbsensiQR","start_url":"./index.html","display":"standalone","background_color":"#0b3c5d","theme_color":"#0b3c5d","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/3135/3135715.png","sizes":"512x512","type":"image/png"}]}'>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -37,7 +37,7 @@
             <span id="status-text" class="text-xs font-semibold">Memeriksa...</span>
           </div>
           <div class="flex items-center justify-end gap-1 mt-0.5">
-            <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30">v2.53</span>
+            <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30">v2.54</span>
             <span id="app-role-badge" onclick="handleRoleBadgeClick()" class="text-[10px] font-bold text-amber-300 bg-amber-950/60 px-1.5 py-0.2 rounded-md border border-amber-500/30 cursor-pointer select-none">PETUGAS</span>
           </div>
         </div>
@@ -63,7 +63,6 @@
             <div class="absolute -bottom-1 -right-1 w-8 h-8 border-b-4 border-r-4 border-green-400 rounded-br-xl"></div>
           </div>
 
-          <!-- BANNER MODE WAKTU + SAKLAR KAMERA DEPAN/BELAKANG -->
           <div class="absolute top-3 left-3 right-3 flex items-center justify-between bg-blue-900/80 p-1.5 px-2.5 rounded-full border border-blue-400/30 backdrop-blur-sm z-20 shadow">
             <span id="scan-mode-indicator" class="text-blue-100 text-[10px] font-bold truncate">Mode Waktu: AUTO (Realtime)</span>
             <div class="flex items-center bg-black/40 p-0.5 rounded-full border border-white/10 flex-shrink-0 ml-1">
@@ -183,7 +182,6 @@
             </select>
           </div>
           <input type="text" id="dash-search-student" onkeyup="renderDashboardStudentTable()" placeholder="Cari nama siswa..." class="w-full px-3 py-1.5 bg-slate-50 border border-gray-200 rounded-xl text-xs">
-          
           <div id="dash-student-table-container" class="space-y-1.5 max-h-60 overflow-y-auto no-scrollbar pr-0.5"></div>
         </div>
       </main>
@@ -318,47 +316,60 @@
         </div>
       </main>
 
-      <!-- TENTANG APLIKASI -->
+      <!-- TENTANG APLIKASI (DIPERBARUI: GRID 2 KOLOM INFORMASI & CACHE, PENGEMBANG DI BAWAH) -->
       <main id="view-about" class="p-4 hidden">
         <div class="mb-3">
           <h2 class="font-bold text-lg text-gray-900">Tentang Aplikasi</h2>
           <p class="text-xs text-gray-500">Status Sistem & Informasi Pengembang</p>
         </div>
-        <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3 mb-3">
-          <h3 class="font-bold text-xs text-blue-900 border-b border-gray-100 pb-1.5">INFORMASI APLIKASI</h3>
-          <div class="flex justify-between text-xs">
-            <span class="text-gray-500">Versi Aplikasi</span>
-            <span class="font-bold text-gray-900">v2.53</span>
+        
+        <!-- DUA KARTU SEJAJAR MEMBELAH LAYAR -->
+        <div class="grid grid-cols-2 gap-2.5 mb-3">
+          <div class="bg-white p-3.5 rounded-2xl border border-gray-200 shadow-sm flex flex-col justify-between space-y-2">
+            <div>
+              <h3 class="font-bold text-xs text-blue-900 border-b border-gray-100 pb-1 mb-2 truncate">INFORMASI APLIKASI</h3>
+              <div class="space-y-1 text-[11px]">
+                <div class="flex justify-between">
+                  <span class="text-gray-500">Versi</span>
+                  <span class="font-bold text-gray-900">v2.54</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-500">Update</span>
+                  <span class="font-bold text-emerald-600 bg-emerald-50 px-1 py-0.2 rounded text-[9px]">Terbaru</span>
+                </div>
+              </div>
+            </div>
+            <button onclick="forceCheckAppUpdate()" class="w-full bg-blue-50 text-blue-600 border border-blue-200 font-bold py-1.5 rounded-xl text-[10px] mt-1"><i class="fa-solid fa-rotate"></i> Check Update</button>
           </div>
-          <div class="flex justify-between text-xs">
-            <span class="text-gray-500">Status Update</span>
-            <span class="font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">Aplikasi Terbaru</span>
+
+          <div class="bg-white p-3.5 rounded-2xl border border-gray-200 shadow-sm flex flex-col justify-between space-y-2">
+            <div>
+              <h3 class="font-bold text-xs text-blue-900 border-b border-gray-100 pb-1 mb-2 truncate">PENYIMPANAN & CACHE</h3>
+              <div class="space-y-1 text-[11px]">
+                <div class="flex justify-between">
+                  <span class="text-gray-500">Cache</span>
+                  <span id="about-cache-size" class="font-bold text-gray-900">...</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-gray-500">Lokal</span>
+                  <span id="about-local-size" class="font-bold text-gray-900">...</span>
+                </div>
+              </div>
+            </div>
+            <button onclick="clearAppCacheOnly()" class="w-full bg-rose-50 text-rose-600 border border-rose-200 font-bold py-1.5 rounded-xl text-[10px] mt-1"><i class="fa-solid fa-trash-can"></i> Hapus Cache</button>
           </div>
-          <button onclick="forceCheckAppUpdate()" class="w-full bg-blue-50 text-blue-600 border border-blue-200 font-bold py-2 rounded-xl text-xs"><i class="fa-solid fa-rotate"></i> Periksa Update</button>
         </div>
 
+        <!-- PENGEMBANG APLIKASI DI BAGIAN BAWAH -->
         <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3 mb-3">
-          <h3 class="font-bold text-xs text-blue-900 border-b border-gray-100 pb-1.5">PENGEMBANG APLIKASI</h3>
+          <h3 class="font-bold text-xs text-blue-900 border-b border-gray-100 pb-1.5"><i class="fa-solid fa-code text-indigo-600 mr-1"></i> PENGEMBANG APLIKASI</h3>
           <div class="text-xs space-y-1.5">
-            <p class="text-gray-600">Pengembang: <b class="text-gray-900">Ajiardin, S.T.</b></p>
+            <p class="text-gray-600">Pengembang Aplikasi: <b class="text-gray-900">Ajiardin, S.T.</b></p>
             <p class="text-gray-600">Kontak Pengembang: <b class="text-gray-900">085298875399</b></p>
           </div>
-          <button onclick="window.open('https://wa.me/6285298875399?text=Halo%20Pengembang%20Aplikasi%20Absensi', '_blank')" class="w-full bg-emerald-600 text-white font-bold py-2 rounded-xl text-xs shadow-md flex items-center justify-center gap-2">
-            <i class="fa-brands fa-whatsapp text-sm"></i> Hubungi Pengembang
+          <button onclick="window.open('https://wa.me/6285298875399?text=Halo%20Pengembang%20Aplikasi%20Absensi', '_blank')" class="w-full bg-emerald-600 text-white font-bold py-2.5 rounded-xl text-xs shadow-md flex items-center justify-center gap-2">
+            <i class="fa-brands fa-whatsapp text-sm"></i> Hubungi Pengembang via WhatsApp
           </button>
-        </div>
-        
-        <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-3 mb-3">
-          <h3 class="font-bold text-xs text-blue-900 border-b border-gray-100 pb-1.5">PENYIMPANAN & CACHE</h3>
-          <div class="flex justify-between text-xs">
-            <span class="text-gray-500">Cache Aplikasi</span>
-            <span id="about-cache-size" class="font-bold text-gray-900">Calculating...</span>
-          </div>
-          <div class="flex justify-between text-xs">
-            <span class="text-gray-500">Data Lokal</span>
-            <span id="about-local-size" class="font-bold text-gray-900">Calculating...</span>
-          </div>
-          <button onclick="clearAppCacheOnly()" class="w-full bg-rose-50 text-rose-600 border border-rose-200 font-bold py-2 rounded-xl text-xs"><i class="fa-solid fa-trash-can"></i> Bersihkan Cache</button>
         </div>
       </main>
 
@@ -811,7 +822,6 @@
       renderMenuModalGrid();
     }
 
-    /* RENDER MENU UTAMA TERPERBARUI (TANPA TOMBOL LOGOUT DI BAGIAN BWAH) */
     function renderMenuModalGrid() {
       const grid = document.getElementById("menu-grid-box");
       if (!grid) return;
@@ -2083,14 +2093,12 @@
         
         stdRecords.sort((a,b) => String(a.tanggal).localeCompare(String(b.tanggal)));
 
-        // 1. CEK 3x ALPA (AKUMULASI) - HANYA DARI STATUS AKHIR
         let totalAlpa = 0;
         stdRecords.forEach(r => {
           const stAkhir = String(r.status_akhir || r.status_presensi || "").trim().toUpperCase();
           if (stAkhir === "ALPA") totalAlpa++;
         });
 
-        // 2. CEK 3x TERLAMBAT (BERTURUT-TURUT) - HANYA DARI STATUS PAGI
         let maxSeqTerlambat = 0, currentSeqTerlambat = 0;
         stdRecords.forEach(r => {
           const stPagi = String(r.status_pagi || (r.sesi === "PAGI" ? r.status_presensi : "") || "").trim().toUpperCase();
@@ -2102,7 +2110,6 @@
           }
         });
 
-        // 3. CEK 3x BOLOS (BERTURUT-TURUT) - HANYA DARI STATUS AKHIR
         let maxSeqBolos = 0, currentSeqBolos = 0;
         stdRecords.forEach(r => {
           const stAkhir = String(r.status_akhir || r.status_presensi || "").trim().toUpperCase();
