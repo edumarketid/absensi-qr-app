@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0b3c5d">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Sistem Absensi Murid - v2.50</title>
+  <title>Sistem Absensi Murid - v2.51</title>
   <link rel="manifest" href='data:application/manifest+json,{"name":"Sistem Absensi Murid","short_name":"AbsensiQR","start_url":"./index.html","display":"standalone","background_color":"#0b3c5d","theme_color":"#0b3c5d","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/3135/3135715.png","sizes":"512x512","type":"image/png"}]}'>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -37,7 +37,7 @@
             <span id="status-text" class="text-xs font-semibold">Memeriksa...</span>
           </div>
           <div class="flex items-center justify-end gap-1 mt-0.5">
-            <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30">v2.50</span>
+            <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30">v2.51</span>
             <span id="app-role-badge" onclick="handleRoleBadgeClick()" class="text-[10px] font-bold text-amber-300 bg-amber-950/60 px-1.5 py-0.2 rounded-md border border-amber-500/30 cursor-pointer select-none">PETUGAS</span>
           </div>
         </div>
@@ -62,9 +62,16 @@
             <div class="absolute -bottom-1 -left-1 w-8 h-8 border-b-4 border-l-4 border-green-400 rounded-bl-xl"></div>
             <div class="absolute -bottom-1 -right-1 w-8 h-8 border-b-4 border-r-4 border-green-400 rounded-br-xl"></div>
           </div>
-          <div id="scan-mode-indicator" class="absolute top-4 left-4 right-4 bg-blue-900/80 text-blue-100 text-[10px] font-bold py-1 px-3 rounded-full text-center border border-blue-400/30 backdrop-blur-sm z-20 shadow">
-            Mode Waktu: AUTO (Realtime Perangkat)
+
+          <!-- BANNER MODE WAKTU + SAKLAR KAMERA DEPAN/BELAKANG -->
+          <div class="absolute top-3 left-3 right-3 flex items-center justify-between bg-blue-900/80 p-1.5 px-2.5 rounded-full border border-blue-400/30 backdrop-blur-sm z-20 shadow">
+            <span id="scan-mode-indicator" class="text-blue-100 text-[10px] font-bold truncate">Mode Waktu: AUTO (Realtime)</span>
+            <div class="flex items-center bg-black/40 p-0.5 rounded-full border border-white/10 flex-shrink-0 ml-1">
+              <button id="cam-facing-back" onclick="changeCameraFacing('environment')" class="px-2 py-0.5 text-[9px] font-extrabold rounded-full bg-blue-500 text-white shadow transition">Belakang</button>
+              <button id="cam-facing-front" onclick="changeCameraFacing('user')" class="px-2 py-0.5 text-[9px] font-extrabold rounded-full text-gray-300 hover:text-white transition">Depan</button>
+            </div>
           </div>
+
           <div class="absolute bottom-4 left-4 right-4 flex items-center justify-between gap-2 z-20">
             <button onclick="toggleScanSessionMode()" class="bg-black/60 text-white flex-1 py-2 rounded-xl text-[11px] font-medium flex flex-col items-center justify-center gap-0.5 backdrop-blur-md border border-white/10">
               <i id="session-icon" class="fa-solid fa-sun text-amber-400 text-xs"></i>
@@ -354,7 +361,7 @@
           <h3 class="font-bold text-xs text-blue-900 border-b border-gray-100 pb-1.5">APLIKASI</h3>
           <div class="flex justify-between text-xs">
             <span class="text-gray-500">Versi Aplikasi</span>
-            <span class="font-bold text-gray-900">v2.50</span>
+            <span class="font-bold text-gray-900">v2.51</span>
           </div>
           <div class="flex justify-between text-xs">
             <span class="text-gray-500">Status Update</span>
@@ -638,6 +645,7 @@
     let currentUserRole = "PETUGAS"; 
     let isProcessingScan = false;
     let currentTLTab = "pending"; 
+    let activeCameraFacingMode = "environment"; // DEFAULT KAMERA BELAKANG
 
     const DAYS_LIST = [
       { key: "sun", label: "Minggu (Ekstrakurikuler)" },
@@ -658,6 +666,24 @@
       fri: { active: true,  pStart: "06:00", pLimit: "07:25", sStart: "10:00", sLimit: "11:45" },
       sat: { active: true,  pStart: "06:00", pLimit: "07:25", sStart: "12:00", sLimit: "13:45" }
     };
+
+    /* AUDIOCONTEXT UNTUK BUNYI BEEP KAMERA */
+    function playBeepSound() {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        const ctx = new AudioContext();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, ctx.currentTime); 
+        gain.gain.setValueAtTime(0.15, ctx.currentTime);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.15); 
+      } catch(e) {}
+    }
 
     function padZeroTime(timeStr) {
       if (!timeStr || typeof timeStr !== "string" || timeStr.trim() === "" || timeStr === "undefined" || timeStr === "null") return "00:00";
@@ -906,11 +932,9 @@
     function updateTimeModeIndicator() {
       const indicator = document.getElementById("scan-mode-indicator");
       if (isManualTimeMode && customScanDateOverride && customScanTimeOverride) {
-        indicator.innerText = `Mode Waktu: MANUAL (${customScanDateOverride} ${customScanTimeOverride})`;
-        indicator.className = "absolute top-4 left-4 right-4 bg-amber-600/90 text-white text-[10px] font-bold py-1 px-3 rounded-full text-center border border-amber-300 backdrop-blur-sm z-20 shadow-md";
+        indicator.innerText = `MANUAL (${customScanDateOverride} ${customScanTimeOverride})`;
       } else {
-        indicator.innerText = "Mode Waktu: AUTO (Realtime Perangkat)";
-        indicator.className = "absolute top-4 left-4 right-4 bg-blue-900/80 text-blue-100 text-[10px] font-bold py-1 px-3 rounded-full text-center border border-blue-400/30 backdrop-blur-sm z-20 shadow";
+        indicator.innerText = "Mode Waktu: AUTO (Realtime)";
       }
     }
 
@@ -1772,7 +1796,7 @@
       });
     }
 
-    /* LOGIKA FITUR TINDAK LANJUT OTOMATIS & SAKLAR PENANGANAN */
+    /* LOGIKA FITUR TINDAK LANJUT OTOMATIS & SAKLAR PENANGANAN (MURNI STATUS AKHIR & STATUS PAGI) */
     function switchTLTab(tabName) {
       currentTLTab = tabName;
       const btnPending = document.getElementById("tl-tab-btn-pending");
@@ -1819,20 +1843,20 @@
         const idS = String(std.id_siswa).trim().toUpperCase();
         const stdRecords = allHistory.filter(r => String(r.id_siswa).trim().toUpperCase() === idS);
         
-        // SORTING BERDASARKAN TANGGAL KEBUTUHAN PENGECEKAN BERTURUT-TURUT
+        // SORTING BERDASARKAN TANGGAL
         stdRecords.sort((a,b) => String(a.tanggal).localeCompare(String(b.tanggal)));
 
-        // 1. CEK 3x ALPA (AKUMULASI)
+        // 1. CEK 3x ALPA (AKUMULASI) - HANYA DARI KOLOM STATUS AKHIR
         let totalAlpa = 0;
         stdRecords.forEach(r => {
-          const st = String(r.status_akhir || r.status_presensi || "").toUpperCase();
-          if (st === "ALPA") totalAlpa++;
+          const stAkhir = String(r.status_akhir || r.status_presensi || "").trim().toUpperCase();
+          if (stAkhir === "ALPA") totalAlpa++;
         });
 
-        // 2. CEK 3x TERLAMBAT (BERTURUT-TURUT)
+        // 2. CEK 3x TERLAMBAT (BERTURUT-TURUT) - HANYA DARI KOLOM STATUS PAGI
         let maxSeqTerlambat = 0, currentSeqTerlambat = 0;
         stdRecords.forEach(r => {
-          const stPagi = String(r.status_pagi || (r.sesi === "PAGI" ? r.status_presensi : "") || "").toUpperCase();
+          const stPagi = String(r.status_pagi || (r.sesi === "PAGI" ? r.status_presensi : "") || "").trim().toUpperCase();
           if (stPagi === "TERLAMBAT") {
             currentSeqTerlambat++;
             if (currentSeqTerlambat > maxSeqTerlambat) maxSeqTerlambat = currentSeqTerlambat;
@@ -1841,14 +1865,14 @@
           }
         });
 
-        // 3. CEK 3x BOLOS (BERTURUT-TURUT)
+        // 3. CEK 3x BOLOS (BERTURUT-TURUT) - HANYA DARI KOLOM STATUS AKHIR
         let maxSeqBolos = 0, currentSeqBolos = 0;
         stdRecords.forEach(r => {
-          const st = String(r.status_akhir || r.status_presensi || "").toUpperCase();
-          if (st === "BOLOS") {
+          const stAkhir = String(r.status_akhir || r.status_presensi || "").trim().toUpperCase();
+          if (stAkhir === "BOLOS") {
             currentSeqBolos++;
             if (currentSeqBolos > maxSeqBolos) maxSeqBolos = currentSeqBolos;
-          } else if (st !== "") {
+          } else if (stAkhir !== "") {
             currentSeqBolos = 0;
           }
         });
@@ -2107,6 +2131,27 @@
       refreshRealtimeSessionUI();
     }
 
+    /* SISTEM GANTI KAMERA DEPAN / BELAKANG */
+    function changeCameraFacing(facingMode) {
+      activeCameraFacingMode = facingMode;
+      const btnBack = document.getElementById("cam-facing-back");
+      const btnFront = document.getElementById("cam-facing-front");
+
+      if (facingMode === "environment") {
+        btnBack.className = "px-2 py-0.5 text-[9px] font-extrabold rounded-full bg-blue-500 text-white shadow transition";
+        btnFront.className = "px-2 py-0.5 text-[9px] font-extrabold rounded-full text-gray-300 hover:text-white transition";
+      } else {
+        btnFront.className = "px-2 py-0.5 text-[9px] font-extrabold rounded-full bg-blue-500 text-white shadow transition";
+        btnBack.className = "px-2 py-0.5 text-[9px] font-extrabold rounded-full text-gray-300 hover:text-white transition";
+      }
+
+      if (isCameraActive) {
+        stopCamera().then(() => {
+          initScanner();
+        });
+      }
+    }
+
     async function initScanner() {
       if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
       document.getElementById('camera-off-placeholder').classList.add('hidden');
@@ -2114,7 +2159,7 @@
       isProcessingScan = false;
       if (!isCameraActive) {
         try {
-          await html5QrCode.start({ facingMode: "environment" }, { fps: 15, qrbox: 250 }, onScanSuccess);
+          await html5QrCode.start({ facingMode: activeCameraFacingMode }, { fps: 15, qrbox: 250 }, onScanSuccess);
           isCameraActive = true;
           document.getElementById('btn-camera-text').innerText = "Matikan Kamera";
         } catch (err) {
@@ -2148,6 +2193,8 @@
     async function onScanSuccess(text) {
       if (isProcessingScan) return; 
       isProcessingScan = true;
+
+      playBeepSound(); // BUNYI BEEP SAAT SCAN BERHASIL
 
       let nowDateObj = new Date();
       const year = nowDateObj.getFullYear();
