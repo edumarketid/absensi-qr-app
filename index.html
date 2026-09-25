@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0b3c5d">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Sistem Absensi Murid - v2.59</title>
+  <title>Sistem Absensi Murid - v2.58 Presisi</title>
   <link rel="manifest" href='data:application/manifest+json,{"name":"Sistem Absensi Murid","short_name":"AbsensiQR","start_url":"./index.html","display":"standalone","background_color":"#0b3c5d","theme_color":"#0b3c5d","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/3135/3135715.png","sizes":"512x512","type":"image/png"}]}'>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -17,8 +17,6 @@
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     #reader video { object-fit: cover !important; width: 100% !important; height: 100% !important; border-radius: 1rem; }
-    @keyframes bounce-subtle { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
-    .animate-bounce-subtle { animation: bounce-subtle 2s infinite ease-in-out; }
   </style>
 </head>
 <body class="flex justify-center items-center h-full p-0 sm:p-4">
@@ -39,7 +37,7 @@
             <span id="status-text" class="text-xs font-semibold">Memeriksa...</span>
           </div>
           <div class="flex items-center justify-end gap-1 mt-0.5">
-            <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30">v2.59</span>
+            <span id="app-version-tag" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/60 px-1.5 py-0.2 rounded-md border border-emerald-500/30">v2.58</span>
             <span id="app-role-badge" onclick="handleRoleBadgeClick()" class="text-[10px] font-bold text-amber-300 bg-amber-950/60 px-1.5 py-0.2 rounded-md border border-amber-500/30 cursor-pointer select-none">PETUGAS</span>
           </div>
         </div>
@@ -521,23 +519,6 @@
       </main>
     </div>
 
-    <!-- MODAL POPUP AUTO-UPDATE PEMBARUAN APLIKASI -->
-    <div id="app-update-modal" class="absolute inset-0 bg-black/70 backdrop-blur-md z-50 flex flex-col justify-center items-center p-6 hidden">
-      <div class="bg-white rounded-3xl p-6 text-center space-y-4 shadow-2xl max-w-xs border border-blue-100 animate-bounce-subtle">
-        <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto text-2xl shadow-inner">
-          <i class="fa-solid fa-cloud-arrow-down"></i>
-        </div>
-        <div class="space-y-1">
-          <h3 class="font-black text-gray-900 text-base">Versi Terbaru Tersedia!</h3>
-          <p class="text-xs text-blue-600 font-bold" id="update-modal-version-title">Versi v2.59 Siap Dipasang</p>
-          <p class="text-[11px] text-gray-500 leading-relaxed pt-1">Pembaruan sistem terbaru telah dirilis. Klik tombol di bawah untuk memperbarui otomatis tanpa hapus data.</p>
-        </div>
-        <button onclick="applyAppUpdateNow()" class="w-full bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold py-3 rounded-2xl text-xs shadow-lg transition duration-150 flex items-center justify-center gap-2">
-          <i class="fa-solid fa-rotate-right"></i> Perbarui Sekarang! (OK)
-        </button>
-      </div>
-    </div>
-
     <!-- MODAL EDIT DATA SISWA -->
     <div id="edit-student-modal" class="absolute inset-0 bg-black/60 backdrop-blur-sm z-50 flex flex-col justify-end hidden">
       <div class="bg-white rounded-t-3xl p-5 space-y-3 shadow-2xl max-h-[85%] overflow-y-auto">
@@ -704,7 +685,7 @@
             const installingWorker = reg.installing;
             installingWorker.onstatechange = () => {
               if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                // Service worker baru terdeteksi
+                window.location.reload();
               }
             };
           };
@@ -713,10 +694,8 @@
     }
   </script>
   <script>
-    const CURRENT_APP_VERSION = "v2.59"; // Versi dasar aplikasi saat ini
     const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxVGAsO-sG7E9bHsSxQ-M16EykkO6jc6QpLzDY7sWg9qEHIbpk9Re32IGgDn1qPOmJ_/exec"; 
 
-    let pendingServerVersion = null;
     let html5QrCode = null, isCameraActive = false, db = null, cachedStudents = [];
     let fetchedTodayAttendance = [], fetchedAttendanceHistory = [], fetchedTindakLanjutHistory = [], fetchedHariLiburList = [];
     let parsedBatchStudents = [];
@@ -748,40 +727,6 @@
       fri: { active: true,  pStart: "06:00", pLimit: "07:25", sStart: "10:00", sLimit: "11:45" },
       sat: { active: true,  pStart: "06:00", pLimit: "07:25", sStart: "12:00", sLimit: "13:45" }
     };
-
-    /* FITUR DETEKSI & AUTO-UPDATE VERSI APLIKASI */
-    function checkAppVersionUpdate(serverVersion) {
-      if (!serverVersion) return;
-      const installedVersion = localStorage.getItem("INSTALLED_VERSION") || CURRENT_APP_VERSION;
-
-      // Jika versi server lebih baru dari versi yang terpasang di HP
-      if (serverVersion !== installedVersion) {
-        pendingServerVersion = serverVersion;
-        document.getElementById("update-modal-version-title").innerText = `Versi Terbaru Telah Tersedia (${serverVersion})`;
-        document.getElementById("app-update-modal").classList.remove("hidden");
-      } else {
-        localStorage.setItem("INSTALLED_VERSION", CURRENT_APP_VERSION);
-      }
-    }
-
-    async function applyAppUpdateNow() {
-      if (pendingServerVersion) {
-        localStorage.setItem("INSTALLED_VERSION", pendingServerVersion);
-      } else {
-        localStorage.setItem("INSTALLED_VERSION", CURRENT_APP_VERSION);
-      }
-
-      // Bersihkan Service Worker Caches
-      if ('caches' in window) {
-        try {
-          const keys = await caches.keys();
-          await Promise.all(keys.map(key => caches.delete(key)));
-        } catch(e){}
-      }
-
-      // Reload halaman otomatis
-      window.location.reload(true);
-    }
 
     function playBeepSound() {
       try {
@@ -1060,7 +1005,7 @@
       const csvHeader = "ID_SISWA,NISN,NAMA_SISWA,KELAS,TTL\nS101,0081234567,Ahmad Fauzi,X TKR 1,Makassar 12 Jan 2008\nS102,0087654321,Siti Rahma,X TKR 1,Gowa 15 Feb 2008\nS103,0089988776,Budi Santoso,X TKR 2,Maros 20 Mar 2008";
       const blob = new Blob([csvHeader], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement("a");
-      const url = URL.ObjectURL(blob);
+      const url = URL.createObjectURL(blob);
       link.setAttribute("href", url);
       link.setAttribute("download", "Template_Data_Siswa.csv");
       document.body.appendChild(link);
@@ -1336,13 +1281,7 @@
         const targetDateFilter = formatCleanDateLocal(targetDateStr) || document.getElementById('monitoring-date-filter').value || realTodayStr;
         const response = await fetch(`${GAS_WEB_APP_URL}?action=GET_APP_DATA&tanggal=${targetDateFilter}`);
         const result = await response.json();
-        
         if (result.success) {
-          // Pengecekan Versi Server vs HP
-          if (result.version) {
-            checkAppVersionUpdate(result.version);
-          }
-
           if (result.time_settings) applyTimeSettingsFromCloud(result.time_settings);
           if (result.today_attendance) fetchedTodayAttendance = result.today_attendance;
           if (result.attendance_history) fetchedAttendanceHistory = result.attendance_history;
@@ -2126,6 +2065,7 @@
       });
     }
 
+    /* TINDAK LANJUT LOGIC (PAGI HANYA MENAMBAH TERLAMBAT) */
     function switchTLTab(tabName) {
       currentTLTab = tabName;
       const btnPending = document.getElementById("tl-tab-btn-pending");
@@ -2178,12 +2118,14 @@
         const stdRecords = allHistory.filter(r => String(r.id_siswa).trim().toUpperCase() === idS);
         stdRecords.sort((a,b) => String(a.tanggal).localeCompare(String(b.tanggal)));
 
+        // 1. Hitung Akumulasi ALPA (Murni dari status_akhir)
         let totalAlpa = 0;
         stdRecords.forEach(r => {
           const stAkhir = String(r.status_akhir || r.status_presensi || "").trim().toUpperCase();
           if (stAkhir === "ALPA") totalAlpa++;
         });
 
+        // 2. Hitung TERLAMBAT Berturut-turut (Murni dari status_pagi === TERLAMBAT)
         let maxSeqTerlambat = 0, currentSeqTerlambat = 0;
         stdRecords.forEach(r => {
           const stPagi = String(r.status_pagi || "").trim().toUpperCase();
@@ -2191,10 +2133,11 @@
             currentSeqTerlambat++;
             if (currentSeqTerlambat > maxSeqTerlambat) maxSeqTerlambat = currentSeqTerlambat;
           } else if (stPagi === "HADIR") {
-            currentSeqTerlambat = 0;
+            currentSeqTerlambat = 0; // Reset streak hanya jika siswa hadir tepat waktu
           }
         });
 
+        // 3. Hitung BOLOS Berturut-turut (Murni dari status_akhir === BOLOS)
         let maxSeqBolos = 0, currentSeqBolos = 0;
         stdRecords.forEach(r => {
           const stAkhir = String(r.status_akhir || r.status_presensi || "").trim().toUpperCase();
@@ -2247,12 +2190,14 @@
         const stdRecords = allHistory.filter(r => String(r.id_siswa).trim().toUpperCase() === idS);
         stdRecords.sort((a,b) => String(a.tanggal).localeCompare(String(b.tanggal)));
 
+        // 1. Akumulasi ALPA: Murni dibaca dari STATUS_AKHIR
         let totalAlpa = 0;
         stdRecords.forEach(r => {
           const stAkhir = String(r.status_akhir || r.status_presensi || "").trim().toUpperCase();
           if (stAkhir === "ALPA") totalAlpa++;
         });
 
+        // 2. TERLAMBAT Berturut-turut: Murni dibaca dari STATUS_PAGI
         let maxSeqTerlambat = 0, currentSeqTerlambat = 0;
         stdRecords.forEach(r => {
           const stPagi = String(r.status_pagi || "").trim().toUpperCase();
@@ -2260,10 +2205,11 @@
             currentSeqTerlambat++;
             if (currentSeqTerlambat > maxSeqTerlambat) maxSeqTerlambat = currentSeqTerlambat;
           } else if (stPagi === "HADIR") {
-            currentSeqTerlambat = 0;
+            currentSeqTerlambat = 0; // Reset beruntun jika tepat waktu
           }
         });
 
+        // 3. BOLOS Berturut-turut: Murni dibaca dari STATUS_AKHIR
         let maxSeqBolos = 0, currentSeqBolos = 0;
         stdRecords.forEach(r => {
           const stAkhir = String(r.status_akhir || r.status_presensi || "").trim().toUpperCase();
@@ -2499,8 +2445,8 @@
           }
         });
       }
-      alert("Memeriksa pembaruan sistem...');
-      autoDownloadMasterStudents();
+      alert("Aplikasi telah menyegarkan file sistem terbaru!");
+      window.location.reload();
     }
 
     async function saveNewStudentToDB() {
