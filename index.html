@@ -4,18 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#0b3c5d">
-  
-  <!-- Apple iOS Mobile Web App Settings -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="AbsensiQR">
-  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
-
   <title>Sistem Absensi Murid - v2.62 Presisi</title>
-  
-  <!-- Web App Manifest -->
   <link rel="manifest" href="./manifest.json">
-
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
@@ -1039,6 +1031,7 @@
       document.body.removeChild(link);
     }
 
+    /* FITUR PEMBARUAN: REGEX PARSER CSV MENDUKUNG STRINGS BERKOMA DALAM TANDA PETIK */
     function parseCSVLine(line) {
       const pattern = new RegExp(
         '\\s*("([^"]*(?:""[^"]*)*)"|([^,;]+)|)\\s*(?:[,;]|$)',
@@ -2466,7 +2459,7 @@
       document.getElementById("about-local-size").innerText = `${localKB} KB`;
 
       if ('storage' in navigator && 'estimate' in navigator.storage) {
-        const estimate = await navigator.storage estimate();
+        const estimate = await navigator.storage.estimate();
         const usageMB = ((estimate.usage || 0) / (1024 * 1024)).toFixed(2);
         document.getElementById("about-cache-size").innerText = `${usageMB} MB`;
       } else {
