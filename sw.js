@@ -4,6 +4,8 @@ const STATIC_ASSETS = [
   './index.html',
   './laporan.html',
   './kartuqrcode.html',
+  './manifest.json',
+  './https://lh3.googleusercontent.com/d/1y6cH1JakChxAwxdnWV9xiUCa29d4CmO8',
   'https://cdn.tailwindcss.com',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
   'https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js',
